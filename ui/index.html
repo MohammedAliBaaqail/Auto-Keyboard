@@ -386,6 +386,66 @@
             </div>
             <div class="wm-hotkey-badge">Win + WheelUp/Down</div>
           </div>
+
+          <!-- Card 5: Focused App Volume Control -->
+          <div class="wm-card">
+            <div class="wm-card-left">
+              <div class="wm-icon-badge">
+                <svg class="wm-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                </svg>
+              </div>
+              <div class="wm-info">
+                <h3>Active App Volume Control</h3>
+                <p>Hold Alt & scroll mouse wheel (or Ctrl+Alt+PgUp/Dn)</p>
+              </div>
+            </div>
+            <div class="wm-hotkey-badge">Alt + WheelUp/Down</div>
+          </div>
+
+          <!-- Card 6: Mute Active Application -->
+          <div class="wm-card">
+            <div class="wm-card-left">
+              <div class="wm-icon-badge">
+                <svg class="wm-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                  <line x1="23" y1="9" x2="17" y2="15"></line>
+                  <line x1="17" y1="9" x2="23" y2="15"></line>
+                </svg>
+              </div>
+              <div class="wm-info">
+                <h3>Mute Active Application</h3>
+                <p>Instantly mute or unmute foreground application audio</p>
+              </div>
+            </div>
+            <div class="wm-hotkey-badge">Alt + M</div>
+          </div>
+        </div>
+
+        <!-- Active App Volume Slider Card -->
+        <div class="slider-module-card">
+          <div class="slider-header">
+            <div class="slider-header-left">
+              <span class="section-label">Active App Volume Controller</span>
+              <span class="app-target-badge" id="wmAppTargetBadge">Active: (detecting...)</span>
+            </div>
+            <span class="slider-value-badge" id="wmAppVolumeValue">100%</span>
+          </div>
+          <div class="neumorphic-slider-container">
+            <input type="range" id="wmAppVolumeSlider" min="0" max="100" value="100" class="neumorphic-slider" />
+          </div>
+          <div class="slider-sub-bar">
+            <span class="hint-tag">Alt + WheelUp/Down anywhere to adjust volume • Alt + M to mute/unmute</span>
+            <button class="neumorphic-btn-pill" id="wmBtnMuteActiveApp" title="Toggle Mute Active App">
+              <svg class="toggle-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <line x1="23" y1="9" x2="17" y2="15"></line>
+                <line x1="17" y1="9" x2="23" y2="15"></line>
+              </svg>
+              <span id="wmBtnMuteActiveAppText">Mute App</span>
+            </button>
+          </div>
         </div>
 
         <!-- Transparency Slider (Exact Slider from Reference Design) -->

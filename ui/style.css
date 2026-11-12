@@ -963,6 +963,74 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
+}
+
+.slider-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+}
+
+.app-target-badge {
+  font-family: 'JetBrains Mono', 'Consolas', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--surface-color);
+  box-shadow: var(--inset-sm);
+  padding: 3px 12px;
+  border-radius: var(--radius-btn);
+  white-space: nowrap;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.slider-sub-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.neumorphic-btn-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: none;
+  background: var(--surface-color);
+  box-shadow: var(--raised-button);
+  border-radius: var(--radius-btn);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.neumorphic-btn-pill:hover {
+  color: var(--green-primary);
+}
+
+.neumorphic-btn-pill:active {
+  box-shadow: var(--inset-sm);
+  transform: translateY(1px);
+}
+
+.neumorphic-btn-pill.is-muted {
+  color: #ef4444;
+  box-shadow: var(--inset-sm);
+}
+
+.neumorphic-btn-pill .toggle-icon-svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
 }
 
 .slider-value-badge {

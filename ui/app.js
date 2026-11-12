@@ -158,6 +158,18 @@
   // Window Manager Elements
   const wmOpacitySlider = document.getElementById('wmOpacitySlider');
   const wmOpacityValue = document.getElementById('wmOpacityValue');
+  const wmAppVolumeSlider = document.getElementById('wmAppVolumeSlider');
+  const wmAppVolumeValue = document.getElementById('wmAppVolumeValue');
+  const wmAppTargetBadge = document.getElementById('wmAppTargetBadge');
+  const wmBtnMuteActiveApp = document.getElementById('wmBtnMuteActiveApp');
+  const wmBtnMuteActiveAppText = document.getElementById('wmBtnMuteActiveAppText');
+
+  let activeAppState = {
+    pid: 0,
+    name: '',
+    volume: 100,
+    muted: false
+  };
 
   // App Launcher Elements
   const alTriggerTypeSelector = document.getElementById('alTriggerTypeSelector');
@@ -238,6 +250,9 @@
     document.querySelectorAll('.module-panel').forEach(panel => {
       panel.classList.toggle('active', panel.id === `panel-${tabName}`);
     });
+    if (tabName === 'windowManager') {
+      sendToAhk('getActiveAppVolume');
+    }
     if (shouldSync && isInitialized) {
       syncConfig();
     }
@@ -514,7 +529,7 @@
   }
 
   function initWindowManager() {
-    const wm = state.config.windowManager;
+    const wm = state.config.windowManager || {};
     wmOpacitySlider.value = wm.opacity || 215;
     updateWmOpacityLabel();
     updateSliderProgress(wmOpacitySlider);
@@ -529,6 +544,31 @@
       updateSliderProgress(wmOpacitySlider);
       syncConfig();
     });
+
+    if (wmAppVolumeSlider) {
+      updateSliderProgress(wmAppVolumeSlider);
+
+      wmAppVolumeSlider.addEventListener('input', () => {
+        const val = parseInt(wmAppVolumeSlider.value, 10);
+        if (wmAppVolumeValue) wmAppVolumeValue.textContent = `${val}%`;
+        updateSliderProgress(wmAppVolumeSlider);
+        sendToAhk('setActiveAppVolume', { volume: val, pid: activeAppState.pid });
+      });
+
+      wmAppVolumeSlider.addEventListener('change', () => {
+        const val = parseInt(wmAppVolumeSlider.value, 10);
+        updateSliderProgress(wmAppVolumeSlider);
+        sendToAhk('setActiveAppVolume', { volume: val, pid: activeAppState.pid });
+      });
+    }
+
+    if (wmBtnMuteActiveApp) {
+      wmBtnMuteActiveApp.addEventListener('click', () => {
+        sendToAhk('toggleMuteActiveApp', { pid: activeAppState.pid });
+      });
+    }
+
+    sendToAhk('getActiveAppVolume');
   }
 
   function updateWmOpacityLabel() {
@@ -1720,6 +1760,39 @@
             alInputName.value = msg.name;
           }
           alInputTarget.focus();
+        }
+      } else if (msg.type === 'activeAppVolumeChanged') {
+        if (msg.name) {
+          activeAppState.name = msg.name;
+          if (wmAppTargetBadge) {
+            wmAppTargetBadge.textContent = `Active: ${msg.name}`;
+          }
+        }
+        if (msg.pid) {
+          activeAppState.pid = msg.pid;
+        }
+        if (typeof msg.volume === 'number') {
+          if (msg.volume >= 0) {
+            activeAppState.volume = msg.volume;
+            if (wmAppVolumeSlider) {
+              wmAppVolumeSlider.value = msg.volume;
+              updateSliderProgress(wmAppVolumeSlider);
+            }
+            if (wmAppVolumeValue) {
+              wmAppVolumeValue.textContent = `${msg.volume}%`;
+            }
+          } else if (msg.volume === -1 && wmAppVolumeValue) {
+            wmAppVolumeValue.textContent = 'No Audio';
+          }
+        }
+        if (typeof msg.muted !== 'undefined') {
+          activeAppState.muted = Boolean(msg.muted);
+          if (wmBtnMuteActiveAppText) {
+            wmBtnMuteActiveAppText.textContent = activeAppState.muted ? 'Unmute App' : 'Mute App';
+          }
+          if (wmBtnMuteActiveApp) {
+            wmBtnMuteActiveApp.classList.toggle('is-muted', activeAppState.muted);
+          }
         }
       }
     } catch (err) {

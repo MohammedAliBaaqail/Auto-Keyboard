@@ -1,5 +1,5 @@
 ﻿{
-  "activeTab":"textExpander",
+  "activeTab":"keyRemapper",
   "appLauncher":{
     "enabled":1,
     "items":[{"id":"al-1794403819689","name":"Everything","target":"C:\\Program Files (x86)\\Everything\\Everything.exe","trigger":"Ctrl+Alt+Shift+E","triggerType":"hotkey"},{"id":"al-1","name":"Calculator","target":"calc.exe","trigger":"@calc","triggerType":"string"},{"id":"al-2","name":"YouTube","target":"https://www.youtube.com","trigger":"@yt","triggerType":"string"},{"id":"al-3","name":"GitHub","target":"https://github.com","trigger":"@gh","triggerType":"string"}]
@@ -22,17 +22,19 @@
     "items":[{"id":"te-1","input":"@@1","multiline":0,"output":"myemail@gmail.com"},{"id":"te-2","input":"@@sig","multiline":1,"output":"Best regards,\nYour Name\nSenior Engineer"}]
   },
   "theme":{
-    "accentColor":"#38bdf8",
-    "bgColor":"#1e222b",
-    "blur":8,
-    "darkIntensity":38,
+    "accentColor":"#22c55e",
+    "bgColor":"#e0e5ec",
+    "blur":11,
+    "darkIntensity":3,
     "distance":4,
-    "intensity":28,
-    "lightIntensity":18,
-    "radius":14
+    "intensity":8,
+    "lightIntensity":12,
+    "radius":9
   },
   "windowManager":{
     "alwaysOnTopHotkey":"^SPACE",
+    "appVolumeMuteHotkey":"!m",
+    "appVolumeWheel":1,
     "centerWindowHotkey":"^!c",
     "enabled":1,
     "hideWindowHotkey":"^!h",

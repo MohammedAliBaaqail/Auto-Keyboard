@@ -24,6 +24,7 @@ A_MenuMaskKey := "vkE8"
 #Include lib\Promise.ahk
 #Include lib\JSON.ahk
 #Include lib\WebView2\WebView2.ahk
+#Include lib\AudioSession.ahk
 
 ; Global constants and variables
 global APP_NAME := "AutoHotKeyboard"
@@ -42,6 +43,8 @@ global g_ActiveHotstrings := []
 global g_ActiveHotkeys := []
 global g_AutoClickerRunning := false
 global g_AutoClickerCount := 0
+global g_LastExternalHwnd := 0
+global g_LastPolledHwnd := 0
 
 LogMessage(msg) {
     OutputDebug("[AutoHotKeyboard] " . msg)
@@ -55,6 +58,7 @@ OnExit(OnAppExit)
 
 OnAppExit(exitReason, exitCode) {
     global g_Wvc
+    SetTimer(CheckActiveAppFocus, 0)
     SaveConfigToFile()
     StopAutoClicker()
     UnregisterAllHooks()
@@ -164,7 +168,9 @@ GetDefaultConfig() {
             "centerWindowHotkey", "^!c",
             "hideWindowHotkey", "^!h",
             "transparencyWheel", true,
-            "opacity", 210
+            "opacity", 210,
+            "appVolumeWheel", true,
+            "appVolumeMuteHotkey", "!m"
         ),
         "appLauncher", Map(
             "enabled", true,
@@ -415,6 +421,29 @@ ApplyWindowManager() {
             g_ActiveHotkeys.Push("#WheelDown")
         }
     }
+    
+    ; Focused Application Volume Control (!WheelUp / !WheelDown, ^!PgUp / ^!PgDn)
+    if (wm.Has("appVolumeWheel") && wm["appVolumeWheel"]) {
+        try {
+            Hotkey("!WheelUp", (*) => AdjustActiveAppVolume(0.05), "On")
+            Hotkey("!WheelDown", (*) => AdjustActiveAppVolume(-0.05), "On")
+            Hotkey("^!PgUp", (*) => AdjustActiveAppVolume(0.05), "On")
+            Hotkey("^!PgDn", (*) => AdjustActiveAppVolume(-0.05), "On")
+            g_ActiveHotkeys.Push("!WheelUp")
+            g_ActiveHotkeys.Push("!WheelDown")
+            g_ActiveHotkeys.Push("^!PgUp")
+            g_ActiveHotkeys.Push("^!PgDn")
+        }
+    }
+
+    ; Mute Active Application Hotkey
+    if (wm.Has("appVolumeMuteHotkey") && Trim(wm["appVolumeMuteHotkey"]) != "") {
+        try {
+            hk := Trim(wm["appVolumeMuteHotkey"])
+            Hotkey(hk, (*) => ToggleActiveAppMute(), "On")
+            g_ActiveHotkeys.Push(hk)
+        }
+    }
 }
 
 ToggleAlwaysOnTop() {
@@ -498,6 +527,128 @@ AdjustActiveWindowTransparency(delta) {
                 "message", "Opacity: " . pct . "%"
             ))
             g_Wv.PostWebMessageAsString(msg)
+        }
+    }
+}
+
+GetActiveExternalWindow() {
+    global g_MainGui, g_LastExternalHwnd
+    curHwnd := WinExist("A")
+    if (curHwnd && curHwnd != g_MainGui.Hwnd) {
+        g_LastExternalHwnd := curHwnd
+        return curHwnd
+    }
+    if (g_LastExternalHwnd && WinExist("ahk_id " . g_LastExternalHwnd)) {
+        return g_LastExternalHwnd
+    }
+    return 0
+}
+
+AdjustActiveAppVolume(delta) {
+    global g_MainGui, g_Wv
+    try {
+        hwnd := GetActiveExternalWindow()
+        if (!hwnd) {
+            return
+        }
+        pid := WinGetPID("ahk_id " . hwnd)
+        if (!pid) {
+            return
+        }
+        procName := ""
+        try procName := ProcessGetName(pid)
+        if (procName = "") {
+            procName := "Application"
+        }
+        
+        if (AudioSession.SetVolume(pid, delta, true, &newVol, &isMuted)) {
+            pct := Round(newVol * 100)
+            icon := isMuted ? "🔇" : (pct = 0 ? "🔈" : (pct < 50 ? "🔉" : "🔊"))
+            ToolTip(icon . " " . procName . " Volume: " . pct . "%")
+            SetTimer(() => ToolTip(), -1400)
+            
+            if (g_Wv) {
+                msg := JSON.stringify(Map(
+                    "type", "activeAppVolumeChanged",
+                    "pid", pid,
+                    "name", procName,
+                    "volume", pct,
+                    "muted", isMuted
+                ))
+                g_Wv.PostWebMessageAsString(msg)
+            }
+        } else {
+            ToolTip("🔈 " . procName . " (No active audio session)")
+            SetTimer(() => ToolTip(), -1400)
+        }
+    }
+}
+
+ToggleActiveAppMute() {
+    global g_MainGui, g_Wv
+    try {
+        hwnd := GetActiveExternalWindow()
+        if (!hwnd) {
+            return
+        }
+        pid := WinGetPID("ahk_id " . hwnd)
+        if (!pid) {
+            return
+        }
+        procName := ""
+        try procName := ProcessGetName(pid)
+        if (procName = "") {
+            procName := "Application"
+        }
+        
+        if (AudioSession.ToggleMute(pid, &isMuted)) {
+            curVol := AudioSession.GetVolume(pid)
+            pct := curVol >= 0 ? Round(curVol * 100) : 0
+            statusText := isMuted ? "MUTED" : "UNMUTED"
+            icon := isMuted ? "🔇" : "🔊"
+            ToolTip(icon . " " . procName . ": " . statusText . " (" . pct . "%)")
+            SetTimer(() => ToolTip(), -1400)
+            
+            if (g_Wv) {
+                msg := JSON.stringify(Map(
+                    "type", "activeAppVolumeChanged",
+                    "pid", pid,
+                    "name", procName,
+                    "volume", pct,
+                    "muted", isMuted
+                ))
+                g_Wv.PostWebMessageAsString(msg)
+            }
+        }
+    }
+}
+
+CheckActiveAppFocus() {
+    global g_MainGui, g_Wv, g_LastExternalHwnd, g_LastPolledHwnd
+    if (!g_Wv) {
+        return
+    }
+    try {
+        curHwnd := WinExist("A")
+        if (curHwnd && curHwnd != g_MainGui.Hwnd) {
+            g_LastExternalHwnd := curHwnd
+            if (curHwnd != g_LastPolledHwnd) {
+                g_LastPolledHwnd := curHwnd
+                pid := WinGetPID("ahk_id " . curHwnd)
+                procName := ""
+                try procName := ProcessGetName(pid)
+                if (procName != "") {
+                    vol := AudioSession.GetVolume(pid, &isMuted)
+                    pct := vol >= 0 ? Round(vol * 100) : -1
+                    g_Wv.PostWebMessageAsString(JSON.stringify(Map(
+                        "type", "activeAppVolumeChanged",
+                        "pid", pid,
+                        "name", procName,
+                        "volume", pct,
+                        "muted", isMuted
+                    )))
+                }
+            }
         }
     }
 }
@@ -832,6 +983,9 @@ InitWebView2() {
         g_Wv.Navigate(htmlUri)
         LogMessage("WebView2 successfully initialized and navigated to: " . htmlUri)
         
+        ; Start polling for active window changes to update Window Manager volume live
+        SetTimer(CheckActiveAppFocus, 400)
+        
     } catch as err {
         LogMessage("FATAL: Failed to configure WebView2: " . err.Message)
         MsgBox("Failed to configure WebView2: " . err.Message, "AutoHotKeyboard Error", 16)
@@ -961,6 +1115,36 @@ OnWebMessageReceived(thisPtr, senderPtr, argsPtr) {
                 } catch as err {
                     LogMessage("browseApp error: " . err.Message)
                 }
+
+            case "getActiveAppVolume":
+                hwnd := GetActiveExternalWindow()
+                if (hwnd) {
+                    pid := WinGetPID("ahk_id " . hwnd)
+                    procName := ""
+                    try procName := ProcessGetName(pid)
+                    vol := AudioSession.GetVolume(pid, &isMuted)
+                    pct := vol >= 0 ? Round(vol * 100) : -1
+                    if (g_Wv) {
+                        g_Wv.PostWebMessageAsString(JSON.stringify(Map(
+                            "type", "activeAppVolumeChanged",
+                            "pid", pid,
+                            "name", procName,
+                            "volume", pct,
+                            "muted", isMuted
+                        )))
+                    }
+                }
+
+            case "setActiveAppVolume":
+                hwnd := GetActiveExternalWindow()
+                if (hwnd && msg.Has("volume")) {
+                    pid := msg.Has("pid") && msg["pid"] > 0 ? msg["pid"] : WinGetPID("ahk_id " . hwnd)
+                    volNorm := msg["volume"] / 100.0
+                    AudioSession.SetVolume(pid, volNorm, false, &newVol, &isMuted)
+                }
+
+            case "toggleMuteActiveApp":
+                ToggleActiveAppMute()
         }
     } catch as err {
         LogMessage("WebMessage dispatch error: " . err.Message)
