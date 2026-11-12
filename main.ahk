@@ -56,6 +56,15 @@ global g_AutoClickerCount := 0
 global g_LastExternalHwnd := 0
 global g_LastPolledHwnd := 0
 
+; Macro Recorder tracking (initialized in auto-execute section)
+global g_MacroRecorderHook := ""
+global g_MacroIsRecording := false
+global g_MacroLastTime := 0
+global g_MacroRealDelays := false
+global g_MacroDefDelay := 50
+global g_MacroActiveTimers := Map()
+global g_MacroIsExecuting := false
+
 LogMessage(msg) {
     OutputDebug("[AutoHotKeyboard] " . msg)
 }
@@ -978,14 +987,6 @@ NotifyWebAutoClicker() {
 ; 6. Macro Recording & Playback Module (Hardware-level capture & sequencer)
 ; ==============================================================================
 
-global g_MacroRecorderHook := ""
-global g_MacroIsRecording := false
-global g_MacroLastTime := 0
-global g_MacroRealDelays := false
-global g_MacroDefDelay := 50
-global g_MacroActiveTimers := Map()
-global g_MacroIsExecuting := false
-
 ApplyMacroRecorder() {
     global g_Config, g_ActiveHotkeys, g_IsEngineActive
     
@@ -1060,6 +1061,9 @@ StartMacroHold(item) {
     if (!item.Has("steps") || !IsObject(item["steps"]))
         return
         
+    if (!IsSet(g_MacroActiveTimers) || !IsObject(g_MacroActiveTimers))
+        g_MacroActiveTimers := Map()
+        
     mId := item.Has("id") ? item["id"] : "hold_macro"
     if (g_MacroActiveTimers.Has(mId))
         return
@@ -1074,6 +1078,9 @@ StartMacroHold(item) {
 
 StopMacroHold(item) {
     global g_MacroActiveTimers
+    if (!IsSet(g_MacroActiveTimers) || !IsObject(g_MacroActiveTimers))
+        return
+        
     mId := item.Has("id") ? item["id"] : "hold_macro"
     if (g_MacroActiveTimers.Has(mId)) {
         fn := g_MacroActiveTimers[mId]
@@ -1088,6 +1095,9 @@ ToggleMacroLoop(item) {
         return
     if (!item.Has("steps") || !IsObject(item["steps"]))
         return
+        
+    if (!IsSet(g_MacroActiveTimers) || !IsObject(g_MacroActiveTimers))
+        g_MacroActiveTimers := Map()
         
     mId := item.Has("id") ? item["id"] : "toggle_macro"
     if (g_MacroActiveTimers.Has(mId)) {
@@ -1112,6 +1122,10 @@ ToggleMacroLoop(item) {
 
 StopAllMacros() {
     global g_MacroActiveTimers
+    if (!IsSet(g_MacroActiveTimers) || !IsObject(g_MacroActiveTimers)) {
+        g_MacroActiveTimers := Map()
+        return
+    }
     for mId, fn in g_MacroActiveTimers {
         try SetTimer(fn, 0)
     }
