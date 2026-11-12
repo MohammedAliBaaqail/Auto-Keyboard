@@ -2188,3 +2188,398 @@ html, body {
   padding-top: 8px;
   border-top: none;
 }
+
+/* ==========================================================================
+   Macro Recorder & Sequencer Deck
+   ========================================================================== */
+
+.macro-config-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.macro-name-box {
+  flex: 1.2 1 180px;
+  min-width: 140px;
+}
+
+.macro-trigger-box {
+  flex: 1 1 140px;
+  min-width: 130px;
+}
+
+.macro-mode-segmented {
+  height: 42px;
+  background: var(--surface-color);
+  box-shadow: var(--inset-sm);
+  border-radius: var(--radius-pill);
+  padding: 3px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.macro-mode-btn {
+  height: 100%;
+  padding: 0 12px;
+  border-radius: calc(var(--radius-pill) - 3px);
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.macro-mode-btn.active {
+  background: var(--surface-color);
+  box-shadow: var(--raised-sm);
+  color: var(--accent-primary);
+  font-weight: 700;
+}
+
+.macro-interval-box {
+  width: 95px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.macro-interval-box input {
+  width: 44px;
+}
+
+.macro-sequencer-deck {
+  margin-top: 10px;
+  border-radius: var(--radius-subcard);
+  background: var(--surface-color);
+  box-shadow: var(--raised-card);
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.macro-deck-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.macro-deck-left,
+.macro-deck-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-record-macro {
+  height: 36px;
+  padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-record-macro.is-recording {
+  background: #ef4444 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.6), var(--raised-sm) !important;
+}
+
+.rec-pulse-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 4px #ef4444;
+  display: inline-block;
+}
+
+.btn-record-macro.is-recording .rec-pulse-dot {
+  background: #ffffff;
+  box-shadow: 0 0 6px #ffffff;
+  animation: macroPulse 1.2s infinite ease-in-out;
+}
+
+@keyframes macroPulse {
+  0% { transform: scale(0.9); opacity: 0.8; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.8; }
+}
+
+.macro-status-pill {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 4px 10px;
+  background: var(--surface-color);
+  box-shadow: var(--inset-sm);
+  border-radius: var(--radius-pill);
+}
+
+.macro-inject-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.macro-inject-btn {
+  height: 32px;
+  padding: 0 10px;
+  border-radius: var(--radius-pill);
+  border: none;
+  background: var(--surface-color);
+  box-shadow: var(--raised-sm);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.macro-inject-btn:hover {
+  color: var(--accent-primary);
+  box-shadow: var(--inset-sm);
+}
+
+.macro-delay-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.macro-delay-toggle input {
+  display: none;
+}
+
+.macro-delay-checkbox {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  background: var(--surface-color);
+  box-shadow: var(--inset-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.macro-delay-toggle input:checked + .macro-delay-checkbox {
+  background: var(--accent-primary);
+  box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.4);
+}
+
+.macro-delay-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.btn-test-macro,
+.btn-clear-macro {
+  height: 34px;
+  padding: 0 12px;
+  font-size: 11px;
+}
+
+.macro-action-icon {
+  width: 13px;
+  height: 13px;
+  stroke: currentColor;
+}
+
+.macro-timeline-track {
+  min-height: 64px;
+  max-height: 150px;
+  overflow-y: auto;
+  border-radius: var(--radius-input);
+  background: var(--surface-color);
+  box-shadow: var(--inset-sm);
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  box-sizing: border-box;
+}
+
+.macro-timeline-empty {
+  width: 100%;
+  text-align: center;
+  font-size: 11.5px;
+  color: var(--text-muted);
+  padding: 12px 0;
+}
+
+.macro-step-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: var(--surface-color);
+  box-shadow: var(--raised-sm);
+  border-radius: var(--radius-badge);
+  user-select: none;
+  transition: all 0.15s ease;
+  font-size: 11px;
+}
+
+.macro-step-chip:hover {
+  transform: translateY(-1px);
+}
+
+.macro-step-dir {
+  font-size: 11px;
+  font-weight: 800;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.macro-step-dir.down {
+  background: rgba(34, 197, 94, 0.15);
+  color: var(--accent-primary);
+}
+
+.macro-step-dir.up {
+  background: rgba(148, 163, 184, 0.2);
+  color: var(--text-muted);
+}
+
+.macro-step-dir.click {
+  background: rgba(56, 189, 248, 0.18);
+  color: #0284c7;
+}
+
+.macro-step-dir.delay {
+  background: rgba(245, 158, 11, 0.18);
+  color: #d97706;
+}
+
+.macro-step-key {
+  font-family: 'JetBrains Mono', 'Consolas', monospace;
+  font-weight: 700;
+  font-size: 11.5px;
+  color: var(--text-primary);
+}
+
+.macro-step-delay {
+  font-family: 'JetBrains Mono', 'Consolas', monospace;
+  font-size: 9.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--surface-color);
+  box-shadow: var(--inset-sm);
+  padding: 2px 5px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.macro-step-delay:hover {
+  color: var(--accent-primary);
+}
+
+.btn-remove-step {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 2px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-remove-step:hover {
+  color: #ef4444;
+}
+
+/* Macro List Cards */
+.macro-card-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.macro-card-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.macro-card-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.macro-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.macro-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.macro-mode-tag,
+.macro-steps-tag {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: var(--radius-badge);
+  background: var(--surface-color);
+  box-shadow: var(--inset-sm);
+  color: var(--text-muted);
+  letter-spacing: 0.3px;
+}
+
+.macro-mode-tag.mode-hold {
+  color: #0284c7;
+}
+
+.macro-mode-tag.mode-toggle {
+  color: #8b5cf6;
+}
+
+.btn-test-run {
+  width: 34px;
+  height: 34px;
+}
+
+.btn-test-run svg {
+  color: var(--accent-primary);
+}

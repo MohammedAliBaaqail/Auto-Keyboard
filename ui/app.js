@@ -99,6 +99,25 @@
         cps: 20,
         limit: 0
       },
+      macroRecorder: {
+        enabled: true,
+        items: [
+          {
+            id: 'macro-1',
+            name: 'Fast Reload Combo',
+            trigger: 'F9',
+            playbackMode: 'NoRepeat',
+            repeatInterval: 50,
+            enabled: 1,
+            steps: [
+              { action: 'Down', key: 'r', delay: 40 },
+              { action: 'Up', key: 'r', delay: 100 },
+              { action: 'Down', key: '1', delay: 40 },
+              { action: 'Up', key: '1', delay: 50 }
+            ]
+          }
+        ]
+      },
       theme: initialTheme
     },
     editingTeId: null,
@@ -1169,6 +1188,473 @@
   }
 
   // ============================================================================
+  // Module 6: Macro Recording & Sequencer
+  // ============================================================================
+
+  const macroState = {
+    isRecording: false,
+    useStandardDelays: true,
+    standardDelay: 50,
+    playbackMode: 'NoRepeat',
+    steps: [],
+    editingId: null
+  };
+
+  const macroInputName = document.getElementById('macroInputName');
+  const macroTriggerBox = document.getElementById('macroTriggerBox');
+  const macroInputTrigger = document.getElementById('macroInputTrigger');
+  const macroBtnClearTrigger = document.getElementById('macroBtnClearTrigger');
+  const macroModeSelector = document.getElementById('macroModeSelector');
+  const macroIntervalBox = document.getElementById('macroIntervalBox');
+  const macroInputInterval = document.getElementById('macroInputInterval');
+  const macroBtnSubmit = document.getElementById('macroBtnSubmit');
+  const macroBtnSubmitText = document.getElementById('macroBtnSubmitText');
+  const macroBtnRecordToggle = document.getElementById('macroBtnRecordToggle');
+  const macroBtnRecordText = document.getElementById('macroBtnRecordText');
+  const macroRecDot = document.getElementById('macroRecDot');
+  const macroStatusPill = document.getElementById('macroStatusPill');
+  const macroStatusText = document.getElementById('macroStatusText');
+  const macroBtnAddLClick = document.getElementById('macroBtnAddLClick');
+  const macroBtnAddRClick = document.getElementById('macroBtnAddRClick');
+  const macroBtnAddMClick = document.getElementById('macroBtnAddMClick');
+  const macroBtnAddDelay = document.getElementById('macroBtnAddDelay');
+  const macroChkStandardDelays = document.getElementById('macroChkStandardDelays');
+  const macroBtnTestPlay = document.getElementById('macroBtnTestPlay');
+  const macroBtnClearSteps = document.getElementById('macroBtnClearSteps');
+  const macroTimelineTrack = document.getElementById('macroTimelineTrack');
+  const macroTimelineEmpty = document.getElementById('macroTimelineEmpty');
+  const macroCountBadge = document.getElementById('macroCountBadge');
+  const macroListContainer = document.getElementById('macroListContainer');
+
+  function renderMacroTimeline() {
+    if (!macroTimelineTrack) return;
+    macroTimelineTrack.innerHTML = '';
+
+    if (!macroState.steps || macroState.steps.length === 0) {
+      if (macroTimelineEmpty) {
+        macroTimelineTrack.appendChild(macroTimelineEmpty);
+      } else {
+        macroTimelineTrack.innerHTML = '<div class="macro-timeline-empty">No sequence steps recorded yet. Click <strong>RECORD</strong> and press any keys, or click the <strong>+ Mouse / Delay</strong> buttons above.</div>';
+      }
+      return;
+    }
+
+    macroState.steps.forEach((step, idx) => {
+      const chip = document.createElement('div');
+      chip.className = 'macro-step-chip';
+
+      let dirClass = 'down';
+      let dirSymbol = '↓';
+      if (step.action === 'Up') {
+        dirClass = 'up';
+        dirSymbol = '↑';
+      } else if (step.action === 'Click') {
+        dirClass = 'click';
+        dirSymbol = '🖱';
+      } else if (step.action === 'Delay') {
+        dirClass = 'delay';
+        dirSymbol = '⏱';
+      }
+
+      chip.innerHTML = `
+        <span class="macro-step-dir ${dirClass}">${dirSymbol}</span>
+        <span class="macro-step-key">${escapeHtml(step.key || 'Delay')}</span>
+        <span class="macro-step-delay" title="Click to edit delay">${step.delay || 50}ms</span>
+        <button type="button" class="btn-remove-step" title="Remove step">&times;</button>
+      `;
+
+      // Click to edit delay
+      const delayEl = chip.querySelector('.macro-step-delay');
+      if (delayEl) {
+        delayEl.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const current = step.delay || 50;
+          const entered = prompt('Enter delay in milliseconds (5 - 5000):', current);
+          if (entered !== null) {
+            const parsed = parseInt(entered, 10);
+            if (!isNaN(parsed) && parsed >= 5 && parsed <= 5000) {
+              step.delay = parsed;
+              renderMacroTimeline();
+            }
+          }
+        });
+      }
+
+      // Remove step button
+      const removeBtn = chip.querySelector('.btn-remove-step');
+      if (removeBtn) {
+        removeBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          macroState.steps.splice(idx, 1);
+          renderMacroTimeline();
+        });
+      }
+
+      macroTimelineTrack.appendChild(chip);
+    });
+  }
+
+  function addMacroStep(action, key, delay = 50) {
+    if (!macroState.steps) macroState.steps = [];
+    macroState.steps.push({
+      action: action || 'Down',
+      key: key || '',
+      delay: parseInt(delay, 10) || 50
+    });
+    renderMacroTimeline();
+  }
+
+  function startMacroRecording() {
+    macroState.isRecording = true;
+    if (macroBtnRecordToggle) {
+      macroBtnRecordToggle.classList.add('is-recording');
+    }
+    if (macroBtnRecordText) {
+      macroBtnRecordText.textContent = 'STOP RECORDING';
+    }
+    if (macroStatusText) {
+      macroStatusText.textContent = 'Recording live keystrokes...';
+    }
+    if (macroStatusPill) {
+      macroStatusPill.style.color = '#ef4444';
+    }
+    sendToAhk('startMacroRecording', {
+      defDelay: macroState.standardDelay,
+      realDelays: !macroState.useStandardDelays
+    });
+  }
+
+  function stopMacroRecording() {
+    macroState.isRecording = false;
+    if (macroBtnRecordToggle) {
+      macroBtnRecordToggle.classList.remove('is-recording');
+    }
+    if (macroBtnRecordText) {
+      macroBtnRecordText.textContent = 'RECORD';
+    }
+    if (macroStatusText) {
+      macroStatusText.textContent = 'Ready to record';
+    }
+    if (macroStatusPill) {
+      macroStatusPill.style.color = '';
+    }
+    sendToAhk('stopMacroRecording');
+  }
+
+  function toggleMacroRecording() {
+    if (macroState.isRecording) {
+      stopMacroRecording();
+    } else {
+      startMacroRecording();
+    }
+  }
+
+  function testCurrentMacro() {
+    if (!macroState.steps || macroState.steps.length === 0) {
+      showToast('Record or add some steps before testing playback!');
+      return;
+    }
+    sendToAhk('testMacro', {
+      macro: {
+        steps: macroState.steps,
+        playbackMode: 'NoRepeat'
+      }
+    });
+    showToast('Executing macro preview...');
+  }
+
+  function renderMacroRecorder() {
+    if (!macroListContainer) return;
+    macroListContainer.innerHTML = '';
+
+    if (!state.config.macroRecorder) {
+      state.config.macroRecorder = { enabled: true, items: [] };
+    }
+    const items = state.config.macroRecorder.items || [];
+
+    if (macroCountBadge) {
+      macroCountBadge.textContent = items.length;
+    }
+
+    if (items.length === 0) {
+      macroListContainer.innerHTML = `
+        <div class="empty-state">
+          <span>No macros recorded yet</span>
+          <p>Create your first macro above using the live keystroke recorder or mouse click injectors.</p>
+        </div>
+      `;
+      return;
+    }
+
+    items.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'shortcut-card macro-card';
+      card.dataset.id = item.id;
+
+      const isEnabled = (item.enabled !== false && item.enabled !== 0);
+      const stepsCount = (item.steps && Array.isArray(item.steps)) ? item.steps.length : 0;
+
+      let modeTag = 'Once';
+      let modeClass = '';
+      if (item.playbackMode === 'RepeatWhileHolding') {
+        modeTag = 'Hold to Loop';
+        modeClass = 'mode-hold';
+      } else if (item.playbackMode === 'Toggle') {
+        modeTag = 'Toggle Loop';
+        modeClass = 'mode-toggle';
+      }
+
+      card.innerHTML = `
+        <div class="macro-card-info">
+          <div class="wm-icon-badge" style="width:36px;height:36px;border-radius:var(--radius-btn);">
+            <svg class="wm-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+              <polyline points="2 17 12 22 22 17"></polyline>
+              <polyline points="2 12 12 17 22 12"></polyline>
+            </svg>
+          </div>
+          <div class="macro-card-text">
+            <div class="macro-card-top">
+              <span class="macro-title">${escapeHtml(item.name || 'Untitled Macro')}</span>
+              <span class="wm-hotkey-badge ${isEnabled ? '' : 'is-disabled'}">${escapeHtml(item.trigger || 'Unassigned')}</span>
+            </div>
+            <div class="macro-card-meta">
+              <span class="macro-steps-tag">${stepsCount} steps</span>
+              <span class="macro-mode-tag ${modeClass}">${modeTag}</span>
+              ${(item.playbackMode !== 'NoRepeat' && item.repeatInterval) ? `<span class="macro-steps-tag">${item.repeatInterval}ms int</span>` : ''}
+            </div>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <button class="card-btn btn-test-run" title="Test Run Macro">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px;">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+          </button>
+          <button class="card-btn btn-edit" title="Edit Macro">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+          </button>
+          <button class="card-btn btn-delete" title="Delete Macro">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+          </button>
+          <div class="toggle-wrapper" title="Enable / Disable Macro">
+            <input class="toggle-checkbox macro-switch" type="checkbox" ${isEnabled ? 'checked' : ''}>
+            <div class="toggle-container">
+              <div class="toggle-button"></div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Test Run
+      card.querySelector('.btn-test-run').addEventListener('click', (e) => {
+        e.stopPropagation();
+        sendToAhk('testMacro', { macro: item });
+        showToast(`Running "${item.name}"...`);
+      });
+
+      // Edit
+      card.querySelector('.btn-edit').addEventListener('click', (e) => {
+        e.stopPropagation();
+        editMacro(item);
+      });
+
+      // Delete
+      card.querySelector('.btn-delete').addEventListener('click', (e) => {
+        e.stopPropagation();
+        deleteMacro(item.id);
+      });
+
+      // Toggle Switch
+      const sw = card.querySelector('.macro-switch');
+      const badge = card.querySelector('.wm-hotkey-badge');
+      sw.addEventListener('change', () => {
+        item.enabled = sw.checked ? 1 : 0;
+        if (badge) badge.classList.toggle('is-disabled', !sw.checked);
+        syncConfig();
+      });
+
+      macroListContainer.appendChild(card);
+    });
+  }
+
+  function submitMacro() {
+    const name = macroInputName ? macroInputName.value.trim() : '';
+    const trig = macroInputTrigger ? macroInputTrigger.value.trim() : '';
+    const interval = macroInputInterval ? parseInt(macroInputInterval.value, 10) || 50 : 50;
+
+    if (!name) {
+      if (macroInputName) macroInputName.focus();
+      showToast('Please enter a name for the macro');
+      return;
+    }
+    if (!trig) {
+      if (macroInputTrigger) macroInputTrigger.focus();
+      showToast('Please record a trigger hotkey');
+      return;
+    }
+    if (!macroState.steps || macroState.steps.length === 0) {
+      showToast('Please record or add at least one step in the sequence');
+      return;
+    }
+
+    if (!state.config.macroRecorder) {
+      state.config.macroRecorder = { enabled: true, items: [] };
+    }
+
+    if (macroState.editingId) {
+      const idx = state.config.macroRecorder.items.findIndex(m => m.id === macroState.editingId);
+      if (idx !== -1) {
+        state.config.macroRecorder.items[idx] = {
+          ...state.config.macroRecorder.items[idx],
+          name: name,
+          trigger: trig,
+          playbackMode: macroState.playbackMode,
+          repeatInterval: interval,
+          steps: [...macroState.steps]
+        };
+      }
+      macroState.editingId = null;
+      if (macroBtnSubmitText) macroBtnSubmitText.textContent = 'ADD';
+      showToast(`Updated macro "${name}"`);
+    } else {
+      state.config.macroRecorder.items.unshift({
+        id: 'macro-' + Date.now(),
+        name: name,
+        trigger: trig,
+        playbackMode: macroState.playbackMode,
+        repeatInterval: interval,
+        enabled: 1,
+        steps: [...macroState.steps]
+      });
+      showToast(`Created macro "${name}"`);
+    }
+
+    if (macroInputName) macroInputName.value = '';
+    if (macroInputTrigger) {
+      macroInputTrigger.value = '';
+      macroInputTrigger.placeholder = 'Trigger (e.g. F9)...';
+    }
+    if (macroBtnClearTrigger) macroBtnClearTrigger.classList.add('hidden-field');
+    macroState.steps = [];
+    renderMacroTimeline();
+    renderMacroRecorder();
+    syncConfig();
+  }
+
+  function editMacro(item) {
+    macroState.editingId = item.id;
+    if (macroInputName) macroInputName.value = item.name || '';
+    if (macroInputTrigger) {
+      macroInputTrigger.value = item.trigger || '';
+      if (macroBtnClearTrigger) macroBtnClearTrigger.classList.remove('hidden-field');
+    }
+    if (macroInputInterval) {
+      macroInputInterval.value = item.repeatInterval || 50;
+    }
+
+    setMacroPlaybackMode(item.playbackMode || 'NoRepeat');
+
+    macroState.steps = (item.steps && Array.isArray(item.steps)) ? JSON.parse(JSON.stringify(item.steps)) : [];
+    renderMacroTimeline();
+
+    if (macroBtnSubmitText) macroBtnSubmitText.textContent = 'SAVE';
+    if (macroInputName) macroInputName.focus();
+    showToast(`Editing "${item.name}"`);
+  }
+
+  function deleteMacro(id) {
+    if (!state.config.macroRecorder) return;
+    state.config.macroRecorder.items = state.config.macroRecorder.items.filter(m => m.id !== id);
+    if (macroState.editingId === id) {
+      macroState.editingId = null;
+      if (macroBtnSubmitText) macroBtnSubmitText.textContent = 'ADD';
+    }
+    renderMacroRecorder();
+    syncConfig();
+    showToast('Macro deleted');
+  }
+
+  function setMacroPlaybackMode(mode) {
+    macroState.playbackMode = mode;
+    if (macroModeSelector) {
+      macroModeSelector.querySelectorAll('.macro-mode-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.mode === mode);
+      });
+    }
+    if (macroIntervalBox) {
+      macroIntervalBox.style.display = (mode === 'NoRepeat') ? 'none' : 'flex';
+    }
+  }
+
+  function initMacroRecorder() {
+    setupKeyCombinationBox(macroTriggerBox, macroInputTrigger, macroBtnClearTrigger, null, submitMacro);
+
+    if (macroModeSelector) {
+      macroModeSelector.querySelectorAll('.macro-mode-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          setMacroPlaybackMode(btn.dataset.mode);
+        });
+      });
+    }
+
+    if (macroInputInterval) {
+      macroInputInterval.addEventListener('input', () => {
+        const val = parseInt(macroInputInterval.value, 10);
+        if (!isNaN(val)) macroState.repeatInterval = Math.max(5, val);
+      });
+    }
+
+    if (macroChkStandardDelays) {
+      macroChkStandardDelays.addEventListener('change', () => {
+        macroState.useStandardDelays = macroChkStandardDelays.checked;
+      });
+    }
+
+    if (macroBtnSubmit) {
+      macroBtnSubmit.addEventListener('click', submitMacro);
+    }
+
+    if (macroBtnRecordToggle) {
+      macroBtnRecordToggle.addEventListener('click', toggleMacroRecording);
+    }
+
+    if (macroBtnAddLClick) {
+      macroBtnAddLClick.addEventListener('click', () => addMacroStep('Click', 'LButton', 50));
+    }
+    if (macroBtnAddRClick) {
+      macroBtnAddRClick.addEventListener('click', () => addMacroStep('Click', 'RButton', 50));
+    }
+    if (macroBtnAddMClick) {
+      macroBtnAddMClick.addEventListener('click', () => addMacroStep('Click', 'MButton', 50));
+    }
+    if (macroBtnAddDelay) {
+      macroBtnAddDelay.addEventListener('click', () => addMacroStep('Delay', 'Sleep', 50));
+    }
+
+    if (macroBtnTestPlay) {
+      macroBtnTestPlay.addEventListener('click', testCurrentMacro);
+    }
+    if (macroBtnClearSteps) {
+      macroBtnClearSteps.addEventListener('click', () => {
+        macroState.steps = [];
+        renderMacroTimeline();
+      });
+    }
+
+    setMacroPlaybackMode('NoRepeat');
+    renderMacroTimeline();
+    renderMacroRecorder();
+  }
+
+  // ============================================================================
   // Master Engine Switch & Indicators
   // ============================================================================
 
@@ -1202,6 +1688,9 @@
     }
     if (state.config.appLauncher && state.config.appLauncher.items) {
       totalItems += state.config.appLauncher.items.length;
+    }
+    if (state.config.macroRecorder && state.config.macroRecorder.items) {
+      totalItems += state.config.macroRecorder.items.length;
     }
 
     activeCountBadge.textContent = totalItems;
@@ -2213,6 +2702,8 @@
         }
       });
     }
+
+    initMacroRecorder();
   }
 
   // Handle IPC Messages from AHK
@@ -2306,6 +2797,15 @@
             wmBtnMuteActiveApp.classList.toggle('is-muted', activeAppState.muted);
           }
         }
+      } else if (msg.type === 'macroStepRecorded') {
+        if (macroState.isRecording) {
+          const delay = macroState.useStandardDelays ? macroState.standardDelay : (msg.delay || 50);
+          addMacroStep(msg.action, msg.key, delay);
+        }
+      } else if (msg.type === 'macroRecordingStopped') {
+        if (macroState.isRecording) {
+          stopMacroRecording();
+        }
       }
     } catch (err) {
       console.error('Error handling AHK message:', err);
@@ -2361,6 +2861,7 @@
     initWindowManager();
     renderAppLauncher();
     initAutoClicker();
+    renderMacroRecorder();
     updateGlobalIndicators();
     renderCustomPresets();
   }

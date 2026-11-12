@@ -190,6 +190,7 @@
         <button class="segment-btn" data-tab="windowManager">Window Manager</button>
         <button class="segment-btn" data-tab="appLauncher">App Launcher</button>
         <button class="segment-btn" data-tab="autoClicker">Auto Clicker</button>
+        <button class="segment-btn" data-tab="macroRecorder">Macro Recorder</button>
       </div>
     </div>
 
@@ -648,6 +649,136 @@
             </button>
             <span class="hint-tag" id="acStatusHint">Ready - Press F8 anywhere in Windows to start or stop clicking</span>
           </div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           6. MACRO RECORDER PANEL (Sequencer, Live Keystroke & Click Recording)
+           ==================================================================== -->
+      <section class="module-panel" id="panel-macroRecorder">
+        <div class="inputs-section">
+          <!-- Top Row: Configuration -->
+          <div class="inputs-row macro-config-row">
+            <!-- Macro Name -->
+            <div class="inset-input-box macro-name-box">
+              <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                <line x1="7" y1="7" x2="7.01" y2="7"></line>
+              </svg>
+              <input type="text" id="macroInputName" placeholder="Macro Name (e.g. Fast Combo)" autocomplete="off" spellcheck="false" />
+            </div>
+
+            <!-- Trigger Hotkey Box -->
+            <div class="inset-input-box key-combo-box macro-trigger-box" id="macroTriggerBox" title="Click to record trigger hotkey">
+              <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                <path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M7 16h10"></path>
+              </svg>
+              <input type="text" id="macroInputTrigger" class="key-combo-input" placeholder="Trigger (e.g. F9)..." readonly autocomplete="off" spellcheck="false" />
+              <button type="button" class="btn-combo-clear hidden-field" id="macroBtnClearTrigger" title="Clear">&times;</button>
+            </div>
+
+            <!-- Playback Mode Segmented Pill -->
+            <div class="macro-mode-segmented" id="macroModeSelector" title="Macro Playback Mode">
+              <button type="button" class="macro-mode-btn active" data-mode="NoRepeat" title="Play sequence once on press">Once</button>
+              <button type="button" class="macro-mode-btn" data-mode="RepeatWhileHolding" title="Loop sequence while hotkey is held">Hold</button>
+              <button type="button" class="macro-mode-btn" data-mode="Toggle" title="Press to start loop, press again to stop">Toggle</button>
+            </div>
+
+            <!-- Repeat Interval (for Hold / Toggle) -->
+            <div class="inset-input-box macro-interval-box" id="macroIntervalBox" title="Repeat delay between loops (ms)">
+              <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+              <input type="number" id="macroInputInterval" value="50" min="5" max="5000" placeholder="Interval" />
+              <span class="input-unit">ms</span>
+            </div>
+
+            <!-- Save / Add Macro Button -->
+            <button class="neumorphic-btn btn-go" id="macroBtnSubmit" title="Save Macro">
+              <span id="macroBtnSubmitText">ADD</span>
+            </button>
+          </div>
+
+          <!-- Macro Sequencer & Live Capture Deck -->
+          <div class="macro-sequencer-deck">
+            <div class="macro-deck-header">
+              <div class="macro-deck-left">
+                <!-- Record Button with Pulsing Dot -->
+                <button type="button" class="neumorphic-btn-pill btn-record-macro" id="macroBtnRecordToggle" title="Start / Stop Hardware Keystroke Recording">
+                  <span class="rec-pulse-dot" id="macroRecDot"></span>
+                  <span id="macroBtnRecordText">RECORD</span>
+                </button>
+
+                <!-- Live Status Pill -->
+                <div class="macro-status-pill" id="macroStatusPill">
+                  <span id="macroStatusText">Ready to record</span>
+                </div>
+
+                <!-- Quick Mouse & Delay Injections -->
+                <div class="macro-inject-group">
+                  <button type="button" class="macro-inject-btn" id="macroBtnAddLClick" title="Inject Left Mouse Click">
+                    <span>+ Left Click</span>
+                  </button>
+                  <button type="button" class="macro-inject-btn" id="macroBtnAddRClick" title="Inject Right Mouse Click">
+                    <span>+ Right Click</span>
+                  </button>
+                  <button type="button" class="macro-inject-btn" id="macroBtnAddMClick" title="Inject Middle Mouse Click">
+                    <span>+ Mid Click</span>
+                  </button>
+                  <button type="button" class="macro-inject-btn" id="macroBtnAddDelay" title="Inject Custom Delay (+50ms)">
+                    <span>+ 50ms Delay</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="macro-deck-right">
+                <!-- Standard Delays Toggle -->
+                <label class="macro-delay-toggle" title="Use fixed 50ms delay between steps or record exact real-time timing">
+                  <input type="checkbox" id="macroChkStandardDelays" checked />
+                  <span class="macro-delay-checkbox"></span>
+                  <span class="macro-delay-label">Fixed Delay (50ms)</span>
+                </label>
+
+                <!-- Test Playback Button -->
+                <button type="button" class="neumorphic-btn-pill btn-test-macro" id="macroBtnTestPlay" title="Test Play Current Sequence">
+                  <svg class="macro-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                  </svg>
+                  <span>Test Play</span>
+                </button>
+
+                <!-- Clear Steps Button -->
+                <button type="button" class="neumorphic-btn-pill btn-clear-macro" id="macroBtnClearSteps" title="Clear all recorded steps">
+                  <svg class="macro-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
+                  <span>Clear</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Sequence Flow Timeline Track -->
+            <div class="macro-timeline-track" id="macroTimelineTrack">
+              <div class="macro-timeline-empty" id="macroTimelineEmpty">
+                <span>No sequence steps recorded yet. Click <strong>RECORD</strong> and press any keys, or click the <strong>+ Mouse / Delay</strong> buttons above.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Saved Macros List -->
+        <div class="list-section">
+          <div class="list-header">
+            <div class="list-header-left">
+              <span class="section-label">Active Recorded Macros</span>
+              <span class="section-count" id="macroCountBadge">0</span>
+            </div>
+            <span class="hint-tag">Press trigger hotkeys anywhere in Windows to execute macros</span>
+          </div>
+          <div class="shortcuts-list" id="macroListContainer"></div>
         </div>
       </section>
 

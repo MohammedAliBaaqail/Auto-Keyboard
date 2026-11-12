@@ -1,49 +1,156 @@
-﻿{
-  "activeTab":"windowManager",
-  "appLauncher":{
-    "enabled":1,
-    "items":[{"id":"al-1794403819689","name":"Everything","target":"C:\\Program Files (x86)\\Everything\\Everything.exe","trigger":"Ctrl+Alt+Shift+E","triggerType":"hotkey"},{"id":"al-1","name":"Calculator","target":"calc.exe","trigger":"@calc","triggerType":"string"},{"id":"al-2","name":"YouTube","target":"https://www.youtube.com","trigger":"@yt","triggerType":"string"},{"id":"al-3","name":"GitHub","target":"https://github.com","trigger":"@gh","triggerType":"string"}]
+{
+  "activeTab": "autoClicker",
+  "appLauncher": {
+    "enabled": 1,
+    "items": [
+      {
+        "id": "al-1794403819689",
+        "name": "Everything",
+        "target": "C:\\Program Files (x86)\\Everything\\Everything.exe",
+        "trigger": "Ctrl+Alt+Shift+E",
+        "triggerType": "hotkey"
+      },
+      {
+        "id": "al-1",
+        "name": "Calculator",
+        "target": "calc.exe",
+        "trigger": "@calc",
+        "triggerType": "string"
+      },
+      {
+        "id": "al-2",
+        "name": "YouTube",
+        "target": "https://www.youtube.com",
+        "trigger": "@yt",
+        "triggerType": "string"
+      },
+      {
+        "id": "al-3",
+        "name": "GitHub",
+        "target": "https://github.com",
+        "trigger": "@gh",
+        "triggerType": "string"
+      }
+    ]
   },
-  "autoClicker":{
-    "button":"Left",
-    "clickType":"Single",
-    "cps":20,
-    "enabled":1,
-    "hotkey":"F8",
-    "limit":0
+  "autoClicker": {
+    "button": "Left",
+    "clickType": "Single",
+    "cps": 20,
+    "enabled": 1,
+    "hotkey": "F8",
+    "limit": 0
   },
-  "enabled":1,
-  "keyRemapper":{
-    "enabled":1,
-    "items":[{"id":"kr-2","name":"Mute Master Audio (Ctrl+Alt+M)","source":"^!m","target":"MuteAudio"}]
+  "enabled": 1,
+  "keyRemapper": {
+    "enabled": 1,
+    "items": [
+      {
+        "id": "kr-2",
+        "name": "Mute Master Audio (Ctrl+Alt+M)",
+        "source": "^!m",
+        "target": "MuteAudio"
+      }
+    ]
   },
-  "textExpander":{
-    "enabled":1,
-    "items":[{"id":"te-1","input":"@@1","multiline":0,"output":"myemail@gmail.com"},{"id":"te-2","input":"@@sig","multiline":1,"output":"Best regards,\nYour Name\nSenior Engineer"}]
+  "macroRecorder": {
+    "enabled": 1,
+    "items": [
+      {
+        "enabled": 1,
+        "id": "macro-1",
+        "name": "Fast Reload Combo",
+        "playbackMode": "NoRepeat",
+        "repeatInterval": 50,
+        "steps": [
+          {
+            "action": "Down",
+            "delay": 40,
+            "key": "r"
+          },
+          {
+            "action": "Up",
+            "delay": 100,
+            "key": "r"
+          },
+          {
+            "action": "Down",
+            "delay": 40,
+            "key": "1"
+          },
+          {
+            "action": "Up",
+            "delay": 50,
+            "key": "1"
+          }
+        ],
+        "trigger": "F9"
+      }
+    ]
   },
-  "theme":{
-    "accentColor":"#22c55e",
-    "bgColor":"#e0e5ec",
-    "blur":11,
-    "customPresets":[{"accentColor":"#22c55e","bgColor":"#e0e5ec","blur":11,"darkIntensity":3,"distance":4,"id":"custom_1794484507311","lightIntensity":12,"name":"1","radius":9},{"accentColor":"#c084fc","bgColor":"#2b2640","blur":10,"darkIntensity":42,"distance":5,"id":"custom_1794484519358","lightIntensity":22,"name":"3","radius":18}],
-    "darkIntensity":3,
-    "distance":4,
-    "intensity":8,
-    "lightIntensity":12,
-    "radius":9
+  "textExpander": {
+    "enabled": 1,
+    "items": [
+      {
+        "id": "te-1",
+        "input": "@@1",
+        "multiline": 0,
+        "output": "myemail@gmail.com"
+      },
+      {
+        "id": "te-2",
+        "input": "@@sig",
+        "multiline": 1,
+        "output": "Best regards,\nYour Name\nSenior Engineer"
+      }
+    ]
   },
-  "windowManager":{
-    "alwaysOnTopEnabled":1,
-    "alwaysOnTopHotkey":"^SPACE",
-    "appVolumeMuteEnabled":1,
-    "appVolumeMuteHotkey":"!m",
-    "appVolumeWheel":1,
-    "centerWindowEnabled":1,
-    "centerWindowHotkey":"^!c",
-    "enabled":1,
-    "hideWindowEnabled":1,
-    "hideWindowHotkey":"^!h",
-    "opacity":255,
-    "transparencyWheel":1
+  "theme": {
+    "accentColor": "#22c55e",
+    "bgColor": "#e0e5ec",
+    "blur": 11,
+    "customPresets": [
+      {
+        "accentColor": "#22c55e",
+        "bgColor": "#e0e5ec",
+        "blur": 11,
+        "darkIntensity": 3,
+        "distance": 4,
+        "id": "custom_1794484507311",
+        "lightIntensity": 12,
+        "name": "1",
+        "radius": 9
+      },
+      {
+        "accentColor": "#c084fc",
+        "bgColor": "#2b2640",
+        "blur": 10,
+        "darkIntensity": 42,
+        "distance": 5,
+        "id": "custom_1794484519358",
+        "lightIntensity": 22,
+        "name": "3",
+        "radius": 18
+      }
+    ],
+    "darkIntensity": 3,
+    "distance": 4,
+    "intensity": 8,
+    "lightIntensity": 12,
+    "radius": 9
+  },
+  "windowManager": {
+    "alwaysOnTopEnabled": 1,
+    "alwaysOnTopHotkey": "^SPACE",
+    "appVolumeMuteEnabled": 1,
+    "appVolumeMuteHotkey": "!m",
+    "appVolumeWheel": 1,
+    "centerWindowEnabled": 1,
+    "centerWindowHotkey": "^!c",
+    "enabled": 1,
+    "hideWindowEnabled": 1,
+    "hideWindowHotkey": "^!h",
+    "opacity": 255,
+    "transparencyWheel": 1
   }
 }
