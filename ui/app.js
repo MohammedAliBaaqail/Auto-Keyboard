@@ -860,8 +860,16 @@
       const currWm = (state.config && state.config.windowManager) ? state.config.windowManager : {};
       const isEnabled = (currWm[key] !== false && currWm[key] !== 0);
       sw.checked = isEnabled;
+      const card = sw.closest('.wm-card');
+      const iconBadge = card ? card.querySelector('.wm-icon-badge') : null;
+      if (card) {
+        card.classList.toggle('is-disabled', !isEnabled);
+      }
       if (badge) {
         badge.classList.toggle('is-disabled', !isEnabled);
+      }
+      if (iconBadge) {
+        iconBadge.classList.toggle('is-disabled', !isEnabled);
       }
 
       if (!sw.dataset.bound) {
@@ -870,9 +878,16 @@
           if (!state.config.windowManager) {
             state.config.windowManager = {};
           }
-          state.config.windowManager[key] = sw.checked ? 1 : 0;
+          const isChecked = sw.checked;
+          state.config.windowManager[key] = isChecked ? 1 : 0;
+          if (card) {
+            card.classList.toggle('is-disabled', !isChecked);
+          }
           if (badge) {
-            badge.classList.toggle('is-disabled', !sw.checked);
+            badge.classList.toggle('is-disabled', !isChecked);
+          }
+          if (iconBadge) {
+            iconBadge.classList.toggle('is-disabled', !isChecked);
           }
           syncConfig();
         });
@@ -1585,12 +1600,11 @@
     }
 
     items.forEach((item, itemIdx) => {
+      const isEnabled = (item.enabled !== false && item.enabled !== 0);
       const card = document.createElement('div');
-      card.className = 'shortcut-card macro-card';
+      card.className = `shortcut-card macro-card ${isEnabled ? '' : 'is-disabled'}`;
       card.dataset.id = item.id;
       card.setAttribute('draggable', 'true');
-
-      const isEnabled = (item.enabled !== false && item.enabled !== 0);
       const stepsCount = (item.steps && Array.isArray(item.steps)) ? item.steps.length : 0;
 
       let modeTag = 'Once';
@@ -1733,9 +1747,16 @@
       // Toggle Switch
       const sw = card.querySelector('.macro-switch');
       const badge = card.querySelector('.wm-hotkey-badge');
+      const iconBadge = card.querySelector('.wm-icon-badge');
+      if (iconBadge) {
+        iconBadge.classList.toggle('is-disabled', !isEnabled);
+      }
       sw.addEventListener('change', () => {
-        item.enabled = sw.checked ? 1 : 0;
-        if (badge) badge.classList.toggle('is-disabled', !sw.checked);
+        const isChecked = sw.checked;
+        item.enabled = isChecked ? 1 : 0;
+        card.classList.toggle('is-disabled', !isChecked);
+        if (badge) badge.classList.toggle('is-disabled', !isChecked);
+        if (iconBadge) iconBadge.classList.toggle('is-disabled', !isChecked);
         syncConfig();
       });
 
