@@ -1028,7 +1028,13 @@ html, body {
 .wm-card.wm-card-column {
   flex-direction: column;
   align-items: stretch;
-  gap: 8px;
+  gap: 3px;
+  padding: 8px 18px 7px 18px;
+}
+
+.wm-card.wm-card-column .wm-icon-badge {
+  width: 36px;
+  height: 36px;
 }
 
 .wm-card-main-row {
@@ -1042,9 +1048,9 @@ html, body {
 .wm-sub-option {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding-top: 8px;
-  border-top: 1px dashed rgba(148, 163, 184, 0.22);
+  gap: 7px;
+  padding-top: 4px;
+  border-top: 1px dashed rgba(148, 163, 184, 0.2);
   width: 100%;
 }
 
@@ -1057,7 +1063,7 @@ html, body {
   align-items: center;
   position: relative;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 10px;
   user-select: none;
   flex-shrink: 0;
 }
@@ -1078,15 +1084,15 @@ html, body {
   width: 1.3em;
   border-radius: 100%;
   background: var(--surface-color);
-  box-shadow: 2px 2px 4px var(--shadow-dark),
-              -2px -2px 4px var(--shadow-light);
-  transition: all 0.35s ease;
+  box-shadow: 1.5px 1.5px 3px var(--shadow-dark),
+              -1.5px -1.5px 3px var(--shadow-light);
+  transition: all 0.25s ease;
   box-sizing: border-box;
 }
 
 .uiverse-checkbox-wrap input:checked ~ .uiverse-checkmark {
-  box-shadow: inset 2px 2px 4px var(--shadow-dark),
-              inset -2px -2px 4px var(--shadow-light);
+  box-shadow: inset 1.5px 1.5px 3px var(--shadow-dark),
+              inset -1.5px -1.5px 3px var(--shadow-light);
   background: var(--surface-color);
 }
 
@@ -1094,7 +1100,7 @@ html, body {
   content: "";
   position: absolute;
   opacity: 0;
-  transition: opacity 0.22s ease, transform 0.22s ease;
+  transition: opacity 0.2s ease, transform 0.2s ease;
   left: 0.44em;
   top: 0.22em;
   width: 0.24em;
@@ -1114,25 +1120,33 @@ html, body {
   align-items: center;
   justify-content: space-between;
   flex: 1;
-  gap: 8px;
+  gap: 6px;
   min-width: 0;
 }
 
 .wm-sub-label {
-  font-size: 11px;
+  font-size: 8.5px;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.2px;
+}
+
+.wm-sub-label:hover {
+  color: var(--text-primary);
 }
 
 .wm-sub-hotkey-tag {
   font-family: var(--font-main);
-  font-size: 9.5px;
+  font-size: 8px;
   font-weight: 700;
   color: var(--green-primary);
   background: var(--surface-color);
   box-shadow: var(--inset-sm);
-  padding: 2px 7px;
+  padding: 1.5px 5px;
   border-radius: var(--radius-badge);
   white-space: nowrap;
   flex-shrink: 0;
