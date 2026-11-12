@@ -14,13 +14,15 @@
   --neo-blur: 8px;
   --neo-intensity: 15%;
 
-  /* Dynamic Border Radii */
+  /* Dynamic Border Radii (all derived dynamically from --neo-radius) */
   --radius-card: var(--neo-radius);
   --radius-panel: var(--neo-radius);
   --radius-input: var(--neo-radius);
   --radius-pill: var(--neo-radius);
   --radius-btn: calc(var(--neo-radius) * 0.8);
   --radius-subcard: calc(var(--neo-radius) * 0.9);
+  --radius-badge: calc(var(--neo-radius) * 0.45);
+  --radius-thumb: calc(var(--neo-radius) * 0.65);
 
   /* Soft Neumorphic Shadows - Compact, crisp, tight elevation without halos or clipping */
   --shadow-light: #f9f9f9;
@@ -145,7 +147,7 @@ html, body {
 .squircle-btn {
   width: 42px;
   height: 42px;
-  border-radius: 16px;
+  border-radius: var(--radius-btn);
   background: var(--surface-color);
   box-shadow: var(--raised-sm);
   border: none;
@@ -243,7 +245,7 @@ html, body {
   flex: 1;
   height: 100%;
   padding: 0 4px;
-  border-radius: calc(var(--radius-pill) - 4px);
+  border-radius: max(0px, calc(var(--radius-pill) - 4px));
   border: none;
   background: transparent;
   color: var(--text-secondary);
@@ -361,7 +363,7 @@ html, body {
 .btn-input-browse {
   height: 30px;
   padding: 0 10px;
-  border-radius: calc(var(--radius-input) - 6px);
+  border-radius: max(0px, calc(var(--radius-input) - 6px));
   background: var(--surface-color);
   box-shadow: var(--raised-sm);
   border: none;
@@ -546,7 +548,7 @@ html, body {
 .al-type-btn {
   height: 100%;
   padding: 0 12px;
-  border-radius: calc(var(--radius-pill) - 4px);
+  border-radius: max(0px, calc(var(--radius-pill) - 4px));
   border: none;
   background: transparent;
   color: var(--text-secondary);
@@ -586,7 +588,7 @@ html, body {
 .neumorphic-select {
   width: 100%;
   height: 100%;
-  border-radius: 22px;
+  border-radius: var(--radius-input);
   background: var(--surface-color);
   box-shadow: var(--raised-sm);
   border: none;
@@ -692,7 +694,7 @@ html, body {
 .search-filter-box {
   width: 200px;
   height: 38px;
-  border-radius: 22px;
+  border-radius: var(--radius-input);
   background: var(--surface-color);
   box-shadow: var(--inset-sm);
   display: flex;
@@ -771,7 +773,7 @@ html, body {
   border: none;
   height: 34px;
   padding: 0 16px;
-  border-radius: 14px;
+  border-radius: var(--radius-btn);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -813,7 +815,7 @@ html, body {
   background: var(--surface-color);
   box-shadow: var(--inset-sm);
   padding: 2px 8px;
-  border-radius: 8px;
+  border-radius: var(--radius-badge);
   margin-left: 6px;
 }
 
@@ -826,7 +828,7 @@ html, body {
 .card-btn {
   width: 36px;
   height: 36px;
-  border-radius: 12px;
+  border-radius: var(--radius-btn);
   background: var(--surface-color);
   box-shadow: var(--raised-sm);
   border: none;
@@ -901,7 +903,7 @@ html, body {
 .wm-icon-badge {
   width: 40px;
   height: 40px;
-  border-radius: 12px;
+  border-radius: var(--radius-btn);
   background: var(--surface-color);
   box-shadow: var(--inset-sm);
   display: flex;
@@ -938,7 +940,7 @@ html, body {
   background: var(--surface-color);
   box-shadow: var(--inset-sm);
   padding: 6px 14px;
-  border-radius: 12px;
+  border-radius: var(--radius-btn);
   white-space: nowrap;
 }
 
@@ -971,7 +973,7 @@ html, body {
   background: var(--surface-color);
   box-shadow: var(--inset-sm);
   padding: 4px 14px;
-  border-radius: 12px;
+  border-radius: var(--radius-btn);
 }
 
 .neumorphic-slider-container {
@@ -984,7 +986,7 @@ html, body {
   appearance: none;
   width: 100%;
   height: 12px;
-  border-radius: 6px;
+  border-radius: calc(var(--radius-pill) * 0.35);
   background: linear-gradient(to right, var(--green-primary) 0%, var(--green-light) var(--progress, 0%), #cfd8e5 var(--progress, 0%), #cfd8e5 100%);
   box-shadow: inset 2px 2px 5px var(--shadow-dark), inset -2px -2px 5px var(--shadow-light);
   outline: none;
@@ -1084,7 +1086,7 @@ html, body {
 
 .ac-hotkey-display {
   height: 36px;
-  border-radius: 14px;
+  border-radius: var(--radius-input);
   background: var(--surface-color);
   box-shadow: var(--inset-sm);
   display: flex;
@@ -1116,7 +1118,7 @@ html, body {
 .ac-toggle-btn {
   height: 48px;
   min-width: 160px;
-  border-radius: 22px;
+  border-radius: var(--radius-pill);
   box-shadow: var(--raised-md);
   font-size: 13px;
   letter-spacing: 1px;
@@ -1247,7 +1249,7 @@ html, body {
 .vertical-rocker {
   width: 46px;
   height: 70px;
-  border-radius: 23px;
+  border-radius: var(--radius-pill);
   background: var(--surface-color);
   box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
   border: none;
@@ -1297,7 +1299,7 @@ html, body {
   position: absolute;
   width: 38px;
   height: 30px;
-  border-radius: 14px;
+  border-radius: var(--radius-thumb);
   background: linear-gradient(180deg, #ffffff 0%, #edf1f7 100%);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.14), 0 1px 3px rgba(0, 0, 0, 0.08), inset 0 1px 1.5px rgba(255, 255, 255, 0.95);
   border: none;
@@ -1363,7 +1365,7 @@ html, body {
 .btn-chip {
   height: 38px;
   padding: 0 16px;
-  border-radius: 22px;
+  border-radius: var(--radius-btn);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -1525,7 +1527,7 @@ html, body {
   align-items: center;
   justify-content: space-between;
   padding: 10px 14px;
-  border-radius: 14px;
+  border-radius: var(--radius-subcard);
   background: var(--surface-color);
   box-shadow: var(--raised-sm);
   border: none;
@@ -1540,7 +1542,7 @@ html, body {
   background: var(--surface-color);
   box-shadow: var(--inset-sm);
   padding: 4px 10px;
-  border-radius: 8px;
+  border-radius: var(--radius-badge);
   white-space: nowrap;
 }
 
@@ -1617,7 +1619,7 @@ html, body {
   background: var(--surface-color);
   box-shadow: var(--inset-sm);
   padding: 2px 7px;
-  border-radius: 8px;
+  border-radius: var(--radius-badge);
   min-width: 36px;
   text-align: center;
 }
@@ -1662,7 +1664,7 @@ html, body {
 .theme-swatch-chip {
   height: 38px;
   padding: 0 14px;
-  border-radius: 22px;
+  border-radius: var(--radius-pill);
   background: var(--surface-color);
   box-shadow: var(--raised-sm);
   border: none;
@@ -1704,7 +1706,7 @@ html, body {
   align-items: center;
   justify-content: space-between;
   padding: 8px 14px;
-  border-radius: 14px;
+  border-radius: var(--radius-subcard);
   background: var(--surface-color);
   box-shadow: var(--inset-sm);
   margin-top: 2px;
@@ -1789,7 +1791,7 @@ html, body {
 .color-hex-input {
   width: 84px;
   height: 28px;
-  border-radius: 14px;
+  border-radius: var(--radius-input);
   border: none;
   background: var(--surface-color);
   box-shadow: var(--inset-sm);
