@@ -258,39 +258,40 @@
       <section class="module-panel" id="panel-keyRemapper">
         <div class="inputs-section">
           <div class="inputs-row">
-            <!-- Source Key Input with Automatic Hotkey Capture -->
-            <div class="inset-input-box trigger-box" title="Click and press your source key or combination (e.g. Ctrl+Shift+A, CapsLock)">
+            <!-- Source Key Combination Box -->
+            <div class="inset-input-box key-combo-box" id="krSourceBox" title="Click to record source key combination">
               <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect x="2" y="4" width="20" height="16" rx="2"></rect>
                 <path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M7 16h10"></path>
               </svg>
-              <input type="text" id="krInputSource" placeholder="Source Key (press any shortcut)" autocomplete="off" spellcheck="false" />
+              <input type="text" id="krInputSource" class="key-combo-input" placeholder="Click to record source key..." readonly autocomplete="off" spellcheck="false" />
+              <button type="button" class="btn-combo-clear hidden-field" id="krBtnClearSource" title="Clear">&times;</button>
             </div>
 
-            <!-- Target Key Input (Replaces dropdown menu) -->
-            <div class="inset-input-box trigger-box" title="Click and press your target key or type action (e.g. Escape, MuteAudio, Ctrl+C)">
+            <!-- Arrow Divider -->
+            <div class="remap-arrow-indicator" title="Remaps to">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </div>
+
+            <!-- Target Key Combination Box -->
+            <div class="inset-input-box key-combo-box" id="krTargetBox" title="Click to record target key or combination">
               <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="13 17 18 12 13 7"></polyline>
                 <polyline points="6 17 11 12 6 7"></polyline>
               </svg>
-              <input type="text" id="krInputTarget" placeholder="Target Key / Action" autocomplete="off" spellcheck="false" />
+              <input type="text" id="krInputTarget" class="key-combo-input" placeholder="Click to record target key..." readonly autocomplete="off" spellcheck="false" />
+              <button type="button" class="btn-combo-clear hidden-field" id="krBtnClearTarget" title="Clear">&times;</button>
             </div>
 
-            <!-- Optional Description / Label -->
-            <div class="inset-input-box output-box">
-              <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
-                <line x1="7" y1="7" x2="7.01" y2="7"></line>
-              </svg>
-              <input type="text" id="krInputName" placeholder="Label / Description (optional)..." autocomplete="off" spellcheck="false" />
-            </div>
-
-            <button class="neumorphic-btn btn-go" id="krBtnSubmit">
+            <button class="neumorphic-btn btn-go" id="krBtnSubmit" title="Add Key Remap">
               <span>ADD</span>
             </button>
           </div>
           <div class="input-hints">
-            <span class="hint-tag">Press any key or combination (Ctrl, Shift, Alt, Win + Key, or CapsLock, Esc, F1-F12)</span>
+            <span class="hint-tag">Click a box & press any key or combination (e.g. Ctrl+Shift+A, CapsLock, F1-F12, Esc)</span>
           </div>
         </div>
 

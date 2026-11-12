@@ -578,6 +578,81 @@ html, body {
   flex-shrink: 0;
 }
 
+/* Key Combination Recorder (Key Remapper) */
+.remap-arrow-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-btn);
+  background: var(--surface-color);
+  box-shadow: var(--inset-sm);
+  color: var(--accent-primary);
+  flex-shrink: 0;
+}
+
+.remap-arrow-indicator svg {
+  width: 16px;
+  height: 16px;
+}
+
+.key-combo-box {
+  flex: 1 1 0;
+  min-width: 160px;
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.key-combo-box .key-combo-input {
+  cursor: pointer;
+  user-select: none;
+  caret-color: transparent;
+  font-family: 'JetBrains Mono', 'Consolas', monospace;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--accent-primary);
+  padding-right: 36px;
+}
+
+.key-combo-box.is-recording {
+  box-shadow: var(--inset-deep), inset 0 0 0 1.5px var(--accent-primary) !important;
+}
+
+.key-combo-box.is-recording .key-combo-input {
+  color: var(--accent-primary);
+}
+
+.btn-combo-clear {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: var(--surface-color);
+  box-shadow: var(--raised-sm);
+  color: var(--text-muted);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: all 0.15s ease;
+  z-index: 2;
+}
+
+.btn-combo-clear:hover {
+  color: #ef4444;
+  box-shadow: var(--inset-sm);
+}
+
 /* Dropdown Select (Select ∨ from Image) */
 .neumorphic-select-wrapper {
   position: relative;

@@ -381,13 +381,14 @@ RegisterSingleRemap(source, target) {
         return
     }
     
-    ; Key-to-key remap (e.g. CapsLock -> Control) with autorepeat protection
-    if (cleanSource = "CapsLock" && (cleanTarget = "Control" || cleanTarget = "Ctrl")) {
-        static isCapsHeld := false
-        Hotkey("*CapsLock", (*) => (isCapsHeld ? "" : (isCapsHeld := true, Send("{Blind}{Ctrl DownR}"))), "On")
-        Hotkey("*CapsLock up", (*) => (isCapsHeld := false, Send("{Blind}{Ctrl Up}")), "On")
-        g_ActiveHotkeys.Push("*CapsLock")
-        g_ActiveHotkeys.Push("*CapsLock up")
+    ; Modifier key remap (e.g. CapsLock -> Control, or any key to Ctrl/Shift/Alt)
+    if (cleanTarget = "Control" || cleanTarget = "Ctrl" || cleanTarget = "Shift" || cleanTarget = "Alt") {
+        modKey := (cleanTarget = "Control" || cleanTarget = "Ctrl") ? "Ctrl" : cleanTarget
+        static isHeld := false
+        Hotkey("*" . ahkSource, (*) => (isHeld ? "" : (isHeld := true, Send("{Blind}{" . modKey . " DownR}"))), "On")
+        Hotkey("*" . ahkSource . " up", (*) => (isHeld := false, Send("{Blind}{" . modKey . " Up}")), "On")
+        g_ActiveHotkeys.Push("*" . ahkSource)
+        g_ActiveHotkeys.Push("*" . ahkSource . " up")
         return
     }
     

@@ -148,10 +148,13 @@
   const teSearchFilter = document.getElementById('teSearchFilter');
   const teShortcutsContainer = document.getElementById('teShortcutsContainer');
 
-  // Key Remapper Elements
+  // Key Remapper Elements (Pure Key Combination Recorders)
   const krInputSource = document.getElementById('krInputSource');
   const krInputTarget = document.getElementById('krInputTarget');
-  const krInputName = document.getElementById('krInputName');
+  const krSourceBox = document.getElementById('krSourceBox');
+  const krTargetBox = document.getElementById('krTargetBox');
+  const krBtnClearSource = document.getElementById('krBtnClearSource');
+  const krBtnClearTarget = document.getElementById('krBtnClearTarget');
   const krBtnSubmit = document.getElementById('krBtnSubmit');
   const krRemapsContainer = document.getElementById('krRemapsContainer');
 
@@ -486,99 +489,199 @@
     });
   }
 
-  function setupHotkeyCapture(inputEl, nextEl, onSubmit) {
-    if (!inputEl) return;
+  function setupKeyCombinationBox(boxEl, inputEl, clearBtn, nextBox, onCommit) {
+    if (!boxEl || !inputEl) return;
+
+    let isRecording = false;
+    let pendingModifier = null;
+
+    function startRecording() {
+      isRecording = true;
+      pendingModifier = null;
+      boxEl.classList.add('is-recording');
+      inputEl.placeholder = 'Press keys...';
+    }
+
+    function stopRecording() {
+      isRecording = false;
+      pendingModifier = null;
+      boxEl.classList.remove('is-recording');
+      if (!inputEl.value) {
+        inputEl.placeholder = 'Click to record...';
+      }
+      updateClearButton();
+    }
+
+    function updateClearButton() {
+      if (clearBtn) {
+        if (inputEl.value.trim()) {
+          clearBtn.classList.remove('hidden-field');
+        } else {
+          clearBtn.classList.add('hidden-field');
+        }
+      }
+    }
+
+    boxEl.addEventListener('click', (e) => {
+      if (e.target === clearBtn) return;
+      inputEl.focus();
+      startRecording();
+    });
+
+    inputEl.addEventListener('focus', () => {
+      startRecording();
+    });
+
+    inputEl.addEventListener('blur', () => {
+      stopRecording();
+    });
+
+    if (clearBtn) {
+      clearBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        inputEl.value = '';
+        inputEl.placeholder = 'Click to record...';
+        updateClearButton();
+        inputEl.blur();
+      });
+    }
 
     inputEl.addEventListener('keydown', (e) => {
+      if (!isRecording) startRecording();
+
       if (e.key === 'Tab') return;
 
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Backspace or Delete clears the combination
+      if ((e.key === 'Backspace' || e.key === 'Delete') && !e.ctrlKey && !e.altKey && !e.shiftKey) {
+        inputEl.value = '';
+        updateClearButton();
+        return;
+      }
+
+      // Enter key commits or advances
       if (e.key === 'Enter') {
-        e.preventDefault();
-        if (nextEl && !nextEl.value.trim()) {
-          nextEl.focus();
-        } else if (onSubmit) {
-          onSubmit();
+        if (inputEl.value.trim()) {
+          stopRecording();
+          if (nextBox) {
+            const nextInput = nextBox.querySelector('input');
+            if (nextInput) nextInput.focus();
+          } else if (onCommit) {
+            onCommit();
+          }
         }
         return;
       }
 
       const isModifier = ['Control', 'Alt', 'Shift', 'Meta', 'OS'].includes(e.key);
-      const hasModifier = e.ctrlKey || e.altKey || e.metaKey || (e.shiftKey && (e.ctrlKey || e.altKey || e.metaKey));
-      const isSpecialKey = [
-        'Escape', 'CapsLock', 'Space', 'Backspace', 'Delete', 'Insert',
-        'Home', 'End', 'PageUp', 'PageDown', 'ArrowUp', 'ArrowDown',
-        'ArrowLeft', 'ArrowRight', 'Tab', 'NumLock', 'ScrollLock', 'PrintScreen'
-      ].includes(e.key) || /^F\d{1,2}$/i.test(e.key);
 
-      // Backspace or Delete without modifiers clears the input
-      if ((e.key === 'Backspace' || e.key === 'Delete') && !hasModifier && !e.shiftKey) {
-        inputEl.value = '';
-        e.preventDefault();
+      const parts = [];
+      if (e.ctrlKey) parts.push('Ctrl');
+      if (e.altKey) parts.push('Alt');
+      if (e.shiftKey) parts.push('Shift');
+      if (e.metaKey) parts.push('Win');
+
+      // Standalone modifier press
+      if (isModifier) {
+        pendingModifier = e.key === 'Control' ? 'Control' : (e.key === 'Shift' ? 'Shift' : (e.key === 'Alt' ? 'Alt' : 'Win'));
+        inputEl.value = parts.join(' + ') + ' + ...';
         return;
       }
 
-      // If any modifier is active, or if user is pressing a modifier or special hardware key:
-      if (hasModifier || isModifier || isSpecialKey) {
-        e.preventDefault();
+      pendingModifier = null;
 
-        const parts = [];
-        if (e.ctrlKey) parts.push('Ctrl');
-        if (e.altKey) parts.push('Alt');
-        if (e.shiftKey) parts.push('Shift');
-        if (e.metaKey) parts.push('Win');
+      let key = e.key;
+      if (e.code && e.code.startsWith('Key')) {
+        key = e.code.slice(3).toUpperCase();
+      } else if (e.code && e.code.startsWith('Digit')) {
+        key = e.code.slice(5);
+      } else if (e.code && e.code.startsWith('Numpad')) {
+        key = e.code;
+      } else if (key === ' ') {
+        key = 'Space';
+      } else if (key === 'Escape' || key === 'Esc') {
+        key = 'Escape';
+      } else if (key === 'ArrowUp') {
+        key = 'Up';
+      } else if (key === 'ArrowDown') {
+        key = 'Down';
+      } else if (key === 'ArrowLeft') {
+        key = 'Left';
+      } else if (key === 'ArrowRight') {
+        key = 'Right';
+      } else if (key === 'PageUp') {
+        key = 'PgUp';
+      } else if (key === 'PageDown') {
+        key = 'PgDn';
+      } else if (e.code === 'Minus') {
+        key = '-';
+      } else if (e.code === 'Equal') {
+        key = '=';
+      } else if (e.code === 'BracketLeft') {
+        key = '[';
+      } else if (e.code === 'BracketRight') {
+        key = ']';
+      } else if (e.code === 'Backslash') {
+        key = '\\';
+      } else if (e.code === 'Semicolon') {
+        key = ';';
+      } else if (e.code === 'Quote') {
+        key = "'";
+      } else if (e.code === 'Backquote') {
+        key = '`';
+      } else if (e.code === 'Comma') {
+        key = ',';
+      } else if (e.code === 'Period') {
+        key = '.';
+      } else if (e.code === 'Slash') {
+        key = '/';
+      } else if (key.length === 1) {
+        key = key.toUpperCase();
+      }
 
-        // Standalone modifier press (e.g. user just pressed Ctrl or Shift)
-        if (isModifier) {
-          if (parts.length > 0) {
-            inputEl.value = parts.join('+');
-          }
-          return;
+      if (!parts.includes(key)) {
+        parts.push(key);
+      }
+
+      const combo = parts.join('+');
+      inputEl.value = combo;
+      updateClearButton();
+      stopRecording();
+
+      if (nextBox) {
+        const nextInput = nextBox.querySelector('input');
+        if (nextInput) {
+          setTimeout(() => nextInput.focus(), 50);
         }
-
-        // Standardize base key
-        let key = e.key;
-        if (e.code && e.code.startsWith('Key')) {
-          key = e.code.slice(3).toUpperCase();
-        } else if (e.code && e.code.startsWith('Digit')) {
-          key = e.code.slice(5);
-        } else if (e.code && e.code.startsWith('Numpad')) {
-          key = e.code;
-        } else if (key === ' ') {
-          key = 'Space';
-        } else if (key === 'Escape' || key === 'Esc') {
-          key = 'Escape';
-        } else if (key === 'ArrowUp') {
-          key = 'Up';
-        } else if (key === 'ArrowDown') {
-          key = 'Down';
-        } else if (key === 'ArrowLeft') {
-          key = 'Left';
-        } else if (key === 'ArrowRight') {
-          key = 'Right';
-        } else if (key === 'PageUp') {
-          key = 'PgUp';
-        } else if (key === 'PageDown') {
-          key = 'PgDn';
-        } else if (key.length === 1) {
-          key = key.toUpperCase();
-        }
-
-        if (!parts.includes(key)) {
-          parts.push(key);
-        }
-
-        inputEl.value = parts.join('+');
       }
     });
+
+    inputEl.addEventListener('keyup', (e) => {
+      if (isRecording && pendingModifier) {
+        inputEl.value = pendingModifier;
+        updateClearButton();
+        stopRecording();
+        pendingModifier = null;
+        if (nextBox) {
+          const nextInput = nextBox.querySelector('input');
+          if (nextInput) {
+            setTimeout(() => nextInput.focus(), 50);
+          }
+        }
+      }
+    });
+
+    updateClearButton();
   }
 
   function submitKeyRemapper() {
-    const src = krInputSource.value.trim();
+    const src = krInputSource ? krInputSource.value.trim() : '';
     const tgt = krInputTarget ? krInputTarget.value.trim() : '';
-    const name = krInputName.value.trim() || `${src} to ${tgt}`;
 
     if (!src) {
-      krInputSource.focus();
+      if (krInputSource) krInputSource.focus();
       return;
     }
     if (!tgt) {
@@ -590,12 +693,18 @@
       id: 'kr-' + Date.now(),
       source: src,
       target: tgt,
-      name: name
+      name: `${src} → ${tgt}`
     });
 
-    krInputSource.value = '';
-    if (krInputTarget) krInputTarget.value = '';
-    krInputName.value = '';
+    if (krInputSource) {
+      krInputSource.value = '';
+      if (krBtnClearSource) krBtnClearSource.classList.add('hidden-field');
+    }
+    if (krInputTarget) {
+      krInputTarget.value = '';
+      if (krBtnClearTarget) krBtnClearTarget.classList.add('hidden-field');
+    }
+
     renderKeyRemapper();
     syncConfig();
   }
@@ -1441,15 +1550,10 @@
       if (e.key === 'Enter') submitTextExpander();
     });
 
-    // Key Remapper Listeners & Universal Hotkey Capture
+    // Key Remapper Pure Key Combination Recorders
     krBtnSubmit.addEventListener('click', submitKeyRemapper);
-    setupHotkeyCapture(krInputSource, krInputTarget, submitKeyRemapper);
-    setupHotkeyCapture(krInputTarget, krInputName, submitKeyRemapper);
-    if (krInputName) {
-      krInputName.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') submitKeyRemapper();
-      });
-    }
+    setupKeyCombinationBox(krSourceBox, krInputSource, krBtnClearSource, krTargetBox, submitKeyRemapper);
+    setupKeyCombinationBox(krTargetBox, krInputTarget, krBtnClearTarget, null, submitKeyRemapper);
 
     // App Launcher Listeners
     if (alTypeString) {
