@@ -1,5 +1,5 @@
 {
-  "activeTab":"windowManager",
+  "activeTab":"macroRecorder",
   "appLauncher":{
     "enabled":1,
     "items":[{"id":"al-1794403819689","name":"Everything","target":"C:\\Program Files (x86)\\Everything\\Everything.exe","trigger":"Ctrl+Alt+Shift+E","triggerType":"hotkey"},{"id":"al-1","name":"Calculator","target":"calc.exe","trigger":"@calc","triggerType":"string"},{"id":"al-2","name":"YouTube","target":"https://www.youtube.com","trigger":"@yt","triggerType":"string"},{"id":"al-3","name":"GitHub","target":"https://github.com","trigger":"@gh","triggerType":"string"}]
@@ -12,7 +12,7 @@
     "hotkey":"F8",
     "limit":0
   },
-  "enabled":1,
+  "enabled":0,
   "keyRemapper":{
     "enabled":1,
     "items":[{"id":"kr-2","name":"Mute Master Audio (Ctrl+Alt+M)","source":"^!m","target":"MuteAudio"}]
@@ -20,7 +20,7 @@
   "macroRecorder":{
     "enabled":1,
     "items":[{"enabled":0,"id":"macro-1794487435500","name":"ggc","playbackMode":"NoRepeat","repeatInterval":50,"steps":[{"action":"Down","delay":50,"key":"g"},{"action":"Up","delay":50,"key":"g"},{"action":"Down","delay":50,"key":"g"},{"action":"Up","delay":50,"key":"g"},{"action":"Down","delay":50,"key":"w"},{"action":"Up","delay":50,"key":"w"},{"action":"Down","delay":50,"key":"p"},{"action":"Up","delay":50,"key":"p"},{"action":"Down","delay":50,"key":"a"},{"action":"Up","delay":641,"key":"a"},{"action":"Down","delay":2219,"key":"d"},{"action":"Up","delay":1344,"key":"d"}],"trigger":"Ctrl+Shift+A"},{"enabled":0,"id":"macro-1","name":"Fast Reload Combo","playbackMode":"NoRepeat","repeatInterval":50,"steps":[{"action":"Down","delay":40,"key":"r"},{"action":"Up","delay":100,"key":"r"},{"action":"Down","delay":40,"key":"1"},{"action":"Up","delay":50,"key":"1"}],"trigger":"F9"}],
-    "useStandardDelays":0
+    "useStandardDelays":1
   },
   "textExpander":{
     "enabled":1,
@@ -35,7 +35,7 @@
     "distance":5,
     "intensity":32,
     "lightIntensity":46,
-    "radius":30
+    "radius":5
   },
   "windowManager":{
     "alwaysOnTopEnabled":1,
@@ -43,12 +43,18 @@
     "appVolumeMuteEnabled":1,
     "appVolumeMuteHotkey":"!m",
     "appVolumeWheel":1,
+    "borderlessEnabled":1,
+    "borderlessHotkey":"^!Enter",
     "centerWindowEnabled":1,
     "centerWindowHotkey":"^!c",
+    "clickThroughGhost":0,
+    "clickThroughGhostHotkey":"^!g",
     "enabled":1,
     "hideWindowEnabled":1,
     "hideWindowHotkey":"^!h",
     "opacity":255,
-    "transparencyWheel":1
+    "transparencyWheel":1,
+    "windowShadeEnabled":1,
+    "windowShadeHotkey":"^!r"
   }
 }

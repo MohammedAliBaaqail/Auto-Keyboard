@@ -1025,6 +1025,119 @@ html, body {
   gap: 14px;
 }
 
+.wm-card.wm-card-column {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.wm-card-main-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  width: 100%;
+}
+
+.wm-sub-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(148, 163, 184, 0.22);
+  width: 100%;
+}
+
+/* ==========================================================================
+   Uiverse bright-rat-5 Neumorphic Round Checkbox (by shreyasm-dev)
+   ========================================================================== */
+
+.uiverse-checkbox-wrap {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+  font-size: 14px;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.uiverse-checkbox-wrap input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.uiverse-checkmark {
+  position: relative;
+  top: 0;
+  left: 0;
+  height: 1.3em;
+  width: 1.3em;
+  border-radius: 100%;
+  background: var(--surface-color);
+  box-shadow: 2px 2px 4px var(--shadow-dark),
+              -2px -2px 4px var(--shadow-light);
+  transition: all 0.35s ease;
+  box-sizing: border-box;
+}
+
+.uiverse-checkbox-wrap input:checked ~ .uiverse-checkmark {
+  box-shadow: inset 2px 2px 4px var(--shadow-dark),
+              inset -2px -2px 4px var(--shadow-light);
+  background: var(--surface-color);
+}
+
+.uiverse-checkmark:after {
+  content: "";
+  position: absolute;
+  opacity: 0;
+  transition: opacity 0.22s ease, transform 0.22s ease;
+  left: 0.44em;
+  top: 0.22em;
+  width: 0.24em;
+  height: 0.52em;
+  border: solid var(--accent-primary);
+  border-width: 0 0.17em 0.17em 0;
+  transform: rotate(45deg) scale(0.7);
+}
+
+.uiverse-checkbox-wrap input:checked ~ .uiverse-checkmark:after {
+  opacity: 1;
+  transform: rotate(45deg) scale(1);
+}
+
+.wm-sub-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+  gap: 8px;
+  min-width: 0;
+}
+
+.wm-sub-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.wm-sub-hotkey-tag {
+  font-family: var(--font-main);
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--green-primary);
+  background: var(--surface-color);
+  box-shadow: var(--inset-sm);
+  padding: 2px 7px;
+  border-radius: var(--radius-badge);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 .wm-card-left {
   display: flex;
   align-items: center;

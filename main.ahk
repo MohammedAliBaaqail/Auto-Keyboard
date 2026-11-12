@@ -55,6 +55,8 @@ global g_AutoClickerRunning := false
 global g_AutoClickerCount := 0
 global g_LastExternalHwnd := 0
 global g_LastPolledHwnd := 0
+global g_ShadedWindows := Map()
+global g_BorderlessWindows := Map()
 
 ; Macro Recorder tracking (initialized in auto-execute section)
 global g_MacroRecorderHook := ""
@@ -527,6 +529,33 @@ ApplyWindowManager() {
             g_ActiveHotkeys.Push(hk)
         }
     }
+
+    ; Click-Through Ghost Mode Hotkey
+    if (wm.Has("clickThroughGhostHotkey") && Trim(wm["clickThroughGhostHotkey"]) != "") {
+        try {
+            hk := Trim(wm["clickThroughGhostHotkey"])
+            Hotkey(hk, (*) => ToggleGhostMode(), "On")
+            g_ActiveHotkeys.Push(hk)
+        }
+    }
+
+    ; Window Shade / Roll Up Hotkey
+    if ((!wm.Has("windowShadeEnabled") || wm["windowShadeEnabled"]) && wm.Has("windowShadeHotkey") && Trim(wm["windowShadeHotkey"]) != "") {
+        try {
+            hk := Trim(wm["windowShadeHotkey"])
+            Hotkey(hk, (*) => ToggleWindowShade(), "On")
+            g_ActiveHotkeys.Push(hk)
+        }
+    }
+
+    ; Force Borderless Fullscreen Hotkey
+    if ((!wm.Has("borderlessEnabled") || wm["borderlessEnabled"]) && wm.Has("borderlessHotkey") && Trim(wm["borderlessHotkey"]) != "") {
+        try {
+            hk := Trim(wm["borderlessHotkey"])
+            Hotkey(hk, (*) => ToggleBorderlessFullscreen(), "On")
+            g_ActiveHotkeys.Push(hk)
+        }
+    }
 }
 
 ToggleAlwaysOnTop() {
@@ -614,14 +643,140 @@ AdjustActiveWindowTransparency(delta) {
         newAlpha := Min(255, Max(40, curAlpha + delta))
         WinSetTransparent(newAlpha, "ahk_id " . hwnd)
         
+        ; If Click-Through Ghost Mode is active in config
+        if (g_Config.Has("windowManager") && g_Config["windowManager"].Has("clickThroughGhost") && g_Config["windowManager"]["clickThroughGhost"]) {
+            if (newAlpha < 255) {
+                WinSetExStyle("+0x20", "ahk_id " . hwnd)
+            } else {
+                WinSetExStyle("-0x20", "ahk_id " . hwnd)
+            }
+        }
+        
         if (g_Wv) {
             pct := Round((newAlpha / 255) * 100)
+            ghostNote := (newAlpha < 255 && g_Config["windowManager"].Has("clickThroughGhost") && g_Config["windowManager"]["clickThroughGhost"]) ? " [Ghost Click-Through]" : ""
             msg := JSON.stringify(Map(
                 "type", "moduleEvent",
                 "module", "windowManager",
-                "message", "Opacity: " . pct . "%"
+                "message", "Opacity: " . pct . "%" . ghostNote
             ))
             g_Wv.PostWebMessageAsString(msg)
+        }
+    }
+}
+
+ToggleGhostMode() {
+    global g_MainGui, g_Wv, g_Config
+    try {
+        hwnd := WinGetID("A")
+        if (hwnd = g_MainGui.Hwnd)
+            return
+        exStyle := WinGetExStyle("ahk_id " . hwnd)
+        isGhost := (exStyle & 0x20)
+        if (isGhost) {
+            WinSetExStyle("-0x20", "ahk_id " . hwnd)
+            WinSetTransparent(255, "ahk_id " . hwnd)
+            SoundBeep(600, 50)
+            msg := "Ghost Mode: Disabled (Normal)"
+        } else {
+            curAlpha := WinGetTransparent("ahk_id " . hwnd)
+            if (curAlpha = "" || curAlpha = 255) {
+                WinSetTransparent(180, "ahk_id " . hwnd)
+            }
+            WinSetExStyle("+0x20", "ahk_id " . hwnd)
+            SoundBeep(950, 50)
+            msg := "Ghost Mode: Enabled (Click-Through)"
+        }
+        if (g_Wv) {
+            postMsg := JSON.stringify(Map("type", "moduleEvent", "module", "windowManager", "message", msg))
+            g_Wv.PostWebMessageAsString(postMsg)
+        }
+    }
+}
+
+ToggleWindowShade() {
+    global g_MainGui, g_ShadedWindows, g_Config, g_Wv
+    if (g_Config.Has("windowManager") && g_Config["windowManager"].Has("windowShadeEnabled") && !g_Config["windowManager"]["windowShadeEnabled"])
+        return
+    try {
+        hwnd := WinGetID("A")
+        if (hwnd = g_MainGui.Hwnd)
+            return
+        
+        if (g_ShadedWindows.Has(hwnd)) {
+            info := g_ShadedWindows[hwnd]
+            g_ShadedWindows.Delete(hwnd)
+            WinMove(info["x"], info["y"], info["w"], info["h"], "ahk_id " . hwnd)
+            SoundBeep(850, 50)
+            msg := "Window Shade: Unrolled"
+        } else {
+            minMax := WinGetMinMax("ahk_id " . hwnd)
+            if (minMax = 1) {
+                WinRestore("ahk_id " . hwnd)
+            }
+            WinGetPos(&x, &y, &w, &h, "ahk_id " . hwnd)
+            g_ShadedWindows[hwnd] := Map("x", x, "y", y, "w", w, "h", h)
+            
+            captionH := DllCall("GetSystemMetrics", "int", 4, "int")
+            frameH := DllCall("GetSystemMetrics", "int", 33, "int")
+            titleBarHeight := Max(32, captionH + (frameH * 2) + 4)
+            WinMove(x, y, w, titleBarHeight, "ahk_id " . hwnd)
+            SoundBeep(650, 50)
+            msg := "Window Shade: Rolled Up"
+        }
+        if (g_Wv) {
+            postMsg := JSON.stringify(Map("type", "moduleEvent", "module", "windowManager", "message", msg))
+            g_Wv.PostWebMessageAsString(postMsg)
+        }
+    }
+}
+
+ToggleBorderlessFullscreen() {
+    global g_MainGui, g_BorderlessWindows, g_Config, g_Wv
+    if (g_Config.Has("windowManager") && g_Config["windowManager"].Has("borderlessEnabled") && !g_Config["windowManager"]["borderlessEnabled"])
+        return
+    try {
+        hwnd := WinGetID("A")
+        if (hwnd = g_MainGui.Hwnd)
+            return
+        
+        if (g_BorderlessWindows.Has(hwnd)) {
+            info := g_BorderlessWindows[hwnd]
+            g_BorderlessWindows.Delete(hwnd)
+            WinSetStyle(info["style"], "ahk_id " . hwnd)
+            WinMove(info["x"], info["y"], info["w"], info["h"], "ahk_id " . hwnd)
+            DllCall("SetWindowPos", "ptr", hwnd, "ptr", 0, "int", 0, "int", 0, "int", 0, "int", 0, "uint", 0x0027)
+            SoundBeep(700, 50)
+            msg := "Borderless: Restored Window"
+        } else {
+            minMax := WinGetMinMax("ahk_id " . hwnd)
+            if (minMax = 1) {
+                WinRestore("ahk_id " . hwnd)
+            }
+            WinGetPos(&x, &y, &w, &h, "ahk_id " . hwnd)
+            curStyle := WinGetStyle("ahk_id " . hwnd)
+            g_BorderlessWindows[hwnd] := Map("x", x, "y", y, "w", w, "h", h, "style", curStyle)
+            
+            hMon := DllCall("MonitorFromWindow", "ptr", hwnd, "uint", 2, "ptr")
+            monInfo := Buffer(40, 0)
+            NumPut("uint", 40, monInfo, 0)
+            DllCall("GetMonitorInfo", "ptr", hMon, "ptr", monInfo)
+            monLeft := NumGet(monInfo, 4, "int")
+            monTop := NumGet(monInfo, 8, "int")
+            monRight := NumGet(monInfo, 12, "int")
+            monBottom := NumGet(monInfo, 16, "int")
+            monW := monRight - monLeft
+            monH := monBottom - monTop
+            
+            WinSetStyle("-0x00C40000", "ahk_id " . hwnd)
+            WinMove(monLeft, monTop, monW, monH, "ahk_id " . hwnd)
+            DllCall("SetWindowPos", "ptr", hwnd, "ptr", 0, "int", 0, "int", 0, "int", 0, "int", 0, "uint", 0x0027)
+            SoundBeep(950, 50)
+            msg := "Force Borderless Fullscreen Enabled"
+        }
+        if (g_Wv) {
+            postMsg := JSON.stringify(Map("type", "moduleEvent", "module", "windowManager", "message", msg))
+            g_Wv.PostWebMessageAsString(postMsg)
         }
     }
 }

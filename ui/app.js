@@ -845,7 +845,9 @@
       { id: 'wmSwitchHideWindow', badgeId: 'wmBadgeHideWindow', key: 'hideWindowEnabled' },
       { id: 'wmSwitchTransparencyWheel', badgeId: 'wmBadgeTransparencyWheel', key: 'transparencyWheel' },
       { id: 'wmSwitchAppVolumeWheel', badgeId: 'wmBadgeAppVolumeWheel', key: 'appVolumeWheel' },
-      { id: 'wmSwitchAppVolumeMute', badgeId: 'wmBadgeAppVolumeMute', key: 'appVolumeMuteEnabled' }
+      { id: 'wmSwitchAppVolumeMute', badgeId: 'wmBadgeAppVolumeMute', key: 'appVolumeMuteEnabled' },
+      { id: 'wmSwitchWindowShade', badgeId: 'wmBadgeWindowShade', key: 'windowShadeEnabled' },
+      { id: 'wmSwitchBorderless', badgeId: 'wmBadgeBorderless', key: 'borderlessEnabled' }
     ];
 
     switchDefinitions.forEach(({ id, badgeId, key }) => {
@@ -874,6 +876,26 @@
         });
       }
     });
+
+    // Wire Uiverse bright-rat-5 round checkbox for Click-Through Ghost Mode
+    const wmCheckboxGhostMode = document.getElementById('wmCheckboxGhostMode');
+    if (wmCheckboxGhostMode) {
+      const currWm = (state.config && state.config.windowManager) ? state.config.windowManager : {};
+      const isGhost = (currWm.clickThroughGhost === 1 || currWm.clickThroughGhost === true);
+      wmCheckboxGhostMode.checked = isGhost;
+      const ghostBadge = document.getElementById('wmBadgeGhostMode');
+      if (ghostBadge) ghostBadge.classList.toggle('is-disabled', !isGhost);
+
+      if (!wmCheckboxGhostMode.dataset.bound) {
+        wmCheckboxGhostMode.dataset.bound = 'true';
+        wmCheckboxGhostMode.addEventListener('change', () => {
+          if (!state.config.windowManager) state.config.windowManager = {};
+          state.config.windowManager.clickThroughGhost = wmCheckboxGhostMode.checked ? 1 : 0;
+          if (ghostBadge) ghostBadge.classList.toggle('is-disabled', !wmCheckboxGhostMode.checked);
+          syncConfig();
+        });
+      }
+    }
 
     if (wmAppVolumeSlider) {
       updateSliderProgress(wmAppVolumeSlider);
