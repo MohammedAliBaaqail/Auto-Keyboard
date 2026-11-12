@@ -153,6 +153,19 @@
         </div>
       </div>
 
+      <!-- MAIN ON / OFF ROCKER SWITCH AT THE TOP OF THE APP -->
+      <div class="header-center">
+        <div class="vertical-rocker is-on header-rocker" id="mainEngineSwitch" title="Click to Toggle Script Engine ON / OFF">
+          <div class="rocker-track rocker-off-track">
+            <span class="rocker-label-off">OFF</span>
+          </div>
+          <div class="rocker-track rocker-on-track">
+            <span class="rocker-label-on">ON</span>
+          </div>
+          <div class="rocker-thumb"></div>
+        </div>
+      </div>
+
       <div class="header-right">
         <button class="squircle-btn" id="btnTheme" title="Customize Theme (Background & Accent)">
           <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -783,44 +796,6 @@
       </section>
 
     </main>
-
-    <!-- Bottom Controls & Neumorphic Visuals from Reference Design -->
-    <footer class="app-footer">
-      <div class="footer-left"></div>
-
-      <!-- SINGLE VERTICAL ROCKER SWITCH ("ON" / "OFF") FROM REFERENCE DESIGN -->
-      <div class="footer-center">
-        <div class="vertical-rocker is-on" id="mainEngineSwitch" title="Click to Toggle Script Engine ON / OFF">
-          <div class="rocker-track rocker-off-track">
-            <span class="rocker-label-off">OFF</span>
-          </div>
-          <div class="rocker-track rocker-on-track">
-            <span class="rocker-label-on">ON</span>
-          </div>
-          <div class="rocker-thumb"></div>
-        </div>
-      </div>
-
-      <!-- Quick Actions -->
-      <div class="footer-right">
-        <div class="action-buttons-group">
-          <button class="neumorphic-btn btn-chip" id="btnExport" title="Open Config Folder">
-            <svg class="chip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-            </svg>
-            <span>Config</span>
-          </button>
-          
-          <button class="squircle-btn btn-mini" id="btnHelp" title="About / Documentation">
-            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="16" x2="12" y2="12"></line>
-              <line x1="12" y1="8" x2="12.01" y2="8"></line>
-            </svg>
-          </button>
-        </div>
-      </div>
-    </footer>
 
     <!-- Window Resize Handles -->
     <div class="resize-handle handle-e" data-direction="e" title="Resize Width"></div>

@@ -2731,7 +2731,9 @@
         e.target.closest('.macro-step-chip') ||
         e.target.closest('.macro-timeline-track') ||
         e.target.closest('.macro-inject-btn') ||
-        e.target.closest('[draggable="true"]')
+        e.target.closest('[draggable="true"]') ||
+        e.target.closest('#mainEngineSwitch') ||
+        e.target.closest('.vertical-rocker')
       ) return;
       sendToAhk('startDrag');
     }
@@ -2762,11 +2764,15 @@
     btnMinimize.addEventListener('click', () => sendToAhk('minimize'));
     btnClose.addEventListener('click', () => sendToAhk('close'));
     btnRefresh.addEventListener('click', () => sendToAhk('reload'));
-    btnExport.addEventListener('click', () => sendToAhk('openConfig'));
-    btnHelp.addEventListener('click', () => {
-      const modal = document.getElementById('infoModal');
-      if (modal) modal.classList.remove('hidden-field');
-    });
+    if (btnExport) {
+      btnExport.addEventListener('click', () => sendToAhk('openConfig'));
+    }
+    if (btnHelp) {
+      btnHelp.addEventListener('click', () => {
+        const modal = document.getElementById('infoModal');
+        if (modal) modal.classList.remove('hidden-field');
+      });
+    }
 
     const btnCloseModal = document.getElementById('btnCloseModal');
     if (btnCloseModal) {

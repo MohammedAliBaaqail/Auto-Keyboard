@@ -144,6 +144,45 @@ html, body {
   gap: 12px;
 }
 
+.header-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 8px;
+}
+
+.vertical-rocker.header-rocker {
+  width: 40px;
+  height: 56px;
+  border-radius: var(--radius-pill);
+}
+
+.vertical-rocker.header-rocker .rocker-track {
+  height: 28px;
+}
+
+.vertical-rocker.header-rocker .rocker-thumb {
+  width: 32px;
+  height: 22px;
+  left: 4px;
+  border-radius: var(--radius-thumb);
+}
+
+.vertical-rocker.header-rocker.is-on .rocker-thumb {
+  top: 3px;
+}
+
+.vertical-rocker.header-rocker.is-off .rocker-thumb {
+  top: 31px;
+}
+
+.vertical-rocker.header-rocker .rocker-label-on,
+.vertical-rocker.header-rocker .rocker-label-off {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
 .squircle-btn {
   width: 42px;
   height: 42px;
