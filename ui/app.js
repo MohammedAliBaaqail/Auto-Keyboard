@@ -820,22 +820,24 @@
       state.config.windowManager = {};
     }
     const wm = state.config.windowManager;
-    wmOpacitySlider.value = wm.opacity || 215;
-    updateWmOpacityLabel();
-    updateSliderProgress(wmOpacitySlider);
+    if (wmOpacitySlider) {
+      wmOpacitySlider.value = wm.opacity || 215;
+      updateWmOpacityLabel();
+      updateSliderProgress(wmOpacitySlider);
 
-    if (!wmOpacitySlider.dataset.bound) {
-      wmOpacitySlider.dataset.bound = 'true';
-      wmOpacitySlider.addEventListener('input', () => {
-        updateWmOpacityLabel();
-        updateSliderProgress(wmOpacitySlider);
-      });
+      if (!wmOpacitySlider.dataset.bound) {
+        wmOpacitySlider.dataset.bound = 'true';
+        wmOpacitySlider.addEventListener('input', () => {
+          updateWmOpacityLabel();
+          updateSliderProgress(wmOpacitySlider);
+        });
 
-      wmOpacitySlider.addEventListener('change', () => {
-        state.config.windowManager.opacity = parseInt(wmOpacitySlider.value, 10);
-        updateSliderProgress(wmOpacitySlider);
-        syncConfig();
-      });
+        wmOpacitySlider.addEventListener('change', () => {
+          state.config.windowManager.opacity = parseInt(wmOpacitySlider.value, 10);
+          updateSliderProgress(wmOpacitySlider);
+          syncConfig();
+        });
+      }
     }
 
     // Wire individual option switches (Uiverse rude-stingray-22)
@@ -928,6 +930,7 @@
   }
 
   function updateWmOpacityLabel() {
+    if (!wmOpacitySlider || !wmOpacityValue) return;
     const pct = Math.round((wmOpacitySlider.value / 255) * 100);
     wmOpacityValue.textContent = `${pct}%`;
   }

@@ -1,5 +1,5 @@
 {
-  "activeTab":"macroRecorder",
+  "activeTab":"windowManager",
   "appLauncher":{
     "enabled":1,
     "items":[{"id":"al-1794403819689","name":"Everything","target":"C:\\Program Files (x86)\\Everything\\Everything.exe","trigger":"Ctrl+Alt+Shift+E","triggerType":"hotkey"},{"id":"al-1","name":"Calculator","target":"calc.exe","trigger":"@calc","triggerType":"string"},{"id":"al-2","name":"YouTube","target":"https://www.youtube.com","trigger":"@yt","triggerType":"string"},{"id":"al-3","name":"GitHub","target":"https://github.com","trigger":"@gh","triggerType":"string"}]
@@ -12,7 +12,7 @@
     "hotkey":"F8",
     "limit":0
   },
-  "enabled":0,
+  "enabled":1,
   "keyRemapper":{
     "enabled":1,
     "items":[{"id":"kr-2","name":"Mute Master Audio (Ctrl+Alt+M)","source":"^!m","target":"MuteAudio"}]
@@ -47,7 +47,7 @@
     "borderlessHotkey":"^!Enter",
     "centerWindowEnabled":1,
     "centerWindowHotkey":"^!c",
-    "clickThroughGhost":0,
+    "clickThroughGhost":1,
     "clickThroughGhostHotkey":"^!g",
     "enabled":1,
     "hideWindowEnabled":1,
