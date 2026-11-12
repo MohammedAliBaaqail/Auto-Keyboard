@@ -13,6 +13,7 @@
 #Requires AutoHotkey v2
 #SingleInstance Force
 Persistent(true)
+try DllCall("shell32\SetCurrentProcessExplicitAppUserModelID", "wstr", "AutoHotKeyboard.Engine.v2")
 
 ; Ensure strictly only ONE AutoHotKeyboard instance is running across processes
 curPid := DllCall("GetCurrentProcessId")
@@ -1551,8 +1552,17 @@ CreateMainWindow() {
     if FileExist(iconPath) {
         try {
             TraySetIcon(iconPath)
-            hIconBig := DllCall("LoadImage", "ptr", 0, "str", iconPath, "uint", 1, "int", 32, "int", 32, "uint", 0x00000010, "ptr")
-            hIconSmall := DllCall("LoadImage", "ptr", 0, "str", iconPath, "uint", 1, "int", 16, "int", 16, "uint", 0x00000010, "ptr")
+            cxBig := DllCall("GetSystemMetrics", "int", 11, "int")   ; SM_CXICON
+            cyBig := DllCall("GetSystemMetrics", "int", 12, "int")   ; SM_CYICON
+            cxSm  := DllCall("GetSystemMetrics", "int", 49, "int")   ; SM_CXSMICON
+            cySm  := DllCall("GetSystemMetrics", "int", 50, "int")   ; SM_CYSMICON
+            if (cxBig < 32) cxBig := 32
+            if (cyBig < 32) cyBig := 32
+            if (cxSm < 16) cxSm := 16
+            if (cySm < 16) cySm := 16
+
+            hIconBig := DllCall("LoadImage", "ptr", 0, "str", iconPath, "uint", 1, "int", cxBig, "int", cyBig, "uint", 0x00000010, "ptr")
+            hIconSmall := DllCall("LoadImage", "ptr", 0, "str", iconPath, "uint", 1, "int", cxSm, "int", cySm, "uint", 0x00000010, "ptr")
             if (hIconBig)
                 SendMessage(0x0080, 1, hIconBig, g_MainGui.Hwnd)
             if (hIconSmall)
