@@ -49,7 +49,7 @@
         }
       }
     } catch (e) {}
-    return { bgColor: '#e0e0e0', accentColor: '#22c55e', radius: 22, distance: 3, lightIntensity: 18, darkIntensity: 18, intensity: 15, blur: 8, customPresets: [] };
+    return { bgColor: '#e8dfd5', accentColor: '#d97706', radius: 5, distance: 3, lightIntensity: 22, darkIntensity: 6, intensity: 14, blur: 10, customPresets: [] };
   })();
 
   let isInitialized = false;
@@ -2145,14 +2145,14 @@
   // Hand-crafted Neumorphic Theme Presets with balanced light/dark shadows & varied radii
   const THEME_PRESETS = {
     'soft-gray': {
-      name: 'Soft Clay',
-      bgColor: '#e0e5ec',
-      accentColor: '#22c55e',
-      radius: 20,
-      distance: 4,
-      lightIntensity: 42,
-      darkIntensity: 16,
-      blur: 9
+      name: 'Warm Clay (Default)',
+      bgColor: '#e8dfd5',
+      accentColor: '#d97706',
+      radius: 5,
+      distance: 3,
+      lightIntensity: 22,
+      darkIntensity: 6,
+      blur: 10
     },
     'obsidian': {
       name: 'Obsidian',
@@ -2263,15 +2263,15 @@
   }
 
   function applyTheme(bgColor, accentColor, save = false, neo = null) {
-    if (!bgColor) bgColor = '#e0e0e0';
-    if (!accentColor) accentColor = '#22c55e';
+    if (!bgColor) bgColor = '#e8dfd5';
+    if (!accentColor) accentColor = '#d97706';
     if (!bgColor.startsWith('#')) bgColor = '#' + bgColor;
     if (!accentColor.startsWith('#')) accentColor = '#' + accentColor;
 
     // Resolve Neumorphism Parameters (Radius, Distance, Light/Dark Intensity, Blur)
     const radius = (neo && typeof neo.radius !== 'undefined')
       ? parseInt(neo.radius, 10)
-      : ((state.config && state.config.theme && typeof state.config.theme.radius !== 'undefined') ? parseInt(state.config.theme.radius, 10) : 22);
+      : ((state.config && state.config.theme && typeof state.config.theme.radius !== 'undefined') ? parseInt(state.config.theme.radius, 10) : 5);
 
     const distance = (neo && typeof neo.distance !== 'undefined')
       ? parseInt(neo.distance, 10)
@@ -2282,18 +2282,18 @@
       : ((state.config && state.config.theme && typeof state.config.theme.lightIntensity !== 'undefined')
           ? parseInt(state.config.theme.lightIntensity, 10)
           : ((state.config && state.config.theme && typeof state.config.theme.intensity !== 'undefined')
-              ? parseInt(state.config.theme.intensity, 10) : 18));
+              ? parseInt(state.config.theme.intensity, 10) : 22));
 
     const darkIntensity = (neo && typeof neo.darkIntensity !== 'undefined')
       ? parseInt(neo.darkIntensity, 10)
       : ((state.config && state.config.theme && typeof state.config.theme.darkIntensity !== 'undefined')
           ? parseInt(state.config.theme.darkIntensity, 10)
           : ((state.config && state.config.theme && typeof state.config.theme.intensity !== 'undefined')
-              ? parseInt(state.config.theme.intensity, 10) : 18));
+              ? parseInt(state.config.theme.intensity, 10) : 6));
 
     const blur = (neo && typeof neo.blur !== 'undefined')
       ? parseInt(neo.blur, 10)
-      : ((state.config && state.config.theme && typeof state.config.theme.blur !== 'undefined') ? parseInt(state.config.theme.blur, 10) : 8);
+      : ((state.config && state.config.theme && typeof state.config.theme.blur !== 'undefined') ? parseInt(state.config.theme.blur, 10) : 10);
 
     const avgIntensity = Math.round((lightIntensity + darkIntensity) / 2);
 
@@ -2433,22 +2433,22 @@
   function getCurrentThemeColors() {
     const bg = (state.config && state.config.theme && state.config.theme.bgColor)
       || document.documentElement.style.getPropertyValue('--bg-color')
-      || '#e0e0e0';
+      || '#e8dfd5';
     const acc = (state.config && state.config.theme && state.config.theme.accentColor)
       || document.documentElement.style.getPropertyValue('--accent-primary')
-      || '#22c55e';
+      || '#d97706';
     const radius = (state.config && state.config.theme && typeof state.config.theme.radius !== 'undefined')
-      ? parseInt(state.config.theme.radius, 10) : 22;
+      ? parseInt(state.config.theme.radius, 10) : 5;
     const distance = (state.config && state.config.theme && typeof state.config.theme.distance !== 'undefined')
       ? parseInt(state.config.theme.distance, 10) : 3;
     const lightIntensity = (state.config && state.config.theme && typeof state.config.theme.lightIntensity !== 'undefined')
       ? parseInt(state.config.theme.lightIntensity, 10)
-      : ((state.config && state.config.theme && typeof state.config.theme.intensity !== 'undefined') ? parseInt(state.config.theme.intensity, 10) : 18);
+      : ((state.config && state.config.theme && typeof state.config.theme.intensity !== 'undefined') ? parseInt(state.config.theme.intensity, 10) : 22);
     const darkIntensity = (state.config && state.config.theme && typeof state.config.theme.darkIntensity !== 'undefined')
       ? parseInt(state.config.theme.darkIntensity, 10)
-      : ((state.config && state.config.theme && typeof state.config.theme.intensity !== 'undefined') ? parseInt(state.config.theme.intensity, 10) : 18);
+      : ((state.config && state.config.theme && typeof state.config.theme.intensity !== 'undefined') ? parseInt(state.config.theme.intensity, 10) : 6);
     const blur = (state.config && state.config.theme && typeof state.config.theme.blur !== 'undefined')
-      ? parseInt(state.config.theme.blur, 10) : 8;
+      ? parseInt(state.config.theme.blur, 10) : 10;
     return { 
       bg: bg.trim(), 
       acc: acc.trim(),

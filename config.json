@@ -1,5 +1,5 @@
 {
-  "activeTab":"windowManager",
+  "activeTab":"appLauncher",
   "appLauncher":{
     "enabled":1,
     "items":[{"id":"al-1794403819689","name":"Everything","target":"C:\\Program Files (x86)\\Everything\\Everything.exe","trigger":"Ctrl+Alt+Shift+E","triggerType":"hotkey"},{"id":"al-1","name":"Calculator","target":"calc.exe","trigger":"@calc","triggerType":"string"},{"id":"al-2","name":"YouTube","target":"https://www.youtube.com","trigger":"@yt","triggerType":"string"},{"id":"al-3","name":"GitHub","target":"https://github.com","trigger":"@gh","triggerType":"string"}]
@@ -31,10 +31,10 @@
     "bgColor":"#e8dfd5",
     "blur":10,
     "customPresets":[{"accentColor":"#22c55e","bgColor":"#e0e5ec","blur":11,"darkIntensity":3,"distance":4,"id":"custom_1794484507311","lightIntensity":12,"name":"1","radius":9},{"accentColor":"#c084fc","bgColor":"#2b2640","blur":10,"darkIntensity":42,"distance":5,"id":"custom_1794484519358","lightIntensity":22,"name":"3","radius":18}],
-    "darkIntensity":11,
+    "darkIntensity":6,
     "distance":3,
-    "intensity":19,
-    "lightIntensity":27,
+    "intensity":14,
+    "lightIntensity":22,
     "radius":5
   },
   "windowManager":{

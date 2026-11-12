@@ -7,17 +7,17 @@
    ========================================================================== */
 
 :root {
-  --bg-color: #e0e0e0;
-  --surface-color: #e0e0e0;
+  --bg-color: #e8dfd5;
+  --surface-color: #e8dfd5;
 
   /* Typography - JetBrains Mono Global Font Family */
   --font-main: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   
   /* Neumorphism Core Parameters (dynamically controlled by user sliders) */
-  --neo-radius: 22px;
+  --neo-radius: 5px;
   --neo-dist: 3px;
-  --neo-blur: 8px;
-  --neo-intensity: 15%;
+  --neo-blur: 10px;
+  --neo-intensity: 14%;
 
   /* Dynamic Border Radii (all derived dynamically from --neo-radius) */
   --radius-card: var(--neo-radius);
@@ -30,9 +30,9 @@
   --radius-thumb: calc(var(--neo-radius) * 0.65);
 
   /* Soft Neumorphic Shadows - Compact, crisp, tight elevation without halos or clipping */
-  --shadow-light: #f9f9f9;
-  --shadow-dark: #c7c7c7;
-  --shadow-dark-deep: #b8b8b8;
+  --shadow-light: #f5f1ec;
+  --shadow-dark: #dccebf;
+  --shadow-dark-deep: #d8c9b9;
   
   /* Standard Soft Neumorphic Elevations dynamically calculated from dist & blur */
   --raised-card: var(--neo-dist) var(--neo-dist) var(--neo-blur) var(--shadow-dark), calc(var(--neo-dist) * -1) calc(var(--neo-dist) * -1) var(--neo-blur) var(--shadow-light);
@@ -45,13 +45,13 @@
   --inset-md: inset calc(var(--neo-dist) * 0.85) calc(var(--neo-dist) * 0.85) calc(var(--neo-blur) * 0.85) var(--shadow-dark), inset calc(var(--neo-dist) * -0.85) calc(var(--neo-dist) * -0.85) calc(var(--neo-blur) * 0.85) var(--shadow-light);
   --inset-deep: inset var(--neo-dist) var(--neo-dist) calc(var(--neo-blur) * 0.9) var(--shadow-dark-deep), inset calc(var(--neo-dist) * -1) calc(var(--neo-dist) * -1) calc(var(--neo-blur) * 0.9) var(--shadow-light);
   
-  /* Secondary / Accent Color (Defaults to Emerald Green, customizable to any color) */
-  --accent-primary: #22c55e;
-  --accent-light: #4ade80;
-  --accent-pastel: #86efac;
-  --accent-dark: #16a34a;
-  --accent-deep: #166534;
-  --accent-glow: 0 4px 16px rgba(34, 197, 94, 0.45);
+  /* Secondary / Accent Color (Defaults to Warm Amber, customizable to any color) */
+  --accent-primary: #d97706;
+  --accent-light: #f59e0b;
+  --accent-pastel: #fcd34d;
+  --accent-dark: #b45309;
+  --accent-deep: #78350f;
+  --accent-glow: 0 4px 16px rgba(217, 119, 6, 0.45);
   --accent-gradient: linear-gradient(135deg, var(--accent-light) 0%, var(--accent-primary) 100%);
   --accent-trough-gradient: var(--accent-primary);
   --accent-trough-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3), 0 0 10px var(--accent-primary);
@@ -66,10 +66,10 @@
   --green-gradient: var(--accent-gradient);
   
   /* Neutral Typography */
-  --text-primary: #334155;
-  --text-secondary: #64748b;
-  --text-muted: #94a3b8;
-  --text-disabled: #cbd5e1;
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --text-disabled: #94a3b8;
   
   /* Transitions */
   --transition-smooth: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);

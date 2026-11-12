@@ -237,14 +237,14 @@ GetDefaultConfig() {
             ]
         ),
         "theme", Map(
-            "bgColor", "#e0e0e0",
-            "accentColor", "#22c55e",
-            "radius", 22,
+            "bgColor", "#e8dfd5",
+            "accentColor", "#d97706",
+            "radius", 5,
             "distance", 3,
-            "lightIntensity", 18,
-            "darkIntensity", 18,
-            "intensity", 18,
-            "blur", 8,
+            "lightIntensity", 22,
+            "darkIntensity", 6,
+            "intensity", 14,
+            "blur", 10,
             "customPresets", []
         )
     )
@@ -1523,7 +1523,7 @@ CreateMainWindow() {
     g_MainGui := Gui("-Caption +Resize", APP_NAME)
     g_MainGui.Opt("+MinSize800x680")
     
-    initBg := "212631"
+    initBg := "e8dfd5"
     if (g_Config.Has("theme") && g_Config["theme"].Has("bgColor")) {
         cleanHex := StrReplace(g_Config["theme"]["bgColor"], "#", "")
         if (StrLen(cleanHex) = 6) {

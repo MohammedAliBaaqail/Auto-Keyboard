@@ -904,10 +904,10 @@
               <span class="theme-section-subtitle">Sets the clay base plane & automatic ambient lighting</span>
             </div>
             <div class="theme-swatches-grid" id="bgSwatchesGrid">
-              <button class="theme-swatch-chip active" data-preset="soft-gray" data-color="#e0e5ec"
-                title="Soft Clay (Balanced Neumorphic, 20px Radius)">
-                <span class="swatch-color-circle" style="background:#e0e5ec;"></span>
-                <span class="swatch-name">Soft Clay</span>
+              <button class="theme-swatch-chip active" data-preset="soft-gray" data-color="#e8dfd5"
+                title="Warm Clay (Default, 5px Radius)">
+                <span class="swatch-color-circle" style="background:#e8dfd5;"></span>
+                <span class="swatch-name">Warm Clay</span>
               </button>
               <button class="theme-swatch-chip" data-preset="obsidian" data-color="#1e222b"
                 title="Obsidian Dark (Stealth Midnight, 14px Radius)">
@@ -945,7 +945,7 @@
               <span class="custom-label">Custom Background Color:</span>
               <div class="color-picker-input-wrap">
                 <div class="color-picker-chip" title="Click to open color palette">
-                  <input type="color" id="themeBgColorPicker" value="#e0e0e0" class="neumorphic-color-picker" />
+                  <input type="color" id="themeBgColorPicker" value="#e8dfd5" class="neumorphic-color-picker" />
                   <svg class="color-picker-badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                     stroke-width="2.2">
                     <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle>
@@ -957,7 +957,7 @@
                     </path>
                   </svg>
                 </div>
-                <input type="text" id="themeBgHex" value="#e0e0e0" maxlength="7" spellcheck="false"
+                <input type="text" id="themeBgHex" value="#E8DFD5" maxlength="7" spellcheck="false"
                   class="color-hex-input" />
               </div>
             </div>
@@ -970,7 +970,11 @@
               <span class="theme-section-subtitle">Styles active states, switches, sliders, badges & buttons</span>
             </div>
             <div class="theme-swatches-grid" id="accentSwatchesGrid">
-              <button class="theme-swatch-chip active" data-color="#22c55e" title="Emerald Green (Current)">
+              <button class="theme-swatch-chip active" data-color="#d97706" title="Warm Amber (Default)">
+                <span class="swatch-color-circle" style="background:#d97706;"></span>
+                <span class="swatch-name">Amber</span>
+              </button>
+              <button class="theme-swatch-chip" data-color="#22c55e" title="Emerald Green">
                 <span class="swatch-color-circle" style="background:#22c55e;"></span>
                 <span class="swatch-name">Emerald</span>
               </button>
@@ -986,10 +990,6 @@
                 <span class="swatch-color-circle" style="background:#a855f7;"></span>
                 <span class="swatch-name">Violet</span>
               </button>
-              <button class="theme-swatch-chip" data-color="#f59e0b" title="Sunset Amber">
-                <span class="swatch-color-circle" style="background:#f59e0b;"></span>
-                <span class="swatch-name">Amber</span>
-              </button>
               <button class="theme-swatch-chip" data-color="#64748b" title="Graphite Slate">
                 <span class="swatch-color-circle" style="background:#64748b;"></span>
                 <span class="swatch-name">Graphite</span>
@@ -1000,7 +1000,7 @@
               <span class="custom-label">Custom Accent Color:</span>
               <div class="color-picker-input-wrap">
                 <div class="color-picker-chip" title="Click to open color palette">
-                  <input type="color" id="themeAccentColorPicker" value="#22c55e" class="neumorphic-color-picker" />
+                  <input type="color" id="themeAccentColorPicker" value="#d97706" class="neumorphic-color-picker" />
                   <svg class="color-picker-badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                     stroke-width="2.2">
                     <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle>
@@ -1012,7 +1012,7 @@
                     </path>
                   </svg>
                 </div>
-                <input type="text" id="themeAccentHex" value="#22c55e" maxlength="7" spellcheck="false"
+                <input type="text" id="themeAccentHex" value="#D97706" maxlength="7" spellcheck="false"
                   class="color-hex-input" />
               </div>
             </div>
@@ -1030,10 +1030,10 @@
               <div class="neo-slider-row">
                 <div class="neo-slider-label-group">
                   <span class="neo-slider-label">Radius</span>
-                  <span class="neo-slider-badge" id="badgeRadius">22px</span>
+                  <span class="neo-slider-badge" id="badgeRadius">5px</span>
                 </div>
                 <div class="neo-slider-track-wrap">
-                  <input type="range" id="themeSliderRadius" min="0" max="40" step="1" value="22"
+                  <input type="range" id="themeSliderRadius" min="0" max="40" step="1" value="5"
                     class="neumorphic-slider" />
                 </div>
               </div>
@@ -1054,10 +1054,10 @@
               <div class="neo-slider-row">
                 <div class="neo-slider-label-group">
                   <span class="neo-slider-label">Light Shadow</span>
-                  <span class="neo-slider-badge" id="badgeLightIntensity">18%</span>
+                  <span class="neo-slider-badge" id="badgeLightIntensity">22%</span>
                 </div>
                 <div class="neo-slider-track-wrap">
-                  <input type="range" id="themeSliderLightIntensity" min="1" max="100" step="1" value="18"
+                  <input type="range" id="themeSliderLightIntensity" min="1" max="100" step="1" value="22"
                     class="neumorphic-slider" />
                 </div>
               </div>
@@ -1066,10 +1066,10 @@
               <div class="neo-slider-row">
                 <div class="neo-slider-label-group">
                   <span class="neo-slider-label">Dark Shadow</span>
-                  <span class="neo-slider-badge" id="badgeDarkIntensity">18%</span>
+                  <span class="neo-slider-badge" id="badgeDarkIntensity">6%</span>
                 </div>
                 <div class="neo-slider-track-wrap">
-                  <input type="range" id="themeSliderDarkIntensity" min="1" max="100" step="1" value="18"
+                  <input type="range" id="themeSliderDarkIntensity" min="1" max="100" step="1" value="6"
                     class="neumorphic-slider" />
                 </div>
               </div>
@@ -1078,10 +1078,10 @@
               <div class="neo-slider-row">
                 <div class="neo-slider-label-group">
                   <span class="neo-slider-label">Blur</span>
-                  <span class="neo-slider-badge" id="badgeBlur">8px</span>
+                  <span class="neo-slider-badge" id="badgeBlur">10px</span>
                 </div>
                 <div class="neo-slider-track-wrap">
-                  <input type="range" id="themeSliderBlur" min="0" max="25" step="1" value="8"
+                  <input type="range" id="themeSliderBlur" min="0" max="25" step="1" value="10"
                     class="neumorphic-slider" />
                 </div>
               </div>
