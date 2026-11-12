@@ -341,21 +341,48 @@ ApplyKeyRemapper() {
     }
 }
 
+FormatSendString(rawKey) {
+    ahkKey := NormalizeHotkeyToAhk(rawKey)
+    if (ahkKey = "")
+        ahkKey := rawKey
+        
+    ; Separate leading modifiers (^, !, +, #) from base key
+    if RegExMatch(ahkKey, "^([\^!+#]*)(.+)$", &m) {
+        mods := m[1]
+        base := m[2]
+        if (StrLen(base) > 1 && !RegExMatch(base, "^\{.+\}$")) {
+            return mods . "{" . base . "}"
+        }
+        return mods . base
+    }
+    return ahkKey
+}
+
 RegisterSingleRemap(source, target) {
     global g_ActiveHotkeys
     
+    cleanSource := Trim(source)
+    cleanTarget := Trim(target)
+    if (cleanSource = "" || cleanTarget = "")
+        return
+
+    ; Convert human-readable source (e.g. "Ctrl+Shift+A") to AHK format (e.g. "^+A")
+    ahkSource := NormalizeHotkeyToAhk(cleanSource)
+    if (ahkSource = "")
+        ahkSource := cleanSource
+
     ; Determine hook-safe source hotkey string to prevent self-triggering loops
-    safeSource := (InStr(source, "$") || InStr(source, "*")) ? source : "$" . source
+    safeSource := (InStr(ahkSource, "$") || InStr(ahkSource, "*")) ? ahkSource : "$" . ahkSource
 
     ; Check for special built-in actions
-    if (target = "MuteAudio") {
+    if (cleanTarget = "MuteAudio") {
         Hotkey(safeSource, (*) => (SoundSetMute(-1), SoundBeep(650, 40)), "On")
         g_ActiveHotkeys.Push(safeSource)
         return
     }
     
     ; Key-to-key remap (e.g. CapsLock -> Control) with autorepeat protection
-    if (source = "CapsLock" && target = "Control") {
+    if (cleanSource = "CapsLock" && (cleanTarget = "Control" || cleanTarget = "Ctrl")) {
         static isCapsHeld := false
         Hotkey("*CapsLock", (*) => (isCapsHeld ? "" : (isCapsHeld := true, Send("{Blind}{Ctrl DownR}"))), "On")
         Hotkey("*CapsLock up", (*) => (isCapsHeld := false, Send("{Blind}{Ctrl Up}")), "On")
@@ -364,8 +391,13 @@ RegisterSingleRemap(source, target) {
         return
     }
     
-    ; General key / shortcut remap with hook ($)
-    Hotkey(safeSource, (*) => Send("{" . target . "}"), "On")
+    ; General key / compound shortcut remap with hook ($)
+    if (InStr(cleanTarget, "+") || InStr(cleanTarget, " ") || RegExMatch(cleanTarget, "^[\^!+#]")) {
+        sendPattern := FormatSendString(cleanTarget)
+        Hotkey(safeSource, (*) => Send(sendPattern), "On")
+    } else {
+        Hotkey(safeSource, (*) => Send("{Blind}{" . cleanTarget . "}"), "On")
+    }
     g_ActiveHotkeys.Push(safeSource)
 }
 

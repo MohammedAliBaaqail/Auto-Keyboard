@@ -150,7 +150,7 @@
 
   // Key Remapper Elements
   const krInputSource = document.getElementById('krInputSource');
-  const krSelectTarget = document.getElementById('krSelectTarget');
+  const krInputTarget = document.getElementById('krInputTarget');
   const krInputName = document.getElementById('krInputName');
   const krBtnSubmit = document.getElementById('krBtnSubmit');
   const krRemapsContainer = document.getElementById('krRemapsContainer');
@@ -486,13 +486,103 @@
     });
   }
 
+  function setupHotkeyCapture(inputEl, nextEl, onSubmit) {
+    if (!inputEl) return;
+
+    inputEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Tab') return;
+
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (nextEl && !nextEl.value.trim()) {
+          nextEl.focus();
+        } else if (onSubmit) {
+          onSubmit();
+        }
+        return;
+      }
+
+      const isModifier = ['Control', 'Alt', 'Shift', 'Meta', 'OS'].includes(e.key);
+      const hasModifier = e.ctrlKey || e.altKey || e.metaKey || (e.shiftKey && (e.ctrlKey || e.altKey || e.metaKey));
+      const isSpecialKey = [
+        'Escape', 'CapsLock', 'Space', 'Backspace', 'Delete', 'Insert',
+        'Home', 'End', 'PageUp', 'PageDown', 'ArrowUp', 'ArrowDown',
+        'ArrowLeft', 'ArrowRight', 'Tab', 'NumLock', 'ScrollLock', 'PrintScreen'
+      ].includes(e.key) || /^F\d{1,2}$/i.test(e.key);
+
+      // Backspace or Delete without modifiers clears the input
+      if ((e.key === 'Backspace' || e.key === 'Delete') && !hasModifier && !e.shiftKey) {
+        inputEl.value = '';
+        e.preventDefault();
+        return;
+      }
+
+      // If any modifier is active, or if user is pressing a modifier or special hardware key:
+      if (hasModifier || isModifier || isSpecialKey) {
+        e.preventDefault();
+
+        const parts = [];
+        if (e.ctrlKey) parts.push('Ctrl');
+        if (e.altKey) parts.push('Alt');
+        if (e.shiftKey) parts.push('Shift');
+        if (e.metaKey) parts.push('Win');
+
+        // Standalone modifier press (e.g. user just pressed Ctrl or Shift)
+        if (isModifier) {
+          if (parts.length > 0) {
+            inputEl.value = parts.join('+');
+          }
+          return;
+        }
+
+        // Standardize base key
+        let key = e.key;
+        if (e.code && e.code.startsWith('Key')) {
+          key = e.code.slice(3).toUpperCase();
+        } else if (e.code && e.code.startsWith('Digit')) {
+          key = e.code.slice(5);
+        } else if (e.code && e.code.startsWith('Numpad')) {
+          key = e.code;
+        } else if (key === ' ') {
+          key = 'Space';
+        } else if (key === 'Escape' || key === 'Esc') {
+          key = 'Escape';
+        } else if (key === 'ArrowUp') {
+          key = 'Up';
+        } else if (key === 'ArrowDown') {
+          key = 'Down';
+        } else if (key === 'ArrowLeft') {
+          key = 'Left';
+        } else if (key === 'ArrowRight') {
+          key = 'Right';
+        } else if (key === 'PageUp') {
+          key = 'PgUp';
+        } else if (key === 'PageDown') {
+          key = 'PgDn';
+        } else if (key.length === 1) {
+          key = key.toUpperCase();
+        }
+
+        if (!parts.includes(key)) {
+          parts.push(key);
+        }
+
+        inputEl.value = parts.join('+');
+      }
+    });
+  }
+
   function submitKeyRemapper() {
     const src = krInputSource.value.trim();
-    const tgt = krSelectTarget.value;
+    const tgt = krInputTarget ? krInputTarget.value.trim() : '';
     const name = krInputName.value.trim() || `${src} to ${tgt}`;
 
     if (!src) {
       krInputSource.focus();
+      return;
+    }
+    if (!tgt) {
+      if (krInputTarget) krInputTarget.focus();
       return;
     }
 
@@ -504,6 +594,7 @@
     });
 
     krInputSource.value = '';
+    if (krInputTarget) krInputTarget.value = '';
     krInputName.value = '';
     renderKeyRemapper();
     syncConfig();
@@ -626,36 +717,70 @@
         else submitAppLauncher();
         return;
       }
-      if (e.key === 'Backspace' || e.key === 'Delete') {
+
+      const isModifier = ['Control', 'Alt', 'Shift', 'Meta', 'OS'].includes(e.key);
+      const hasModifier = e.ctrlKey || e.altKey || e.metaKey || (e.shiftKey && (e.ctrlKey || e.altKey || e.metaKey));
+      const isSpecialKey = [
+        'Escape', 'CapsLock', 'Space', 'Backspace', 'Delete', 'Insert',
+        'Home', 'End', 'PageUp', 'PageDown', 'ArrowUp', 'ArrowDown',
+        'ArrowLeft', 'ArrowRight', 'Tab', 'NumLock', 'ScrollLock', 'PrintScreen'
+      ].includes(e.key) || /^F\d{1,2}$/i.test(e.key);
+
+      if ((e.key === 'Backspace' || e.key === 'Delete') && !hasModifier && !e.shiftKey) {
         alInputTrigger.value = '';
         e.preventDefault();
         return;
       }
-      // Ignore standalone modifier presses
-      if (['Control', 'Alt', 'Shift', 'Meta', 'OS'].includes(e.key)) {
+
+      if (hasModifier || isModifier || isSpecialKey) {
         e.preventDefault();
-        return;
+
+        const parts = [];
+        if (e.ctrlKey) parts.push('Ctrl');
+        if (e.altKey) parts.push('Alt');
+        if (e.shiftKey) parts.push('Shift');
+        if (e.metaKey) parts.push('Win');
+
+        if (isModifier) {
+          if (parts.length > 0) {
+            alInputTrigger.value = parts.join('+');
+          }
+          return;
+        }
+
+        let key = e.key;
+        if (e.code && e.code.startsWith('Key')) {
+          key = e.code.slice(3).toUpperCase();
+        } else if (e.code && e.code.startsWith('Digit')) {
+          key = e.code.slice(5);
+        } else if (e.code && e.code.startsWith('Numpad')) {
+          key = e.code;
+        } else if (key === ' ') {
+          key = 'Space';
+        } else if (key === 'Escape' || key === 'Esc') {
+          key = 'Escape';
+        } else if (key === 'ArrowUp') {
+          key = 'Up';
+        } else if (key === 'ArrowDown') {
+          key = 'Down';
+        } else if (key === 'ArrowLeft') {
+          key = 'Left';
+        } else if (key === 'ArrowRight') {
+          key = 'Right';
+        } else if (key === 'PageUp') {
+          key = 'PgUp';
+        } else if (key === 'PageDown') {
+          key = 'PgDn';
+        } else if (key.length === 1) {
+          key = key.toUpperCase();
+        }
+
+        if (!parts.includes(key)) {
+          parts.push(key);
+        }
+
+        alInputTrigger.value = parts.join('+');
       }
-
-      e.preventDefault();
-
-      const parts = [];
-      if (e.ctrlKey) parts.push('Ctrl');
-      if (e.altKey) parts.push('Alt');
-      if (e.shiftKey) parts.push('Shift');
-      if (e.metaKey) parts.push('Win');
-
-      let key = e.key;
-      if (key === ' ') key = 'Space';
-      else if (key === 'Escape') key = 'Esc';
-      else if (key === 'ArrowUp') key = 'Up';
-      else if (key === 'ArrowDown') key = 'Down';
-      else if (key === 'ArrowLeft') key = 'Left';
-      else if (key === 'ArrowRight') key = 'Right';
-      else if (key.length === 1) key = key.toUpperCase();
-
-      parts.push(key);
-      alInputTrigger.value = parts.join('+');
     } else {
       if (e.key === 'Enter') {
         if (!alInputTarget.value.trim()) alInputTarget.focus();
@@ -1316,11 +1441,15 @@
       if (e.key === 'Enter') submitTextExpander();
     });
 
-    // Key Remapper Listeners
+    // Key Remapper Listeners & Universal Hotkey Capture
     krBtnSubmit.addEventListener('click', submitKeyRemapper);
-    krInputSource.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') submitKeyRemapper();
-    });
+    setupHotkeyCapture(krInputSource, krInputTarget, submitKeyRemapper);
+    setupHotkeyCapture(krInputTarget, krInputName, submitKeyRemapper);
+    if (krInputName) {
+      krInputName.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') submitKeyRemapper();
+      });
+    }
 
     // App Launcher Listeners
     if (alTypeString) {

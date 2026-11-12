@@ -258,37 +258,31 @@
       <section class="module-panel" id="panel-keyRemapper">
         <div class="inputs-section">
           <div class="inputs-row">
-            <div class="inset-input-box trigger-box">
+            <!-- Source Key Input with Automatic Hotkey Capture -->
+            <div class="inset-input-box trigger-box" title="Click and press your source key or combination (e.g. Ctrl+Shift+A, CapsLock)">
               <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect x="2" y="4" width="20" height="16" rx="2"></rect>
                 <path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M7 16h10"></path>
               </svg>
-              <input type="text" id="krInputSource" placeholder="Source Key (e.g. CapsLock, ^!m)" autocomplete="off" />
+              <input type="text" id="krInputSource" placeholder="Source Key (press any shortcut)" autocomplete="off" spellcheck="false" />
             </div>
 
-            <!-- Dropdown Select (Select ∨ from reference image) -->
-            <div class="neumorphic-select-wrapper">
-              <select id="krSelectTarget" class="neumorphic-select">
-                <option value="Control">Control (Ctrl)</option>
-                <option value="Escape">Escape (Esc)</option>
-                <option value="Alt">Alt</option>
-                <option value="Shift">Shift</option>
-                <option value="MuteAudio">Mute Master Audio</option>
-                <option value="Media_Play_Pause">Media Play / Pause</option>
-                <option value="Media_Next">Next Media Track</option>
-                <option value="F13">F13</option>
-              </select>
-              <svg class="select-chevron-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <polyline points="6 9 12 15 18 9"></polyline>
+            <!-- Target Key Input (Replaces dropdown menu) -->
+            <div class="inset-input-box trigger-box" title="Click and press your target key or type action (e.g. Escape, MuteAudio, Ctrl+C)">
+              <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="13 17 18 12 13 7"></polyline>
+                <polyline points="6 17 11 12 6 7"></polyline>
               </svg>
+              <input type="text" id="krInputTarget" placeholder="Target Key / Action" autocomplete="off" spellcheck="false" />
             </div>
 
+            <!-- Optional Description / Label -->
             <div class="inset-input-box output-box">
               <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
                 <line x1="7" y1="7" x2="7.01" y2="7"></line>
               </svg>
-              <input type="text" id="krInputName" placeholder="Label / Description..." autocomplete="off" />
+              <input type="text" id="krInputName" placeholder="Label / Description (optional)..." autocomplete="off" spellcheck="false" />
             </div>
 
             <button class="neumorphic-btn btn-go" id="krBtnSubmit">
@@ -296,7 +290,7 @@
             </button>
           </div>
           <div class="input-hints">
-            <span class="hint-tag">Remap hardware keys (e.g. CapsLock to Control) or bind global shortcuts</span>
+            <span class="hint-tag">Press any key or combination (Ctrl, Shift, Alt, Win + Key, or CapsLock, Esc, F1-F12)</span>
           </div>
         </div>
 
