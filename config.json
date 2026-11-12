@@ -1,0 +1,42 @@
+﻿{
+  "activeTab":"textExpander",
+  "appLauncher":{
+    "enabled":1,
+    "items":[{"id":"al-1794403819689","name":"Everything","target":"C:\\Program Files (x86)\\Everything\\Everything.exe","trigger":"Ctrl+Alt+Shift+E","triggerType":"hotkey"},{"id":"al-1","name":"Calculator","target":"calc.exe","trigger":"@calc","triggerType":"string"},{"id":"al-2","name":"YouTube","target":"https://www.youtube.com","trigger":"@yt","triggerType":"string"},{"id":"al-3","name":"GitHub","target":"https://github.com","trigger":"@gh","triggerType":"string"}]
+  },
+  "autoClicker":{
+    "button":"Left",
+    "clickType":"Single",
+    "cps":20,
+    "enabled":1,
+    "hotkey":"F8",
+    "limit":0
+  },
+  "enabled":1,
+  "keyRemapper":{
+    "enabled":1,
+    "items":[{"id":"kr-2","name":"Mute Master Audio (Ctrl+Alt+M)","source":"^!m","target":"MuteAudio"}]
+  },
+  "textExpander":{
+    "enabled":1,
+    "items":[{"id":"te-1","input":"@@1","multiline":0,"output":"myemail@gmail.com"},{"id":"te-2","input":"@@sig","multiline":1,"output":"Best regards,\nYour Name\nSenior Engineer"}]
+  },
+  "theme":{
+    "accentColor":"#38bdf8",
+    "bgColor":"#1e222b",
+    "blur":8,
+    "darkIntensity":38,
+    "distance":4,
+    "intensity":28,
+    "lightIntensity":18,
+    "radius":14
+  },
+  "windowManager":{
+    "alwaysOnTopHotkey":"^SPACE",
+    "centerWindowHotkey":"^!c",
+    "enabled":1,
+    "hideWindowHotkey":"^!h",
+    "opacity":255,
+    "transparencyWheel":1
+  }
+}

@@ -1,0 +1,32 @@
+# Development & Temporary files
+*.log
+*.tmp
+*.bak
+stderr.log
+stdout.log
+
+# User uploaded / reference images
+*.png.bak
+*.jpg.bak
+ref_switch.png
+
+# Operating System files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+
+# Editor & IDE artifacts
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# WebView2 Runtime Cache (only root cache folders, not lib/WebView2)
+/EBWebView/
+/WebView2_Data/
+/WebView2_Cache/

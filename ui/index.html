@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AutoHotKeyboard</title>
+  <script>
+    (function () {
+      try {
+        function hexToHsl(hex) {
+          hex = hex.replace('#', '').trim();
+          if (hex.length === 3) hex = hex.split('').map(function(x) { return x + x; }).join('');
+          var r = parseInt(hex.substring(0, 2), 16) / 255;
+          var g = parseInt(hex.substring(2, 4), 16) / 255;
+          var b = parseInt(hex.substring(4, 6), 16) / 255;
+          var max = Math.max(r, g, b), min = Math.min(r, g, b);
+          var h, s, l = (max + min) / 2;
+          if (max === min) {
+            h = s = 0;
+          } else {
+            var d = max - min;
+            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+            switch (max) {
+              case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+              case g: h = (b - r) / d + 2; break;
+              case b: h = (r - g) / d + 4; break;
+            }
+            h /= 6;
+          }
+          return { h: h, s: s, l: l };
+        }
+
+        function hslToHex(h, s, l) {
+          l = Math.max(0, Math.min(1, l));
+          s = Math.max(0, Math.min(1, s));
+          var r, g, b;
+          if (s === 0) {
+            r = g = b = l;
+          } else {
+            function hue2rgb(p, q, t) {
+              if (t < 0) t += 1;
+              if (t > 1) t -= 1;
+              if (t < 1/6) return p + (q - p) * 6 * t;
+              if (t < 1/2) return q;
+              if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+              return p;
+            }
+            var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+            var p = 2 * l - q;
+            r = hue2rgb(p, q, h + 1/3);
+            g = hue2rgb(p, q, h);
+            b = hue2rgb(p, q, h - 1/3);
+          }
+          var toHex = function(x) {
+            var hex = Math.round(Math.max(0, Math.min(255, x * 255))).toString(16);
+            return hex.length === 1 ? '0' + hex : hex;
+          };
+          return '#' + toHex(r) + toHex(g) + toHex(b);
+        }
+
+        var t = null;
+        if (window.__INITIAL_CONFIG__ && window.__INITIAL_CONFIG__.theme) {
+          t = window.__INITIAL_CONFIG__.theme;
+        } else {
+          var cached = localStorage.getItem('ahk_theme');
+          if (cached) t = JSON.parse(cached);
+        }
+        if (t && t.bgColor && t.accentColor) {
+          var root = document.documentElement;
+          root.style.setProperty('--bg-color', t.bgColor);
+          root.style.setProperty('--surface-color', t.bgColor);
+          root.style.setProperty('--accent-primary', t.accentColor);
+          if (t.radius !== undefined) root.style.setProperty('--neo-radius', t.radius + 'px');
+          if (t.distance !== undefined) root.style.setProperty('--neo-dist', t.distance + 'px');
+          if (t.blur !== undefined) root.style.setProperty('--neo-blur', t.blur + 'px');
+          if (t.lightIntensity !== undefined) root.style.setProperty('--neo-light-intensity', t.lightIntensity + '%');
+          if (t.darkIntensity !== undefined) root.style.setProperty('--neo-dark-intensity', t.darkIntensity + '%');
+          if (t.intensity !== undefined) root.style.setProperty('--neo-intensity', t.intensity + '%');
+          
+          var lightInten = (t.lightIntensity !== undefined) ? parseInt(t.lightIntensity, 10) : ((t.intensity !== undefined) ? parseInt(t.intensity, 10) : 18);
+          var darkInten = (t.darkIntensity !== undefined) ? parseInt(t.darkIntensity, 10) : ((t.intensity !== undefined) ? parseInt(t.intensity, 10) : 18);
+          var hsl = hexToHsl(t.bgColor);
+          var dl = Math.max(1, Math.min(100, lightInten)) / 100;
+          var dd = Math.max(1, Math.min(100, darkInten)) / 100;
+
+          // Lighter tint of base color for top light shadow
+          var lightL = hsl.l <= 0.7 
+            ? Math.min(0.96, hsl.l + (1 - hsl.l) * (dl * 1.5))
+            : Math.min(0.995, hsl.l + (1 - hsl.l) * (dl * 2.5));
+
+          // Darker shade of base color for bottom dark shadow
+          var darkL = hsl.l >= 0.3
+            ? Math.max(0.03, hsl.l - hsl.l * (dd * 1.3))
+            : Math.max(0.015, hsl.l * (1 - dd * 0.9));
+
+          var deepL = Math.max(0.005, darkL - (hsl.l * dd * 0.35));
+
+          root.style.setProperty('--shadow-light', hslToHex(hsl.h, hsl.s, lightL));
+          root.style.setProperty('--shadow-dark', hslToHex(hsl.h, hsl.s, darkL));
+          root.style.setProperty('--shadow-dark-deep', hslToHex(hsl.h, hsl.s, deepL));
+
+          var c = t.bgColor.replace('#', '');
+          if (c.length === 6) {
+            var r = parseInt(c.substr(0, 2), 16);
+            var g = parseInt(c.substr(2, 2), 16);
+            var b = parseInt(c.substr(4, 2), 16);
+            var brightness = (0.299 * r + 0.587 * g + 0.114 * b);
+            if (brightness < 140) {
+              root.style.setProperty('--text-primary', '#f8fafc');
+              root.style.setProperty('--text-secondary', '#cbd5e1');
+              root.style.setProperty('--text-muted', '#94a3b8');
+              root.style.setProperty('--text-disabled', '#64748b');
+            } else {
+              root.style.setProperty('--text-primary', '#1e293b');
+              root.style.setProperty('--text-secondary', '#475569');
+              root.style.setProperty('--text-muted', '#64748b');
+              root.style.setProperty('--text-disabled', '#94a3b8');
+            }
+          }
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Main Frameless Neumorphic Card Window -->
+  <div class="neumorphic-card" id="appCard">
+    
+    <!-- Top Header Bar -->
+    <header class="app-header" id="dragHeader">
+      <div class="header-left">
+        <div class="squircle-btn logo-btn" title="AutoHotKeyboard Engine">
+          <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="4" width="20" height="16" rx="3"></rect>
+            <line x1="6" y1="8" x2="6.01" y2="8"></line>
+            <line x1="10" y1="8" x2="10.01" y2="8"></line>
+            <line x1="14" y1="8" x2="14.01" y2="8"></line>
+            <line x1="18" y1="8" x2="18.01" y2="8"></line>
+            <line x1="6" y1="12" x2="6.01" y2="12"></line>
+            <line x1="10" y1="12" x2="10.01" y2="12"></line>
+            <line x1="14" y1="12" x2="14.01" y2="12"></line>
+            <line x1="18" y1="12" x2="18.01" y2="12"></line>
+            <line x1="7" y1="16" x2="17" y2="16"></line>
+          </svg>
+        </div>
+        <div class="squircle-btn" id="btnStats" title="Active Items Count">
+          <span class="badge-num" id="activeCountBadge">0</span>
+        </div>
+        <div class="title-group">
+          <h1 class="app-title">AUTOHOTKEYBOARD</h1>
+          <span class="app-subtitle" id="statusSubtitle">Engine: <span class="status-indicator-text online">Active</span></span>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <button class="squircle-btn" id="btnTheme" title="Customize Theme (Background & Accent)">
+          <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle>
+            <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle>
+            <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle>
+            <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle>
+            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.992 6.012 17.461 2 12 2z"></path>
+          </svg>
+        </button>
+        <button class="squircle-btn" id="btnRefresh" title="Reload / Re-sync Config">
+          <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"></path>
+          </svg>
+        </button>
+        <button class="squircle-btn" id="btnMinimize" title="Minimize Window">
+          <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </button>
+        <button class="squircle-btn btn-close" id="btnClose" title="Close Window">
+          <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Script Type / Feature Tabs Bar (Segmented Control from image) -->
+    <div class="segmented-control-wrapper">
+      <div class="segmented-control" id="segmentedBar">
+        <button class="segment-btn active" data-tab="textExpander">Text Expander</button>
+        <button class="segment-btn" data-tab="keyRemapper">Key Remapper</button>
+        <button class="segment-btn" data-tab="windowManager">Window Manager</button>
+        <button class="segment-btn" data-tab="appLauncher">App Launcher</button>
+        <button class="segment-btn" data-tab="autoClicker">Auto Clicker</button>
+      </div>
+    </div>
+
+    <!-- Main Module Panels Container with Smooth Overflow -->
+    <main class="modules-container">
+      
+      <!-- ====================================================================
+           1. TEXT EXPANDER PANEL (with Multiline Expansion)
+           ==================================================================== -->
+      <section class="module-panel active" id="panel-textExpander">
+        <div class="inputs-section">
+          <div class="inputs-row">
+            <div class="inset-input-box trigger-box">
+              <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+              </svg>
+              <input type="text" id="teInputTrigger" placeholder="Trigger (e.g. @@1, @@sig)" autocomplete="off" spellcheck="false" />
+            </div>
+
+            <!-- Single or Multiline Output Field -->
+            <div class="inset-input-box output-box" id="teOutputContainer">
+              <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+              </svg>
+              <input type="text" id="teInputOutput" placeholder="Replacement text or snippet..." autocomplete="off" spellcheck="false" />
+              <textarea id="teTextareaOutput" class="hidden-field" placeholder="Type multiline snippet / signature..."></textarea>
+            </div>
+
+            <!-- Multiline Toggle Pill -->
+            <button class="neumorphic-toggle-pill" id="teToggleMultiline" title="Toggle Single-line / Multiline">
+              <svg class="toggle-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="21" y1="6" x2="3" y2="6"></line>
+                <line x1="15" y1="12" x2="3" y2="12"></line>
+                <line x1="17" y1="18" x2="3" y2="18"></line>
+              </svg>
+              <span>Multiline</span>
+            </button>
+
+            <!-- Neumorphic GO Button -->
+            <button class="neumorphic-btn btn-go" id="teBtnSubmit">
+              <span id="teBtnSubmitText">GO</span>
+            </button>
+          </div>
+          <div class="input-hints">
+            <span class="hint-tag">Typing trigger replaces immediately anywhere in Windows</span>
+          </div>
+        </div>
+
+        <div class="list-section">
+          <div class="list-header">
+            <span class="section-label">Configured Expansions</span>
+            <div class="search-filter-box">
+              <input type="text" id="teSearchFilter" placeholder="Filter snippets..." autocomplete="off" />
+            </div>
+          </div>
+          <div class="shortcuts-list" id="teShortcutsContainer"></div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           2. KEY REMAPPER PANEL
+           ==================================================================== -->
+      <section class="module-panel" id="panel-keyRemapper">
+        <div class="inputs-section">
+          <div class="inputs-row">
+            <div class="inset-input-box trigger-box">
+              <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                <path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M7 16h10"></path>
+              </svg>
+              <input type="text" id="krInputSource" placeholder="Source Key (e.g. CapsLock, ^!m)" autocomplete="off" />
+            </div>
+
+            <!-- Dropdown Select (Select ∨ from reference image) -->
+            <div class="neumorphic-select-wrapper">
+              <select id="krSelectTarget" class="neumorphic-select">
+                <option value="Control">Control (Ctrl)</option>
+                <option value="Escape">Escape (Esc)</option>
+                <option value="Alt">Alt</option>
+                <option value="Shift">Shift</option>
+                <option value="MuteAudio">Mute Master Audio</option>
+                <option value="Media_Play_Pause">Media Play / Pause</option>
+                <option value="Media_Next">Next Media Track</option>
+                <option value="F13">F13</option>
+              </select>
+              <svg class="select-chevron-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </div>
+
+            <div class="inset-input-box output-box">
+              <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                <line x1="7" y1="7" x2="7.01" y2="7"></line>
+              </svg>
+              <input type="text" id="krInputName" placeholder="Label / Description..." autocomplete="off" />
+            </div>
+
+            <button class="neumorphic-btn btn-go" id="krBtnSubmit">
+              <span>ADD</span>
+            </button>
+          </div>
+          <div class="input-hints">
+            <span class="hint-tag">Remap hardware keys (e.g. CapsLock to Control) or bind global shortcuts</span>
+          </div>
+        </div>
+
+        <div class="list-section">
+          <div class="list-header">
+            <span class="section-label">Active Key Remaps</span>
+          </div>
+          <div class="shortcuts-list" id="krRemapsContainer"></div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           3. WINDOW MANAGEMENT PANEL
+           ==================================================================== -->
+      <section class="module-panel" id="panel-windowManager">
+        <div class="wm-grid">
+          <!-- Card 1: Always on Top -->
+          <div class="wm-card">
+            <div class="wm-card-left">
+              <div class="wm-icon-badge">
+                <svg class="wm-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="12" y1="17" x2="12" y2="22"></line>
+                  <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1v3.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"></path>
+                </svg>
+              </div>
+              <div class="wm-info">
+                <h3>Pin Always-on-Top</h3>
+                <p>Pins the current active window on top of all others</p>
+              </div>
+            </div>
+            <div class="wm-hotkey-badge">Ctrl + Space</div>
+          </div>
+
+          <!-- Card 2: Center Window -->
+          <div class="wm-card">
+            <div class="wm-card-left">
+              <div class="wm-icon-badge">
+                <svg class="wm-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="22" y1="12" x2="18" y2="12"></line>
+                  <line x1="6" y1="12" x2="2" y2="12"></line>
+                  <line x1="12" y1="2" x2="12" y2="6"></line>
+                  <line x1="12" y1="18" x2="12" y2="22"></line>
+                </svg>
+              </div>
+              <div class="wm-info">
+                <h3>Center Active Window</h3>
+                <p>Instantly centers the window on your monitor</p>
+              </div>
+            </div>
+            <div class="wm-hotkey-badge">Ctrl + Alt + C</div>
+          </div>
+
+          <!-- Card 3: Boss Key / Quick Hide -->
+          <div class="wm-card">
+            <div class="wm-card-left">
+              <div class="wm-icon-badge">
+                <svg class="wm-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
+                  <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"></path>
+                  <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"></path>
+                  <line x1="2" y1="2" x2="22" y2="22"></line>
+                </svg>
+              </div>
+              <div class="wm-info">
+                <h3>Boss Key / Minimize Active</h3>
+                <p>Instantly minimizes the foreground window</p>
+              </div>
+            </div>
+            <div class="wm-hotkey-badge">Ctrl + Alt + H</div>
+          </div>
+
+          <!-- Card 4: Transparency Wheel -->
+          <div class="wm-card">
+            <div class="wm-card-left">
+              <div class="wm-icon-badge">
+                <svg class="wm-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                  <polyline points="2 17 12 22 22 17"></polyline>
+                  <polyline points="2 12 12 17 22 12"></polyline>
+                </svg>
+              </div>
+              <div class="wm-info">
+                <h3>Scrollwheel Transparency</h3>
+                <p>Hold Win key and scroll mouse wheel over any window</p>
+              </div>
+            </div>
+            <div class="wm-hotkey-badge">Win + WheelUp/Down</div>
+          </div>
+        </div>
+
+        <!-- Transparency Slider (Exact Slider from Reference Design) -->
+        <div class="slider-module-card">
+          <div class="slider-header">
+            <span class="section-label">Window Opacity Controller</span>
+            <span class="slider-value-badge" id="wmOpacityValue">84%</span>
+          </div>
+          <div class="neumorphic-slider-container">
+            <input type="range" id="wmOpacitySlider" min="40" max="255" value="215" class="neumorphic-slider" />
+          </div>
+          <span class="hint-tag">Drag slider to test live opacity adjustment on foreground windows</span>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           4. APP LAUNCHER PANEL
+           ==================================================================== -->
+      <section class="module-panel" id="panel-appLauncher">
+        <div class="inputs-section">
+          <div class="inputs-row">
+            <!-- Trigger Type Selector: Text String vs Button Combination -->
+            <div class="al-type-segmented" id="alTriggerTypeSelector">
+              <button type="button" class="al-type-btn active" id="alTypeString" data-type="string" title="Trigger by typing text (e.g. @calc)">
+                <svg class="al-type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="4 17 10 11 4 5"></polyline>
+                  <line x1="12" y1="19" x2="20" y2="19"></line>
+                </svg>
+                <span>Text</span>
+              </button>
+              <button type="button" class="al-type-btn" id="alTypeHotkey" data-type="hotkey" title="Trigger by pressing a button combination (e.g. Ctrl+Alt+C)">
+                <svg class="al-type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                  <path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M7 16h10"></path>
+                </svg>
+                <span>Shortcut</span>
+              </button>
+            </div>
+
+            <div class="inset-input-box trigger-box" id="alTriggerBox">
+              <svg class="input-icon-svg" id="alTriggerIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="4 17 10 11 4 5"></polyline>
+                <line x1="12" y1="19" x2="20" y2="19"></line>
+              </svg>
+              <input type="text" id="alInputTrigger" placeholder="Trigger (e.g. @calc, @yt)" autocomplete="off" spellcheck="false" />
+            </div>
+
+            <div class="inset-input-box output-box al-output-box" id="alOutputBox">
+              <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <line x1="10" y1="14" x2="21" y2="3"></line>
+              </svg>
+              <input type="text" id="alInputTarget" placeholder="Target app path or URL..." autocomplete="off" spellcheck="false" />
+              <button type="button" class="btn-input-browse" id="alBtnBrowse" title="Browse for application or file (.exe, .lnk, etc.)">
+                <svg class="browse-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <span>Browse</span>
+              </button>
+            </div>
+
+            <div class="inset-input-box label-box">
+              <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                <line x1="7" y1="7" x2="7.01" y2="7"></line>
+              </svg>
+              <input type="text" id="alInputName" placeholder="Name..." autocomplete="off" spellcheck="false" />
+            </div>
+
+            <button class="neumorphic-btn btn-go" id="alBtnSubmit">
+              <span id="alBtnSubmitText">ADD</span>
+            </button>
+          </div>
+          <div class="input-hints">
+            <span class="hint-tag" id="alHintTag">Typing trigger anywhere opens apps, websites, or commands instantly</span>
+          </div>
+        </div>
+
+        <div class="list-section">
+          <div class="list-header">
+            <span class="section-label">Configured Launchers</span>
+          </div>
+          <div class="shortcuts-list" id="alLaunchersContainer"></div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           5. AUTO CLICKER PANEL
+           ==================================================================== -->
+      <section class="module-panel" id="panel-autoClicker">
+        <div class="ac-container">
+          <div class="ac-settings-grid">
+            <!-- Mouse Button -->
+            <div class="ac-setting-card">
+              <span class="setting-title">Mouse Button</span>
+              <div class="ac-pill-selector" id="acButtonSelector">
+                <button class="ac-pill-btn active" data-val="Left">Left</button>
+                <button class="ac-pill-btn" data-val="Right">Right</button>
+                <button class="ac-pill-btn" data-val="Middle">Middle</button>
+              </div>
+            </div>
+
+            <!-- Click Type -->
+            <div class="ac-setting-card">
+              <span class="setting-title">Click Type</span>
+              <div class="ac-pill-selector" id="acTypeSelector">
+                <button class="ac-pill-btn active" data-val="Single">Single</button>
+                <button class="ac-pill-btn" data-val="Double">Double</button>
+              </div>
+            </div>
+
+            <!-- Toggle Hotkey -->
+            <div class="ac-setting-card">
+              <span class="setting-title">Global Hotkey</span>
+              <div class="ac-hotkey-display" title="Press this key anywhere to toggle auto-clicking">
+                <svg class="hotkey-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                </svg>
+                <span id="acHotkeyLabel">F8</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- CPS Speed Slider (from reference image) -->
+          <div class="slider-module-card">
+            <div class="slider-header">
+              <span class="section-label">Click Speed (Clicks Per Second)</span>
+              <span class="slider-value-badge" id="acCpsValue">20 CPS</span>
+            </div>
+            <div class="neumorphic-slider-container">
+              <input type="range" id="acCpsSlider" min="1" max="60" value="20" class="neumorphic-slider" />
+            </div>
+            <div class="cps-quick-row">
+              <span class="hint-tag">1 CPS (Slow)</span>
+              <span class="hint-tag">20 CPS (Gaming)</span>
+              <span class="hint-tag">60 CPS (Max Speed)</span>
+            </div>
+          </div>
+
+          <!-- Live Arm & Status Button -->
+          <div class="ac-action-row">
+            <button class="neumorphic-btn ac-toggle-btn" id="acToggleBtn">
+              <span id="acToggleBtnText">START (F8)</span>
+            </button>
+            <span class="hint-tag" id="acStatusHint">Ready - Press F8 anywhere in Windows to start or stop clicking</span>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Bottom Controls & Neumorphic Visuals from Reference Design -->
+    <footer class="app-footer">
+      <div class="footer-left"></div>
+
+      <!-- SINGLE VERTICAL ROCKER SWITCH ("ON" / "OFF") FROM REFERENCE DESIGN -->
+      <div class="footer-center">
+        <div class="vertical-rocker is-on" id="mainEngineSwitch" title="Click to Toggle Script Engine ON / OFF">
+          <div class="rocker-track rocker-off-track">
+            <span class="rocker-label-off">OFF</span>
+          </div>
+          <div class="rocker-track rocker-on-track">
+            <span class="rocker-label-on">ON</span>
+          </div>
+          <div class="rocker-thumb"></div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="footer-right">
+        <div class="action-buttons-group">
+          <button class="neumorphic-btn btn-chip" id="btnExport" title="Open Config Folder">
+            <svg class="chip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span>Config</span>
+          </button>
+          
+          <button class="squircle-btn btn-mini" id="btnHelp" title="About / Documentation">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Window Resize Handles -->
+    <div class="resize-handle handle-e" data-direction="e" title="Resize Width"></div>
+    <div class="resize-handle handle-s" data-direction="s" title="Resize Height"></div>
+    <div class="resize-handle handle-se" data-direction="se" title="Resize Window"></div>
+
+    <!-- Neumorphic Theme Customizer Modal -->
+    <div class="modal-overlay hidden-field" id="themeModal">
+      <div class="modal-card theme-modal-card">
+        <div class="modal-header">
+          <div class="modal-title-row">
+            <svg class="icon-svg" style="color:var(--accent-primary);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle>
+              <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle>
+              <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle>
+              <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle>
+              <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.992 6.012 17.461 2 12 2z"></path>
+            </svg>
+            <h3 class="modal-title">Theme & Appearance</h3>
+          </div>
+          <button class="squircle-btn btn-mini" id="btnCloseThemeModal" title="Close Theme Settings">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <div class="theme-modal-body">
+          <!-- Background (Primary) Color Section -->
+          <div class="theme-section">
+            <div class="theme-section-header">
+              <span class="theme-section-title">Background Color (Primary)</span>
+              <span class="theme-section-subtitle">Sets the clay base plane & automatic ambient lighting</span>
+            </div>
+            <div class="theme-swatches-grid" id="bgSwatchesGrid">
+              <button class="theme-swatch-chip active" data-preset="soft-gray" data-color="#e0e5ec" title="Soft Clay (Balanced Neumorphic, 20px Radius)">
+                <span class="swatch-color-circle" style="background:#e0e5ec;"></span>
+                <span class="swatch-name">Soft Clay</span>
+              </button>
+              <button class="theme-swatch-chip" data-preset="obsidian" data-color="#1e222b" title="Obsidian Dark (Stealth Midnight, 14px Radius)">
+                <span class="swatch-color-circle" style="background:#1e222b;"></span>
+                <span class="swatch-name">Obsidian</span>
+              </button>
+              <button class="theme-swatch-chip" data-preset="retro-sharp" data-color="#f2f4f7" title="Retro Sharp (Embossed 0px Blur, 6px Radius)">
+                <span class="swatch-color-circle" style="background:#f2f4f7;"></span>
+                <span class="swatch-name">Retro Sharp</span>
+              </button>
+              <button class="theme-swatch-chip" data-preset="warm-ceramic" data-color="#e8dfd5" title="Warm Ceramic (Pebble 30px Radius, Soft Light)">
+                <span class="swatch-color-circle" style="background:#e8dfd5;"></span>
+                <span class="swatch-name">Warm Sand</span>
+              </button>
+              <button class="theme-swatch-chip" data-preset="cyber-violet" data-color="#2b2640" title="Cyber Violet (Moody Twilight, 18px Radius)">
+                <span class="swatch-color-circle" style="background:#2b2640;"></span>
+                <span class="swatch-name">Cyber Violet</span>
+              </button>
+              <button class="theme-swatch-chip" data-preset="sage-mint" data-color="#dbe5de" title="Sage Mint (Botanical Pastel, 24px Radius)">
+                <span class="swatch-color-circle" style="background:#dbe5de;"></span>
+                <span class="swatch-name">Sage Mint</span>
+              </button>
+              <button class="theme-swatch-chip" data-preset="arctic-frost" data-color="#edf2f7" title="Arctic Frost (High-Key Silver, 12px Radius)">
+                <span class="swatch-color-circle" style="background:#edf2f7;"></span>
+                <span class="swatch-name">Arctic Frost</span>
+              </button>
+            </div>
+            <!-- Custom Background Color Picker Row -->
+            <div class="custom-color-row">
+              <span class="custom-label">Custom Background Color:</span>
+              <div class="color-picker-input-wrap">
+                <div class="color-picker-chip" title="Click to open color palette">
+                  <input type="color" id="themeBgColorPicker" value="#e0e0e0" class="neumorphic-color-picker" />
+                  <svg class="color-picker-badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle>
+                    <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle>
+                    <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle>
+                    <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle>
+                    <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.992 6.012 17.461 2 12 2z"></path>
+                  </svg>
+                </div>
+                <input type="text" id="themeBgHex" value="#e0e0e0" maxlength="7" spellcheck="false" class="color-hex-input" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Elements (Secondary / Accent) Color Section -->
+          <div class="theme-section">
+            <div class="theme-section-header">
+              <span class="theme-section-title">Elements Color (Secondary / Accent)</span>
+              <span class="theme-section-subtitle">Styles active states, switches, sliders, badges & buttons</span>
+            </div>
+            <div class="theme-swatches-grid" id="accentSwatchesGrid">
+              <button class="theme-swatch-chip active" data-color="#22c55e" title="Emerald Green (Current)">
+                <span class="swatch-color-circle" style="background:#22c55e;"></span>
+                <span class="swatch-name">Emerald</span>
+              </button>
+              <button class="theme-swatch-chip" data-color="#fb7185" title="Cybercore Pink (Reference)">
+                <span class="swatch-color-circle" style="background:#fb7185;"></span>
+                <span class="swatch-name">Cyber Pink</span>
+              </button>
+              <button class="theme-swatch-chip" data-color="#0284c7" title="Pacific Blue">
+                <span class="swatch-color-circle" style="background:#0284c7;"></span>
+                <span class="swatch-name">Pacific Blue</span>
+              </button>
+              <button class="theme-swatch-chip" data-color="#a855f7" title="Electric Purple">
+                <span class="swatch-color-circle" style="background:#a855f7;"></span>
+                <span class="swatch-name">Violet</span>
+              </button>
+              <button class="theme-swatch-chip" data-color="#f59e0b" title="Sunset Amber">
+                <span class="swatch-color-circle" style="background:#f59e0b;"></span>
+                <span class="swatch-name">Amber</span>
+              </button>
+              <button class="theme-swatch-chip" data-color="#64748b" title="Graphite Slate">
+                <span class="swatch-color-circle" style="background:#64748b;"></span>
+                <span class="swatch-name">Graphite</span>
+              </button>
+            </div>
+            <!-- Custom Accent Color Picker Row -->
+            <div class="custom-color-row">
+              <span class="custom-label">Custom Accent Color:</span>
+              <div class="color-picker-input-wrap">
+                <div class="color-picker-chip" title="Click to open color palette">
+                  <input type="color" id="themeAccentColorPicker" value="#22c55e" class="neumorphic-color-picker" />
+                  <svg class="color-picker-badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle>
+                    <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle>
+                    <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle>
+                    <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle>
+                    <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.992 6.012 17.461 2 12 2z"></path>
+                  </svg>
+                </div>
+                <input type="text" id="themeAccentHex" value="#22c55e" maxlength="7" spellcheck="false" class="color-hex-input" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Neumorphism Controls Section (Radius, Distance, Intensity, Blur) -->
+          <div class="theme-section">
+            <div class="theme-section-header">
+              <span class="theme-section-title">Neumorphism Effect Controls</span>
+              <span class="theme-section-subtitle">Fine-tune the 3D clay elevation, softness, roundness & shadow contrast</span>
+            </div>
+            <div class="neo-sliders-grid">
+              <!-- Radius Slider -->
+              <div class="neo-slider-row">
+                <div class="neo-slider-label-group">
+                  <span class="neo-slider-label">Radius</span>
+                  <span class="neo-slider-badge" id="badgeRadius">22px</span>
+                </div>
+                <div class="neo-slider-track-wrap">
+                  <input type="range" id="themeSliderRadius" min="0" max="40" step="1" value="22" class="neumorphic-slider" />
+                </div>
+              </div>
+
+              <!-- Distance Slider -->
+              <div class="neo-slider-row">
+                <div class="neo-slider-label-group">
+                  <span class="neo-slider-label">Distance</span>
+                  <span class="neo-slider-badge" id="badgeDistance">3px</span>
+                </div>
+                <div class="neo-slider-track-wrap">
+                  <input type="range" id="themeSliderDistance" min="1" max="15" step="1" value="3" class="neumorphic-slider" />
+                </div>
+              </div>
+
+              <!-- Top Light Shadow Intensity Slider -->
+              <div class="neo-slider-row">
+                <div class="neo-slider-label-group">
+                  <span class="neo-slider-label">Light Shadow</span>
+                  <span class="neo-slider-badge" id="badgeLightIntensity">18%</span>
+                </div>
+                <div class="neo-slider-track-wrap">
+                  <input type="range" id="themeSliderLightIntensity" min="1" max="100" step="1" value="18" class="neumorphic-slider" />
+                </div>
+              </div>
+
+              <!-- Bottom Dark Shadow Intensity Slider -->
+              <div class="neo-slider-row">
+                <div class="neo-slider-label-group">
+                  <span class="neo-slider-label">Dark Shadow</span>
+                  <span class="neo-slider-badge" id="badgeDarkIntensity">18%</span>
+                </div>
+                <div class="neo-slider-track-wrap">
+                  <input type="range" id="themeSliderDarkIntensity" min="1" max="100" step="1" value="18" class="neumorphic-slider" />
+                </div>
+              </div>
+
+              <!-- Blur Slider -->
+              <div class="neo-slider-row">
+                <div class="neo-slider-label-group">
+                  <span class="neo-slider-label">Blur</span>
+                  <span class="neo-slider-badge" id="badgeBlur">8px</span>
+                </div>
+                <div class="neo-slider-track-wrap">
+                  <input type="range" id="themeSliderBlur" min="0" max="25" step="1" value="8" class="neumorphic-slider" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="theme-modal-footer">
+          <button class="neumorphic-btn btn-chip" id="btnResetTheme">
+            <span>Reset to Default</span>
+          </button>
+          <button class="neumorphic-btn btn-go" id="btnSaveTheme">
+            <span>APPLY</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
