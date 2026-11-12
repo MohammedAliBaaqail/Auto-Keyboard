@@ -1019,6 +1019,118 @@ html, body {
   white-space: nowrap;
 }
 
+.wm-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.wm-hotkey-badge.is-disabled {
+  opacity: 0.35;
+  filter: grayscale(1);
+  text-decoration: line-through;
+  transition: all 0.25s ease;
+}
+
+/* ==========================================================================
+   Skeuomorphic 3D Toggle Switch (Uiverse rude-stingray-22 by njesenberger)
+   Dynamic secondary color binding via var(--accent-primary)
+   ========================================================================== */
+
+.toggle-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  border-radius: 0.55em;
+  padding: 0.125em;
+  background-color: var(--surface-color);
+  box-shadow: var(--inset-sm);
+  font-size: 13px;
+  flex-shrink: 0;
+  user-select: none;
+  cursor: pointer;
+}
+
+.toggle-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  border-radius: inherit;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.toggle-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+  border-radius: 0.4em;
+  width: 3em;
+  height: 1.5em;
+  background-color: var(--surface-color);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.35),
+              inset 0 -1px 2px rgba(255, 255, 255, 0.15);
+  transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toggle-checkbox:checked + .toggle-container {
+  background-color: var(--accent-primary);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3),
+              0 0 10px var(--accent-primary);
+}
+
+.toggle-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  left: 0.08em;
+  border-radius: 0.32em;
+  width: 1.34em;
+  height: 1.34em;
+  background-color: var(--surface-color);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.35),
+              inset 0 1px 1px rgba(255, 255, 255, 0.6),
+              inset 0 -1px 1px rgba(0, 0, 0, 0.2);
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toggle-checkbox:checked + .toggle-container > .toggle-button {
+  left: 1.58em;
+}
+
+.toggle-button-circles-container {
+  display: grid;
+  grid-template-columns: repeat(3, min-content);
+  gap: 0.125em;
+  position: absolute;
+  margin: 0 auto;
+}
+
+.toggle-button-circle {
+  border-radius: 50%;
+  width: 0.15em;
+  height: 0.15em;
+  background-color: var(--text-muted);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.45),
+              0 1px 1px rgba(255, 255, 255, 0.4);
+  transition: background-color 0.3s ease;
+}
+
+.toggle-checkbox:checked + .toggle-container .toggle-button-circle {
+  background-color: var(--accent-primary);
+}
+
 /* ==========================================================================
    Neumorphic Range Slider (Exact Slider from Reference Design)
    ========================================================================== */

@@ -164,12 +164,16 @@ GetDefaultConfig() {
         ),
         "windowManager", Map(
             "enabled", true,
+            "alwaysOnTopEnabled", true,
             "alwaysOnTopHotkey", "^SPACE",
+            "centerWindowEnabled", true,
             "centerWindowHotkey", "^!c",
+            "hideWindowEnabled", true,
             "hideWindowHotkey", "^!h",
             "transparencyWheel", true,
             "opacity", 210,
             "appVolumeWheel", true,
+            "appVolumeMuteEnabled", true,
             "appVolumeMuteHotkey", "!m"
         ),
         "appLauncher", Map(
@@ -419,7 +423,7 @@ ApplyWindowManager() {
     }
     
     ; Always-on-Top Hotkey
-    if (wm.Has("alwaysOnTopHotkey") && Trim(wm["alwaysOnTopHotkey"]) != "") {
+    if ((!wm.Has("alwaysOnTopEnabled") || wm["alwaysOnTopEnabled"]) && wm.Has("alwaysOnTopHotkey") && Trim(wm["alwaysOnTopHotkey"]) != "") {
         try {
             hk := Trim(wm["alwaysOnTopHotkey"])
             Hotkey(hk, (*) => ToggleAlwaysOnTop(), "On")
@@ -428,7 +432,7 @@ ApplyWindowManager() {
     }
     
     ; Center Window Hotkey
-    if (wm.Has("centerWindowHotkey") && Trim(wm["centerWindowHotkey"]) != "") {
+    if ((!wm.Has("centerWindowEnabled") || wm["centerWindowEnabled"]) && wm.Has("centerWindowHotkey") && Trim(wm["centerWindowHotkey"]) != "") {
         try {
             hk := Trim(wm["centerWindowHotkey"])
             Hotkey(hk, (*) => CenterActiveWindow(), "On")
@@ -437,7 +441,7 @@ ApplyWindowManager() {
     }
     
     ; Boss Key / Hide Active Window Hotkey
-    if (wm.Has("hideWindowHotkey") && Trim(wm["hideWindowHotkey"]) != "") {
+    if ((!wm.Has("hideWindowEnabled") || wm["hideWindowEnabled"]) && wm.Has("hideWindowHotkey") && Trim(wm["hideWindowHotkey"]) != "") {
         try {
             hk := Trim(wm["hideWindowHotkey"])
             Hotkey(hk, (*) => HideActiveWindow(), "On")
@@ -470,7 +474,7 @@ ApplyWindowManager() {
     }
 
     ; Mute Active Application Hotkey
-    if (wm.Has("appVolumeMuteHotkey") && Trim(wm["appVolumeMuteHotkey"]) != "") {
+    if ((!wm.Has("appVolumeMuteEnabled") || wm["appVolumeMuteEnabled"]) && wm.Has("appVolumeMuteHotkey") && Trim(wm["appVolumeMuteHotkey"]) != "") {
         try {
             hk := Trim(wm["appVolumeMuteHotkey"])
             Hotkey(hk, (*) => ToggleActiveAppMute(), "On")

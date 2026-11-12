@@ -729,40 +729,83 @@
   }
 
   function initWindowManager() {
-    const wm = state.config.windowManager || {};
+    if (!state.config.windowManager) {
+      state.config.windowManager = {};
+    }
+    const wm = state.config.windowManager;
     wmOpacitySlider.value = wm.opacity || 215;
     updateWmOpacityLabel();
     updateSliderProgress(wmOpacitySlider);
 
-    wmOpacitySlider.addEventListener('input', () => {
-      updateWmOpacityLabel();
-      updateSliderProgress(wmOpacitySlider);
-    });
+    if (!wmOpacitySlider.dataset.bound) {
+      wmOpacitySlider.dataset.bound = 'true';
+      wmOpacitySlider.addEventListener('input', () => {
+        updateWmOpacityLabel();
+        updateSliderProgress(wmOpacitySlider);
+      });
 
-    wmOpacitySlider.addEventListener('change', () => {
-      state.config.windowManager.opacity = parseInt(wmOpacitySlider.value, 10);
-      updateSliderProgress(wmOpacitySlider);
-      syncConfig();
+      wmOpacitySlider.addEventListener('change', () => {
+        state.config.windowManager.opacity = parseInt(wmOpacitySlider.value, 10);
+        updateSliderProgress(wmOpacitySlider);
+        syncConfig();
+      });
+    }
+
+    // Wire individual option switches (Uiverse rude-stingray-22)
+    const switchDefinitions = [
+      { id: 'wmSwitchAlwaysOnTop', badgeId: 'wmBadgeAlwaysOnTop', key: 'alwaysOnTopEnabled' },
+      { id: 'wmSwitchCenterWindow', badgeId: 'wmBadgeCenterWindow', key: 'centerWindowEnabled' },
+      { id: 'wmSwitchHideWindow', badgeId: 'wmBadgeHideWindow', key: 'hideWindowEnabled' },
+      { id: 'wmSwitchTransparencyWheel', badgeId: 'wmBadgeTransparencyWheel', key: 'transparencyWheel' },
+      { id: 'wmSwitchAppVolumeWheel', badgeId: 'wmBadgeAppVolumeWheel', key: 'appVolumeWheel' },
+      { id: 'wmSwitchAppVolumeMute', badgeId: 'wmBadgeAppVolumeMute', key: 'appVolumeMuteEnabled' }
+    ];
+
+    switchDefinitions.forEach(({ id, badgeId, key }) => {
+      const sw = document.getElementById(id);
+      const badge = document.getElementById(badgeId);
+      if (!sw) return;
+
+      const isEnabled = (wm[key] !== false && wm[key] !== 0);
+      sw.checked = isEnabled;
+      if (badge) {
+        badge.classList.toggle('is-disabled', !isEnabled);
+      }
+
+      if (!sw.dataset.bound) {
+        sw.dataset.bound = 'true';
+        sw.addEventListener('change', () => {
+          wm[key] = sw.checked;
+          if (badge) {
+            badge.classList.toggle('is-disabled', !sw.checked);
+          }
+          syncConfig();
+        });
+      }
     });
 
     if (wmAppVolumeSlider) {
       updateSliderProgress(wmAppVolumeSlider);
 
-      wmAppVolumeSlider.addEventListener('input', () => {
-        const val = parseInt(wmAppVolumeSlider.value, 10);
-        if (wmAppVolumeValue) wmAppVolumeValue.textContent = `${val}%`;
-        updateSliderProgress(wmAppVolumeSlider);
-        sendToAhk('setActiveAppVolume', { volume: val, pid: activeAppState.pid });
-      });
+      if (!wmAppVolumeSlider.dataset.bound) {
+        wmAppVolumeSlider.dataset.bound = 'true';
+        wmAppVolumeSlider.addEventListener('input', () => {
+          const val = parseInt(wmAppVolumeSlider.value, 10);
+          if (wmAppVolumeValue) wmAppVolumeValue.textContent = `${val}%`;
+          updateSliderProgress(wmAppVolumeSlider);
+          sendToAhk('setActiveAppVolume', { volume: val, pid: activeAppState.pid });
+        });
 
-      wmAppVolumeSlider.addEventListener('change', () => {
-        const val = parseInt(wmAppVolumeSlider.value, 10);
-        updateSliderProgress(wmAppVolumeSlider);
-        sendToAhk('setActiveAppVolume', { volume: val, pid: activeAppState.pid });
-      });
+        wmAppVolumeSlider.addEventListener('change', () => {
+          const val = parseInt(wmAppVolumeSlider.value, 10);
+          updateSliderProgress(wmAppVolumeSlider);
+          sendToAhk('setActiveAppVolume', { volume: val, pid: activeAppState.pid });
+        });
+      }
     }
 
-    if (wmBtnMuteActiveApp) {
+    if (wmBtnMuteActiveApp && !wmBtnMuteActiveApp.dataset.bound) {
+      wmBtnMuteActiveApp.dataset.bound = 'true';
       wmBtnMuteActiveApp.addEventListener('click', () => {
         sendToAhk('toggleMuteActiveApp', { pid: activeAppState.pid });
       });

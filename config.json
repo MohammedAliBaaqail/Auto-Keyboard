@@ -1,5 +1,5 @@
 ﻿{
-  "activeTab":"windowManager",
+  "activeTab":"appLauncher",
   "appLauncher":{
     "enabled":1,
     "items":[{"id":"al-1794403819689","name":"Everything","target":"C:\\Program Files (x86)\\Everything\\Everything.exe","trigger":"Ctrl+Alt+Shift+E","triggerType":"hotkey"},{"id":"al-1","name":"Calculator","target":"calc.exe","trigger":"@calc","triggerType":"string"},{"id":"al-2","name":"YouTube","target":"https://www.youtube.com","trigger":"@yt","triggerType":"string"},{"id":"al-3","name":"GitHub","target":"https://github.com","trigger":"@gh","triggerType":"string"}]
@@ -32,11 +32,15 @@
     "radius":9
   },
   "windowManager":{
+    "alwaysOnTopEnabled":1,
     "alwaysOnTopHotkey":"^SPACE",
+    "appVolumeMuteEnabled":1,
     "appVolumeMuteHotkey":"!m",
     "appVolumeWheel":1,
+    "centerWindowEnabled":1,
     "centerWindowHotkey":"^!c",
     "enabled":1,
+    "hideWindowEnabled":1,
     "hideWindowHotkey":"^!h",
     "opacity":255,
     "transparencyWheel":1
