@@ -2347,8 +2347,18 @@ html, body {
   color: var(--text-secondary);
   font-size: 11px;
   font-weight: 600;
-  cursor: pointer;
+  cursor: grab;
+  user-select: none;
   transition: var(--transition-smooth);
+}
+
+.macro-inject-btn:active {
+  cursor: grabbing;
+}
+
+.macro-inject-btn.is-dragging {
+  opacity: 0.4;
+  transform: scale(0.95);
 }
 
 .macro-inject-btn:hover {
@@ -2417,6 +2427,11 @@ html, body {
   gap: 8px;
   flex-wrap: wrap;
   box-sizing: border-box;
+  transition: box-shadow 0.2s ease;
+}
+
+.macro-timeline-track.track-drag-over {
+  box-shadow: var(--inset-deep), inset 0 0 0 1.5px var(--accent-primary);
 }
 
 .macro-timeline-empty {
@@ -2430,18 +2445,71 @@ html, body {
 .macro-step-chip {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   padding: 4px 8px;
   background: var(--surface-color);
   box-shadow: var(--raised-sm);
   border-radius: var(--radius-badge);
   user-select: none;
-  transition: all 0.15s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
   font-size: 11px;
+  cursor: grab;
+  position: relative;
+}
+
+.macro-step-chip:active {
+  cursor: grabbing;
 }
 
 .macro-step-chip:hover {
   transform: translateY(-1px);
+  box-shadow: var(--raised-md);
+}
+
+.macro-step-chip.is-dragging {
+  opacity: 0.35;
+  transform: scale(0.92);
+  box-shadow: var(--inset-sm);
+}
+
+.macro-step-chip.drag-over-left::before {
+  content: "";
+  position: absolute;
+  left: -4px;
+  top: -2px;
+  bottom: -2px;
+  width: 3px;
+  background: var(--accent-primary);
+  border-radius: 3px;
+  box-shadow: 0 0 6px var(--accent-primary);
+}
+
+.macro-step-chip.drag-over-right::after {
+  content: "";
+  position: absolute;
+  right: -4px;
+  top: -2px;
+  bottom: -2px;
+  width: 3px;
+  background: var(--accent-primary);
+  border-radius: 3px;
+  box-shadow: 0 0 6px var(--accent-primary);
+}
+
+.macro-step-drag-grip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  cursor: grab;
+  opacity: 0.65;
+  margin-right: 1px;
+  transition: opacity 0.15s ease, color 0.15s ease;
+}
+
+.macro-step-chip:hover .macro-step-drag-grip {
+  opacity: 1;
+  color: var(--accent-primary);
 }
 
 .macro-step-dir {
@@ -2583,3 +2651,96 @@ html, body {
 .btn-test-run svg {
   color: var(--accent-primary);
 }
+
+/* Macro Card Drag Reordering */
+.macro-card[draggable="true"] {
+  cursor: grab;
+  position: relative;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.macro-card.is-dragging {
+  opacity: 0.35;
+  transform: scale(0.98);
+}
+
+.macro-card.drag-over-top::before {
+  content: "";
+  position: absolute;
+  top: -4px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--accent-primary);
+  border-radius: 2px;
+  box-shadow: 0 0 6px var(--accent-primary);
+}
+
+.macro-card.drag-over-bottom::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--accent-primary);
+  border-radius: 2px;
+  box-shadow: 0 0 6px var(--accent-primary);
+}
+
+/* ==========================================================================
+   Global Toast Notification System
+   ========================================================================== */
+
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.toast-item {
+  pointer-events: auto;
+  background: var(--surface-color);
+  color: var(--text-primary);
+  box-shadow: var(--raised-md);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-pill);
+  padding: 8px 18px;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  transform: translateY(12px) scale(0.95);
+  transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  cursor: pointer;
+}
+
+.toast-item.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.toast-icon-svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.toast-warning {
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.toast-success {
+  border-color: rgba(34, 197, 94, 0.3);
+}
+

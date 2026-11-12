@@ -251,7 +251,7 @@ SaveConfigToFile() {
     global g_Config, CONFIG_FILE
     try {
         jsonStr := JSON.stringify(g_Config, 2)
-        f := FileOpen(CONFIG_FILE, "w", "UTF-8")
+        f := FileOpen(CONFIG_FILE, "w", "UTF-8-RAW")
         if (f) {
             f.Write(jsonStr)
             f.Close()

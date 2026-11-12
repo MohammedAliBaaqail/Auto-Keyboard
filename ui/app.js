@@ -275,6 +275,59 @@
       .replace(/'/g, '&#039;');
   }
 
+  // Global Toast Notification System
+  function showToast(message, type = 'info', duration = 2500) {
+    if (!message) return;
+    try {
+      let container = document.getElementById('toastContainer');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+      }
+
+      const toast = document.createElement('div');
+      toast.className = `toast-item toast-${type}`;
+
+      let iconSvg = '';
+      const lower = String(message).toLowerCase();
+      if (type === 'error' || lower.includes('please') || lower.includes('error')) {
+        toast.classList.add('toast-warning');
+        iconSvg = `<svg viewBox="0 0 24 24" class="toast-icon-svg" fill="none" stroke="#f59e0b" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
+      } else if (lower.includes('created') || lower.includes('updated') || lower.includes('saved')) {
+        toast.classList.add('toast-success');
+        iconSvg = `<svg viewBox="0 0 24 24" class="toast-icon-svg" fill="none" stroke="var(--accent-primary)" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="9 12 11 14 15 10"></polyline></svg>`;
+      } else {
+        iconSvg = `<svg viewBox="0 0 24 24" class="toast-icon-svg" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`;
+      }
+
+      toast.innerHTML = `${iconSvg}<span>${escapeHtml(message)}</span>`;
+      container.appendChild(toast);
+
+      requestAnimationFrame(() => {
+        toast.classList.add('show');
+      });
+
+      const removeTimer = setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+          if (toast.parentElement) toast.parentElement.removeChild(toast);
+        }, 300);
+      }, duration);
+
+      toast.addEventListener('click', () => {
+        clearTimeout(removeTimer);
+        toast.classList.remove('show');
+        setTimeout(() => {
+          if (toast.parentElement) toast.parentElement.removeChild(toast);
+        }, 200);
+      });
+    } catch (err) {
+      console.warn('Toast display failed:', err);
+    }
+  }
+
   // ============================================================================
   // Tab Management
   // ============================================================================
@@ -1226,22 +1279,27 @@
   const macroCountBadge = document.getElementById('macroCountBadge');
   const macroListContainer = document.getElementById('macroListContainer');
 
+  // Drag & drop state for macro sequencer
+  let macroDragSourceIndex = null;
+  let macroDragInjectItem = null;
+
   function renderMacroTimeline() {
     if (!macroTimelineTrack) return;
     macroTimelineTrack.innerHTML = '';
 
     if (!macroState.steps || macroState.steps.length === 0) {
-      if (macroTimelineEmpty) {
-        macroTimelineTrack.appendChild(macroTimelineEmpty);
-      } else {
-        macroTimelineTrack.innerHTML = '<div class="macro-timeline-empty">No sequence steps recorded yet. Click <strong>RECORD</strong> and press any keys, or click the <strong>+ Mouse / Delay</strong> buttons above.</div>';
-      }
+      const emptyDiv = document.createElement('div');
+      emptyDiv.className = 'macro-timeline-empty';
+      emptyDiv.innerHTML = 'No sequence steps recorded yet. Click <strong>RECORD</strong> or <strong>drag &amp; drop buttons</strong> here.';
+      macroTimelineTrack.appendChild(emptyDiv);
       return;
     }
 
     macroState.steps.forEach((step, idx) => {
       const chip = document.createElement('div');
       chip.className = 'macro-step-chip';
+      chip.setAttribute('draggable', 'true');
+      chip.dataset.index = idx;
 
       let dirClass = 'down';
       let dirSymbol = '↓';
@@ -1257,11 +1315,110 @@
       }
 
       chip.innerHTML = `
+        <span class="macro-step-drag-grip" title="Drag to reorder">
+          <svg viewBox="0 0 24 24" width="10" height="10" fill="currentColor">
+            <circle cx="8" cy="6" r="1.5"/><circle cx="16" cy="6" r="1.5"/>
+            <circle cx="8" cy="12" r="1.5"/><circle cx="16" cy="12" r="1.5"/>
+            <circle cx="8" cy="18" r="1.5"/><circle cx="16" cy="18" r="1.5"/>
+          </svg>
+        </span>
         <span class="macro-step-dir ${dirClass}">${dirSymbol}</span>
         <span class="macro-step-key">${escapeHtml(step.key || 'Delay')}</span>
         <span class="macro-step-delay" title="Click to edit delay">${step.delay || 50}ms</span>
         <button type="button" class="btn-remove-step" title="Remove step">&times;</button>
       `;
+
+      // Drag Start
+      chip.addEventListener('dragstart', (e) => {
+        macroDragSourceIndex = idx;
+        macroDragInjectItem = null;
+        chip.classList.add('is-dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        try {
+          e.dataTransfer.setData('text/plain', JSON.stringify({ type: 'reorder', fromIndex: idx }));
+        } catch (err) {}
+        e.stopPropagation();
+      });
+
+      // Drag End
+      chip.addEventListener('dragend', () => {
+        chip.classList.remove('is-dragging');
+        macroDragSourceIndex = null;
+        macroDragInjectItem = null;
+        if (macroTimelineTrack) {
+          macroTimelineTrack.querySelectorAll('.macro-step-chip').forEach(c => {
+            c.classList.remove('drag-over-left', 'drag-over-right');
+          });
+        }
+      });
+
+      // Drag Over Chip
+      chip.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        e.dataTransfer.dropEffect = 'move';
+
+        const rect = chip.getBoundingClientRect();
+        const midX = rect.left + rect.width / 2;
+        const isAfter = e.clientX > midX;
+
+        chip.classList.toggle('drag-over-left', !isAfter);
+        chip.classList.toggle('drag-over-right', isAfter);
+      });
+
+      // Drag Leave Chip
+      chip.addEventListener('dragleave', (e) => {
+        if (!chip.contains(e.relatedTarget)) {
+          chip.classList.remove('drag-over-left', 'drag-over-right');
+        }
+      });
+
+      // Drop on Chip
+      chip.addEventListener('drop', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        chip.classList.remove('drag-over-left', 'drag-over-right');
+
+        const rect = chip.getBoundingClientRect();
+        const midX = rect.left + rect.width / 2;
+        const isAfter = e.clientX > midX;
+        let targetIndex = isAfter ? idx + 1 : idx;
+
+        let data = null;
+        try {
+          const raw = e.dataTransfer.getData('text/plain');
+          if (raw) data = JSON.parse(raw);
+        } catch (err) {}
+
+        if (!data) {
+          if (macroDragSourceIndex !== null) {
+            data = { type: 'reorder', fromIndex: macroDragSourceIndex };
+          } else if (macroDragInjectItem) {
+            data = macroDragInjectItem;
+          }
+        }
+
+        if (data && data.type === 'reorder') {
+          const fromIdx = data.fromIndex;
+          if (fromIdx === undefined || fromIdx === null) return;
+          if (fromIdx === targetIndex || (fromIdx === targetIndex - 1 && isAfter)) {
+            return;
+          }
+          const [movedStep] = macroState.steps.splice(fromIdx, 1);
+          if (fromIdx < targetIndex) {
+            targetIndex--;
+          }
+          macroState.steps.splice(targetIndex, 0, movedStep);
+          renderMacroTimeline();
+        } else if (data && data.type === 'inject') {
+          macroState.steps.splice(targetIndex, 0, {
+            action: data.action,
+            key: data.key,
+            delay: data.delay || 50
+          });
+          renderMacroTimeline();
+        }
+      });
 
       // Click to edit delay
       const delayEl = chip.querySelector('.macro-step-delay');
@@ -1386,10 +1543,11 @@
       return;
     }
 
-    items.forEach(item => {
+    items.forEach((item, itemIdx) => {
       const card = document.createElement('div');
       card.className = 'shortcut-card macro-card';
       card.dataset.id = item.id;
+      card.setAttribute('draggable', 'true');
 
       const isEnabled = (item.enabled !== false && item.enabled !== 0);
       const stepsCount = (item.steps && Array.isArray(item.steps)) ? item.steps.length : 0;
@@ -1453,6 +1611,65 @@
         </div>
       `;
 
+      // Drag reordering for macro cards in list
+      card.addEventListener('dragstart', (e) => {
+        card.classList.add('is-dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        try {
+          e.dataTransfer.setData('text/plain', JSON.stringify({ type: 'macroCard', id: item.id }));
+        } catch (err) {}
+        e.stopPropagation();
+      });
+
+      card.addEventListener('dragend', () => {
+        card.classList.remove('is-dragging');
+        if (macroListContainer) {
+          macroListContainer.querySelectorAll('.macro-card').forEach(c => {
+            c.classList.remove('drag-over-top', 'drag-over-bottom');
+          });
+        }
+      });
+
+      card.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        const rect = card.getBoundingClientRect();
+        const isBottom = e.clientY > (rect.top + rect.height / 2);
+        card.classList.toggle('drag-over-top', !isBottom);
+        card.classList.toggle('drag-over-bottom', isBottom);
+      });
+
+      card.addEventListener('dragleave', (e) => {
+        if (!card.contains(e.relatedTarget)) {
+          card.classList.remove('drag-over-top', 'drag-over-bottom');
+        }
+      });
+
+      card.addEventListener('drop', (e) => {
+        e.preventDefault();
+        card.classList.remove('drag-over-top', 'drag-over-bottom');
+        let data = null;
+        try {
+          const raw = e.dataTransfer.getData('text/plain');
+          if (raw) data = JSON.parse(raw);
+        } catch (err) {}
+
+        if (data && data.type === 'macroCard' && data.id !== item.id) {
+          const items = state.config.macroRecorder.items;
+          const fromIdx = items.findIndex(m => m.id === data.id);
+          let toIdx = items.findIndex(m => m.id === item.id);
+          if (fromIdx !== -1 && toIdx !== -1) {
+            const rect = card.getBoundingClientRect();
+            if (e.clientY > (rect.top + rect.height / 2)) toIdx++;
+            const [moved] = items.splice(fromIdx, 1);
+            if (fromIdx < toIdx) toIdx--;
+            items.splice(toIdx, 0, moved);
+            renderMacroRecorder();
+            syncConfig();
+          }
+        }
+      });
+
       // Test Run
       card.querySelector('.btn-test-run').addEventListener('click', (e) => {
         e.stopPropagation();
@@ -1486,67 +1703,75 @@
   }
 
   function submitMacro() {
-    const name = macroInputName ? macroInputName.value.trim() : '';
-    const trig = macroInputTrigger ? macroInputTrigger.value.trim() : '';
-    const interval = macroInputInterval ? parseInt(macroInputInterval.value, 10) || 50 : 50;
+    try {
+      const name = macroInputName ? macroInputName.value.trim() : '';
+      const trig = macroInputTrigger ? macroInputTrigger.value.trim() : '';
+      const interval = macroInputInterval ? parseInt(macroInputInterval.value, 10) || 50 : 50;
 
-    if (!name) {
-      if (macroInputName) macroInputName.focus();
-      showToast('Please enter a name for the macro');
-      return;
-    }
-    if (!trig) {
-      if (macroInputTrigger) macroInputTrigger.focus();
-      showToast('Please record a trigger hotkey');
-      return;
-    }
-    if (!macroState.steps || macroState.steps.length === 0) {
-      showToast('Please record or add at least one step in the sequence');
-      return;
-    }
+      if (!name) {
+        if (macroInputName) macroInputName.focus();
+        showToast('Please enter a name for the macro');
+        return;
+      }
+      if (!trig) {
+        if (macroInputTrigger) macroInputTrigger.focus();
+        showToast('Please record a trigger hotkey');
+        return;
+      }
+      if (!macroState.steps || macroState.steps.length === 0) {
+        showToast('Please record or add at least one step in the sequence');
+        return;
+      }
 
-    if (!state.config.macroRecorder) {
-      state.config.macroRecorder = { enabled: true, items: [] };
-    }
+      if (!state.config.macroRecorder) {
+        state.config.macroRecorder = { enabled: 1, items: [] };
+      }
+      if (!Array.isArray(state.config.macroRecorder.items)) {
+        state.config.macroRecorder.items = [];
+      }
 
-    if (macroState.editingId) {
-      const idx = state.config.macroRecorder.items.findIndex(m => m.id === macroState.editingId);
-      if (idx !== -1) {
-        state.config.macroRecorder.items[idx] = {
-          ...state.config.macroRecorder.items[idx],
+      if (macroState.editingId) {
+        const idx = state.config.macroRecorder.items.findIndex(m => m.id === macroState.editingId);
+        if (idx !== -1) {
+          state.config.macroRecorder.items[idx] = {
+            ...state.config.macroRecorder.items[idx],
+            name: name,
+            trigger: trig,
+            playbackMode: macroState.playbackMode,
+            repeatInterval: interval,
+            steps: JSON.parse(JSON.stringify(macroState.steps))
+          };
+        }
+        macroState.editingId = null;
+        if (macroBtnSubmitText) macroBtnSubmitText.textContent = 'ADD';
+        showToast(`Updated macro "${name}"`);
+      } else {
+        state.config.macroRecorder.items.unshift({
+          id: 'macro-' + Date.now(),
           name: name,
           trigger: trig,
           playbackMode: macroState.playbackMode,
           repeatInterval: interval,
-          steps: [...macroState.steps]
-        };
+          enabled: 1,
+          steps: JSON.parse(JSON.stringify(macroState.steps))
+        });
+        showToast(`Created macro "${name}"`);
       }
-      macroState.editingId = null;
-      if (macroBtnSubmitText) macroBtnSubmitText.textContent = 'ADD';
-      showToast(`Updated macro "${name}"`);
-    } else {
-      state.config.macroRecorder.items.unshift({
-        id: 'macro-' + Date.now(),
-        name: name,
-        trigger: trig,
-        playbackMode: macroState.playbackMode,
-        repeatInterval: interval,
-        enabled: 1,
-        steps: [...macroState.steps]
-      });
-      showToast(`Created macro "${name}"`);
-    }
 
-    if (macroInputName) macroInputName.value = '';
-    if (macroInputTrigger) {
-      macroInputTrigger.value = '';
-      macroInputTrigger.placeholder = 'Trigger (e.g. F9)...';
+      if (macroInputName) macroInputName.value = '';
+      if (macroInputTrigger) {
+        macroInputTrigger.value = '';
+        macroInputTrigger.placeholder = 'Click to record...';
+      }
+      if (macroBtnClearTrigger) macroBtnClearTrigger.classList.add('hidden-field');
+      macroState.steps = [];
+      renderMacroTimeline();
+      renderMacroRecorder();
+      syncConfig();
+    } catch (err) {
+      console.error('Error submitting macro:', err);
+      showToast('Error saving macro: ' + err.message, 'error');
     }
-    if (macroBtnClearTrigger) macroBtnClearTrigger.classList.add('hidden-field');
-    macroState.steps = [];
-    renderMacroTimeline();
-    renderMacroRecorder();
-    syncConfig();
   }
 
   function editMacro(item) {
@@ -1597,6 +1822,19 @@
   function initMacroRecorder() {
     setupKeyCombinationBox(macroTriggerBox, macroInputTrigger, macroBtnClearTrigger, null, submitMacro);
 
+    if (macroInputName) {
+      macroInputName.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          if (macroInputTrigger && !macroInputTrigger.value.trim()) {
+            if (macroTriggerBox) macroTriggerBox.click();
+          } else {
+            submitMacro();
+          }
+        }
+      });
+    }
+
     if (macroModeSelector) {
       macroModeSelector.querySelectorAll('.macro-mode-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1626,17 +1864,75 @@
       macroBtnRecordToggle.addEventListener('click', toggleMacroRecording);
     }
 
-    if (macroBtnAddLClick) {
-      macroBtnAddLClick.addEventListener('click', () => addMacroStep('Click', 'LButton', 50));
+    // Quick Action Injectors with Click & Drag-and-Drop
+    function wireInjectButton(btn, action, key, delay = 50) {
+      if (!btn) return;
+      btn.setAttribute('draggable', 'true');
+      btn.addEventListener('click', () => {
+        addMacroStep(action, key, delay);
+      });
+      btn.addEventListener('dragstart', (e) => {
+        macroDragSourceIndex = null;
+        macroDragInjectItem = { type: 'inject', action, key, delay };
+        btn.classList.add('is-dragging');
+        e.dataTransfer.effectAllowed = 'copyMove';
+        try {
+          e.dataTransfer.setData('text/plain', JSON.stringify(macroDragInjectItem));
+        } catch (err) {}
+        e.stopPropagation();
+      });
+      btn.addEventListener('dragend', () => {
+        btn.classList.remove('is-dragging');
+        macroDragInjectItem = null;
+      });
     }
-    if (macroBtnAddRClick) {
-      macroBtnAddRClick.addEventListener('click', () => addMacroStep('Click', 'RButton', 50));
-    }
-    if (macroBtnAddMClick) {
-      macroBtnAddMClick.addEventListener('click', () => addMacroStep('Click', 'MButton', 50));
-    }
-    if (macroBtnAddDelay) {
-      macroBtnAddDelay.addEventListener('click', () => addMacroStep('Delay', 'Sleep', 50));
+
+    wireInjectButton(macroBtnAddLClick, 'Click', 'LButton', 50);
+    wireInjectButton(macroBtnAddRClick, 'Click', 'RButton', 50);
+    wireInjectButton(macroBtnAddMClick, 'Click', 'MButton', 50);
+    wireInjectButton(macroBtnAddDelay, 'Delay', 'Sleep', 50);
+
+    // Timeline track drop zone for empty background drops
+    if (macroTimelineTrack) {
+      macroTimelineTrack.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        macroTimelineTrack.classList.add('track-drag-over');
+      });
+
+      macroTimelineTrack.addEventListener('dragleave', (e) => {
+        if (!macroTimelineTrack.contains(e.relatedTarget)) {
+          macroTimelineTrack.classList.remove('track-drag-over');
+        }
+      });
+
+      macroTimelineTrack.addEventListener('drop', (e) => {
+        macroTimelineTrack.classList.remove('track-drag-over');
+        if (e.target === macroTimelineTrack || e.target.classList.contains('macro-timeline-empty')) {
+          e.preventDefault();
+          let data = null;
+          try {
+            const raw = e.dataTransfer.getData('text/plain');
+            if (raw) data = JSON.parse(raw);
+          } catch (err) {}
+
+          if (!data) {
+            if (macroDragSourceIndex !== null) data = { type: 'reorder', fromIndex: macroDragSourceIndex };
+            else if (macroDragInjectItem) data = macroDragInjectItem;
+          }
+
+          if (data && data.type === 'reorder') {
+            const fromIdx = data.fromIndex;
+            if (fromIdx !== undefined && fromIdx !== null && fromIdx < macroState.steps.length) {
+              const [movedStep] = macroState.steps.splice(fromIdx, 1);
+              macroState.steps.push(movedStep);
+              renderMacroTimeline();
+            }
+          } else if (data && data.type === 'inject') {
+            addMacroStep(data.action, data.key, data.delay || 50);
+          }
+        }
+      });
     }
 
     if (macroBtnTestPlay) {
@@ -2400,7 +2696,18 @@
 
     // Window Dragging
     function handleDragStart(e) {
-      if (e.target.closest('button') || e.target.closest('input') || e.target.closest('textarea') || e.target.closest('select') || e.target.closest('.resize-handle') || e.target.closest('.shortcut-card')) return;
+      if (
+        e.target.closest('button') ||
+        e.target.closest('input') ||
+        e.target.closest('textarea') ||
+        e.target.closest('select') ||
+        e.target.closest('.resize-handle') ||
+        e.target.closest('.shortcut-card') ||
+        e.target.closest('.macro-step-chip') ||
+        e.target.closest('.macro-timeline-track') ||
+        e.target.closest('.macro-inject-btn') ||
+        e.target.closest('[draggable="true"]')
+      ) return;
       sendToAhk('startDrag');
     }
 
