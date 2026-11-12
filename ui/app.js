@@ -2286,8 +2286,8 @@
     
     const accGlow = `0 4px 16px rgba(${accRgb.r}, ${accRgb.g}, ${accRgb.b}, 0.45)`;
     const accGradient = `linear-gradient(135deg, ${accLight} 0%, ${accentColor} 100%)`;
-    const accTroughGrad = `linear-gradient(180deg, ${accSuperPastel} 0%, ${accPastel} 50%, ${accLight} 100%)`;
-    const accTroughShadow = `inset 2.5px 2.5px 5px rgba(${deepRgb.r}, ${deepRgb.g}, ${deepRgb.b}, 0.35), inset -2.5px -2.5px 5px rgba(255, 255, 255, 0.85)`;
+    const accTroughGrad = accentColor;
+    const accTroughShadow = `inset 0 2px 4px rgba(0, 0, 0, 0.35), 0 0 10px ${accentColor}`;
 
     const root = document.documentElement;
     root.style.setProperty('--bg-color', bgColor);

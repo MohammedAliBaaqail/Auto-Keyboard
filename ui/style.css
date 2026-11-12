@@ -48,8 +48,8 @@
   --accent-deep: #166534;
   --accent-glow: 0 4px 16px rgba(34, 197, 94, 0.45);
   --accent-gradient: linear-gradient(135deg, var(--accent-light) 0%, var(--accent-primary) 100%);
-  --accent-trough-gradient: linear-gradient(180deg, #bbf7d0 0%, #86efac 50%, #4ade80 100%);
-  --accent-trough-shadow: inset 2.5px 2.5px 5px rgba(22, 101, 52, 0.35), inset -2.5px -2.5px 5px rgba(255, 255, 255, 0.85);
+  --accent-trough-gradient: var(--accent-primary);
+  --accent-trough-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3), 0 0 10px var(--accent-primary);
 
   /* Aliases for backwards compatibility */
   --green-primary: var(--accent-primary);
@@ -1608,13 +1608,15 @@ html, body {
 
 /* STATE: ON - Entire switch cavity is secondary accent ALL THE WAY UP, wrapping behind and around the thumb */
 .vertical-rocker.is-on {
-  background: var(--accent-trough-gradient);
-  box-shadow: var(--accent-trough-shadow);
+  background: var(--accent-primary);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.35), 0 0 10px var(--accent-primary);
 }
 
 .vertical-rocker.is-on .rocker-label-on {
-  color: var(--accent-deep);
-  opacity: 0.85;
+  color: #ffffff;
+  opacity: 0.95;
+  font-weight: 800;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
 .vertical-rocker.is-on .rocker-label-off {
