@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
+
 /* ==========================================================================
    AutoHotKeyboard - 100% Faithful Neumorphic (Soft UI) Styling
    Based strictly on user design reference with Light Green Accent
@@ -7,6 +9,9 @@
 :root {
   --bg-color: #e0e0e0;
   --surface-color: #e0e0e0;
+
+  /* Typography - JetBrains Mono Global Font Family */
+  --font-main: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   
   /* Neumorphism Core Parameters (dynamically controlled by user sliders) */
   --neo-radius: 22px;
@@ -77,6 +82,8 @@
   user-select: none;
   -webkit-user-select: none;
   outline: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 button:focus,
@@ -87,9 +94,13 @@ select:focus {
   outline: none;
 }
 
+button, input, select, textarea {
+  font-family: inherit;
+}
+
 html, body {
   background-color: var(--surface-color);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--font-main);
   color: var(--text-primary);
   width: 100vw;
   height: 100vh;
@@ -523,7 +534,7 @@ html, body {
   background: transparent;
   border: none;
   resize: none;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-main);
   font-size: 13px;
   color: var(--text-primary);
   line-height: 1.4;
@@ -1561,7 +1572,7 @@ html, body {
 }
 
 .rocker-label-off {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-main);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.5px;
@@ -1571,7 +1582,7 @@ html, body {
 }
 
 .rocker-label-on {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-main);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.5px;

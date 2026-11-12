@@ -27,15 +27,15 @@
     "items":[{"id":"te-1","input":"@@1","multiline":0,"output":"myemail@gmail.com"},{"id":"te-2","input":"@@sig","multiline":1,"output":"Best regards,\nYour Name\nSenior Engineer"}]
   },
   "theme":{
-    "accentColor":"#04ff00",
-    "bgColor":"#1e222b",
-    "blur":6,
+    "accentColor":"#d97706",
+    "bgColor":"#e8dfd5",
+    "blur":12,
     "customPresets":[{"accentColor":"#22c55e","bgColor":"#e0e5ec","blur":11,"darkIntensity":3,"distance":4,"id":"custom_1794484507311","lightIntensity":12,"name":"1","radius":9},{"accentColor":"#c084fc","bgColor":"#2b2640","blur":10,"darkIntensity":42,"distance":5,"id":"custom_1794484519358","lightIntensity":22,"name":"3","radius":18}],
-    "darkIntensity":12,
-    "distance":4,
-    "intensity":9,
-    "lightIntensity":5,
-    "radius":14
+    "darkIntensity":18,
+    "distance":5,
+    "intensity":32,
+    "lightIntensity":46,
+    "radius":30
   },
   "windowManager":{
     "alwaysOnTopEnabled":1,
