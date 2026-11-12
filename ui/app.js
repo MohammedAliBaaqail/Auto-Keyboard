@@ -17,12 +17,21 @@
             accentColor: t.accentColor,
             radius: typeof t.radius !== 'undefined' ? parseInt(t.radius, 10) : 22,
             distance: typeof t.distance !== 'undefined' ? parseInt(t.distance, 10) : 3,
+            lightIntensity: typeof t.lightIntensity !== 'undefined' ? parseInt(t.lightIntensity, 10) : (typeof t.intensity !== 'undefined' ? parseInt(t.intensity, 10) : 18),
+            darkIntensity: typeof t.darkIntensity !== 'undefined' ? parseInt(t.darkIntensity, 10) : (typeof t.intensity !== 'undefined' ? parseInt(t.intensity, 10) : 18),
             intensity: typeof t.intensity !== 'undefined' ? parseInt(t.intensity, 10) : 15,
-            blur: typeof t.blur !== 'undefined' ? parseInt(t.blur, 10) : 8
+            blur: typeof t.blur !== 'undefined' ? parseInt(t.blur, 10) : 8,
+            customPresets: Array.isArray(t.customPresets) ? t.customPresets : []
           };
         }
       }
       const cached = localStorage.getItem('ahk_theme');
+      let cachedCustom = [];
+      try {
+        const cPresets = localStorage.getItem('ahk_custom_theme_presets');
+        if (cPresets) cachedCustom = JSON.parse(cPresets) || [];
+      } catch (e) {}
+
       if (cached) {
         const parsed = JSON.parse(cached);
         if (parsed && parsed.bgColor && parsed.accentColor) {
@@ -31,13 +40,16 @@
             accentColor: parsed.accentColor,
             radius: typeof parsed.radius !== 'undefined' ? parseInt(parsed.radius, 10) : 22,
             distance: typeof parsed.distance !== 'undefined' ? parseInt(parsed.distance, 10) : 3,
+            lightIntensity: typeof parsed.lightIntensity !== 'undefined' ? parseInt(parsed.lightIntensity, 10) : 18,
+            darkIntensity: typeof parsed.darkIntensity !== 'undefined' ? parseInt(parsed.darkIntensity, 10) : 18,
             intensity: typeof parsed.intensity !== 'undefined' ? parseInt(parsed.intensity, 10) : 15,
-            blur: typeof parsed.blur !== 'undefined' ? parseInt(parsed.blur, 10) : 8
+            blur: typeof parsed.blur !== 'undefined' ? parseInt(parsed.blur, 10) : 8,
+            customPresets: Array.isArray(parsed.customPresets) ? parsed.customPresets : cachedCustom
           };
         }
       }
     } catch (e) {}
-    return { bgColor: '#e0e0e0', accentColor: '#22c55e', radius: 22, distance: 3, intensity: 15, blur: 8 };
+    return { bgColor: '#e0e0e0', accentColor: '#22c55e', radius: 22, distance: 3, lightIntensity: 18, darkIntensity: 18, intensity: 15, blur: 8, customPresets: [] };
   })();
 
   let isInitialized = false;
@@ -127,6 +139,9 @@
   const badgeDarkIntensity = document.getElementById('badgeDarkIntensity');
   const themeSliderBlur = document.getElementById('themeSliderBlur');
   const badgeBlur = document.getElementById('badgeBlur');
+  const customPresetsGrid = document.getElementById('customPresetsGrid');
+  const inputCustomPresetName = document.getElementById('inputCustomPresetName');
+  const btnSaveCustomPreset = document.getElementById('btnSaveCustomPreset');
   const segmentedBar = document.getElementById('segmentedBar');
   const mainEngineSwitch = document.getElementById('mainEngineSwitch');
   const switchCaptionText = document.getElementById('switchCaptionText');
@@ -1548,17 +1563,258 @@
       if (badgeBlur) badgeBlur.textContent = `${blur}px`;
     }
 
-    // Update active swatch chip indicators
-    document.querySelectorAll('#bgSwatchesGrid .theme-swatch-chip').forEach(chip => {
-      chip.classList.toggle('active', chip.dataset.color.toLowerCase() === bgColor.toLowerCase());
-    });
-    document.querySelectorAll('#accentSwatchesGrid .theme-swatch-chip').forEach(chip => {
-      chip.classList.toggle('active', chip.dataset.color.toLowerCase() === accentColor.toLowerCase());
-    });
+    updateActivePresetChips();
 
     if (save) {
       syncConfig();
     }
+  }
+
+  function getCurrentThemeColors() {
+    const bg = (state.config && state.config.theme && state.config.theme.bgColor)
+      || document.documentElement.style.getPropertyValue('--bg-color')
+      || '#e0e0e0';
+    const acc = (state.config && state.config.theme && state.config.theme.accentColor)
+      || document.documentElement.style.getPropertyValue('--accent-primary')
+      || '#22c55e';
+    const radius = (state.config && state.config.theme && typeof state.config.theme.radius !== 'undefined')
+      ? parseInt(state.config.theme.radius, 10) : 22;
+    const distance = (state.config && state.config.theme && typeof state.config.theme.distance !== 'undefined')
+      ? parseInt(state.config.theme.distance, 10) : 3;
+    const lightIntensity = (state.config && state.config.theme && typeof state.config.theme.lightIntensity !== 'undefined')
+      ? parseInt(state.config.theme.lightIntensity, 10)
+      : ((state.config && state.config.theme && typeof state.config.theme.intensity !== 'undefined') ? parseInt(state.config.theme.intensity, 10) : 18);
+    const darkIntensity = (state.config && state.config.theme && typeof state.config.theme.darkIntensity !== 'undefined')
+      ? parseInt(state.config.theme.darkIntensity, 10)
+      : ((state.config && state.config.theme && typeof state.config.theme.intensity !== 'undefined') ? parseInt(state.config.theme.intensity, 10) : 18);
+    const blur = (state.config && state.config.theme && typeof state.config.theme.blur !== 'undefined')
+      ? parseInt(state.config.theme.blur, 10) : 8;
+    return { 
+      bg: bg.trim(), 
+      acc: acc.trim(),
+      radius,
+      distance,
+      lightIntensity,
+      darkIntensity,
+      intensity: Math.round((lightIntensity + darkIntensity) / 2),
+      blur
+    };
+  }
+
+  function getNeoSliderValues() {
+    return {
+      radius: themeSliderRadius ? parseInt(themeSliderRadius.value, 10) : 22,
+      distance: themeSliderDistance ? parseInt(themeSliderDistance.value, 10) : 3,
+      lightIntensity: themeSliderLightIntensity ? parseInt(themeSliderLightIntensity.value, 10) : 18,
+      darkIntensity: themeSliderDarkIntensity ? parseInt(themeSliderDarkIntensity.value, 10) : 18,
+      blur: themeSliderBlur ? parseInt(themeSliderBlur.value, 10) : 8
+    };
+  }
+
+  function getCustomThemePresets() {
+    if (state.config && state.config.theme && Array.isArray(state.config.theme.customPresets)) {
+      return state.config.theme.customPresets;
+    }
+    try {
+      const cached = localStorage.getItem('ahk_custom_theme_presets');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed)) {
+          if (!state.config.theme) state.config.theme = {};
+          state.config.theme.customPresets = parsed;
+          return parsed;
+        }
+      }
+    } catch (e) {}
+    return [];
+  }
+
+  function updateActivePresetChips() {
+    const currentColors = getCurrentThemeColors();
+    const currentSliders = getNeoSliderValues();
+
+    // Check built-in swatches
+    document.querySelectorAll('#bgSwatchesGrid .theme-swatch-chip').forEach(chip => {
+      const presetKey = chip.dataset.preset;
+      const preset = presetKey ? THEME_PRESETS[presetKey] : null;
+      let isMatch = false;
+      if (preset) {
+        isMatch = (
+          preset.bgColor.toLowerCase() === currentColors.bg.toLowerCase() &&
+          (preset.accentColor || currentColors.acc).toLowerCase() === currentColors.acc.toLowerCase() &&
+          parseInt(preset.radius, 10) === currentSliders.radius &&
+          parseInt(preset.distance, 10) === currentSliders.distance &&
+          parseInt(preset.blur, 10) === currentSliders.blur &&
+          parseInt(preset.lightIntensity, 10) === currentSliders.lightIntensity &&
+          parseInt(preset.darkIntensity, 10) === currentSliders.darkIntensity
+        );
+      } else if (chip.dataset.color) {
+        isMatch = (chip.dataset.color.toLowerCase() === currentColors.bg.toLowerCase());
+      }
+      chip.classList.toggle('active', isMatch);
+    });
+
+    document.querySelectorAll('#accentSwatchesGrid .theme-swatch-chip').forEach(chip => {
+      chip.classList.toggle('active', chip.dataset.color.toLowerCase() === currentColors.acc.toLowerCase());
+    });
+
+    // Check custom presets
+    const presets = getCustomThemePresets();
+    document.querySelectorAll('#customPresetsGrid .custom-preset-chip').forEach(chip => {
+      const p = presets.find(item => item.id === chip.dataset.presetId);
+      if (!p) {
+        chip.classList.remove('active');
+        return;
+      }
+      const isMatch = (
+        p.bgColor.toLowerCase() === currentColors.bg.toLowerCase() &&
+        p.accentColor.toLowerCase() === currentColors.acc.toLowerCase() &&
+        parseInt(p.radius, 10) === currentSliders.radius &&
+        parseInt(p.distance, 10) === currentSliders.distance &&
+        parseInt(p.blur, 10) === currentSliders.blur &&
+        (typeof p.lightIntensity === 'undefined' || parseInt(p.lightIntensity, 10) === currentSliders.lightIntensity) &&
+        (typeof p.darkIntensity === 'undefined' || parseInt(p.darkIntensity, 10) === currentSliders.darkIntensity)
+      );
+      chip.classList.toggle('active', isMatch);
+    });
+  }
+
+  function renderCustomPresets() {
+    const grid = document.getElementById('customPresetsGrid');
+    if (!grid) return;
+
+    const presets = getCustomThemePresets();
+    grid.innerHTML = '';
+
+    if (presets.length === 0) {
+      grid.innerHTML = '<span class="empty-custom-presets-hint">No custom presets saved yet. Adjust colors & sliders above, name your preset, and click Save Preset!</span>';
+      return;
+    }
+
+    const currentColors = getCurrentThemeColors();
+    const currentSliders = getNeoSliderValues();
+
+    presets.forEach(p => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'theme-swatch-chip custom-preset-chip';
+      chip.dataset.presetId = p.id;
+      chip.title = `${p.name} (Background: ${p.bgColor}, Accent: ${p.accentColor}, Radius: ${p.radius}px, Blur: ${p.blur}px)`;
+
+      const isMatch = (
+        p.bgColor.toLowerCase() === currentColors.bg.toLowerCase() &&
+        p.accentColor.toLowerCase() === currentColors.acc.toLowerCase() &&
+        parseInt(p.radius, 10) === currentSliders.radius &&
+        parseInt(p.distance, 10) === currentSliders.distance &&
+        parseInt(p.blur, 10) === currentSliders.blur &&
+        (typeof p.lightIntensity === 'undefined' || parseInt(p.lightIntensity, 10) === currentSliders.lightIntensity) &&
+        (typeof p.darkIntensity === 'undefined' || parseInt(p.darkIntensity, 10) === currentSliders.darkIntensity)
+      );
+
+      if (isMatch) {
+        chip.classList.add('active');
+      }
+
+      chip.innerHTML = `
+        <span class="custom-swatch-preview" style="background:${p.bgColor}; border-color:${p.accentColor};"></span>
+        <span class="swatch-name">${escapeHtml(p.name)}</span>
+        <span class="btn-delete-preset" data-delete-id="${p.id}" title="Delete preset">&times;</span>
+      `;
+
+      chip.addEventListener('click', (e) => {
+        if (e.target.closest('.btn-delete-preset')) return;
+
+        applyTheme(p.bgColor, p.accentColor, true, {
+          radius: p.radius,
+          distance: p.distance,
+          lightIntensity: p.lightIntensity,
+          darkIntensity: p.darkIntensity,
+          blur: p.blur
+        });
+
+        updateActivePresetChips();
+      });
+
+      const btnDelete = chip.querySelector('.btn-delete-preset');
+      if (btnDelete) {
+        btnDelete.addEventListener('click', (e) => {
+          e.stopPropagation();
+          deleteCustomPreset(p.id);
+        });
+      }
+
+      grid.appendChild(chip);
+    });
+  }
+
+  function saveCurrentCustomPreset() {
+    const input = document.getElementById('inputCustomPresetName');
+    const nameVal = input ? input.value.trim() : '';
+
+    if (!state.config.theme) state.config.theme = {};
+    let presets = getCustomThemePresets();
+
+    const name = nameVal || `Custom Theme ${presets.length + 1}`;
+    const current = getCurrentThemeColors();
+    const sliders = getNeoSliderValues();
+
+    const existingIndex = presets.findIndex(p => p.name.toLowerCase() === name.toLowerCase());
+    const newPreset = {
+      id: (existingIndex >= 0) ? presets[existingIndex].id : ('custom_' + Date.now()),
+      name: name,
+      bgColor: current.bg,
+      accentColor: current.acc,
+      radius: sliders.radius,
+      distance: sliders.distance,
+      lightIntensity: sliders.lightIntensity,
+      darkIntensity: sliders.darkIntensity,
+      blur: sliders.blur
+    };
+
+    if (existingIndex >= 0) {
+      presets[existingIndex] = newPreset;
+    } else {
+      presets.push(newPreset);
+    }
+
+    state.config.theme.customPresets = presets;
+
+    try {
+      localStorage.setItem('ahk_custom_theme_presets', JSON.stringify(presets));
+    } catch (e) {}
+
+    syncConfig();
+
+    if (input) input.value = '';
+
+    renderCustomPresets();
+    updateActivePresetChips();
+
+    const btnSave = document.getElementById('btnSaveCustomPreset');
+    if (btnSave) {
+      const origText = btnSave.innerHTML;
+      btnSave.classList.add('btn-saved');
+      btnSave.innerHTML = '<span>SAVED!</span>';
+      setTimeout(() => {
+        btnSave.classList.remove('btn-saved');
+        btnSave.innerHTML = origText;
+      }, 1200);
+    }
+  }
+
+  function deleteCustomPreset(id) {
+    if (!state.config.theme) state.config.theme = {};
+    let presets = getCustomThemePresets();
+    presets = presets.filter(p => p.id !== id);
+    state.config.theme.customPresets = presets;
+
+    try {
+      localStorage.setItem('ahk_custom_theme_presets', JSON.stringify(presets));
+    } catch (e) {}
+
+    syncConfig();
+    renderCustomPresets();
+    updateActivePresetChips();
   }
 
   // ============================================================================
@@ -1704,48 +1960,6 @@
       });
     }
 
-    // Theme Helper
-    function getCurrentThemeColors() {
-      const bg = (state.config && state.config.theme && state.config.theme.bgColor)
-        || document.documentElement.style.getPropertyValue('--bg-color')
-        || '#e0e0e0';
-      const acc = (state.config && state.config.theme && state.config.theme.accentColor)
-        || document.documentElement.style.getPropertyValue('--accent-primary')
-        || '#22c55e';
-      const radius = (state.config && state.config.theme && typeof state.config.theme.radius !== 'undefined')
-        ? parseInt(state.config.theme.radius, 10) : 22;
-      const distance = (state.config && state.config.theme && typeof state.config.theme.distance !== 'undefined')
-        ? parseInt(state.config.theme.distance, 10) : 3;
-      const lightIntensity = (state.config && state.config.theme && typeof state.config.theme.lightIntensity !== 'undefined')
-        ? parseInt(state.config.theme.lightIntensity, 10)
-        : ((state.config && state.config.theme && typeof state.config.theme.intensity !== 'undefined') ? parseInt(state.config.theme.intensity, 10) : 18);
-      const darkIntensity = (state.config && state.config.theme && typeof state.config.theme.darkIntensity !== 'undefined')
-        ? parseInt(state.config.theme.darkIntensity, 10)
-        : ((state.config && state.config.theme && typeof state.config.theme.intensity !== 'undefined') ? parseInt(state.config.theme.intensity, 10) : 18);
-      const blur = (state.config && state.config.theme && typeof state.config.theme.blur !== 'undefined')
-        ? parseInt(state.config.theme.blur, 10) : 8;
-      return { 
-        bg: bg.trim(), 
-        acc: acc.trim(),
-        radius,
-        distance,
-        lightIntensity,
-        darkIntensity,
-        intensity: Math.round((lightIntensity + darkIntensity) / 2),
-        blur
-      };
-    }
-
-    function getNeoSliderValues() {
-      return {
-        radius: themeSliderRadius ? parseInt(themeSliderRadius.value, 10) : 22,
-        distance: themeSliderDistance ? parseInt(themeSliderDistance.value, 10) : 3,
-        lightIntensity: themeSliderLightIntensity ? parseInt(themeSliderLightIntensity.value, 10) : 18,
-        darkIntensity: themeSliderDarkIntensity ? parseInt(themeSliderDarkIntensity.value, 10) : 18,
-        blur: themeSliderBlur ? parseInt(themeSliderBlur.value, 10) : 8
-      };
-    }
-
     // Theme Settings Listeners
     if (btnTheme) {
       btnTheme.addEventListener('click', () => {
@@ -1782,12 +1996,8 @@
             if (badgeBlur) badgeBlur.textContent = `${current.blur}px`;
           }
 
-          document.querySelectorAll('#bgSwatchesGrid .theme-swatch-chip').forEach(chip => {
-            chip.classList.toggle('active', chip.dataset.color.toLowerCase() === current.bg.toLowerCase());
-          });
-          document.querySelectorAll('#accentSwatchesGrid .theme-swatch-chip').forEach(chip => {
-            chip.classList.toggle('active', chip.dataset.color.toLowerCase() === current.acc.toLowerCase());
-          });
+          updateActivePresetChips();
+          renderCustomPresets();
 
           themeModal.classList.remove('hidden-field');
         }
@@ -1986,6 +2196,19 @@
         if (themeModal) themeModal.classList.add('hidden-field');
       });
     }
+
+    // Save Custom Theme Preset Listeners
+    if (btnSaveCustomPreset) {
+      btnSaveCustomPreset.addEventListener('click', saveCurrentCustomPreset);
+    }
+    if (inputCustomPresetName) {
+      inputCustomPresetName.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          saveCurrentCustomPreset();
+        }
+      });
+    }
   }
 
   // Handle IPC Messages from AHK
@@ -2006,19 +2229,28 @@
               {
                 radius: msg.config.theme.radius,
                 distance: msg.config.theme.distance,
+                lightIntensity: msg.config.theme.lightIntensity,
+                darkIntensity: msg.config.theme.darkIntensity,
                 intensity: msg.config.theme.intensity,
                 blur: msg.config.theme.blur
               }
             );
+            renderCustomPresets();
             try {
               localStorage.setItem('ahk_theme', JSON.stringify({
                 bgColor: msg.config.theme.bgColor,
                 accentColor: msg.config.theme.accentColor,
                 radius: msg.config.theme.radius,
                 distance: msg.config.theme.distance,
+                lightIntensity: msg.config.theme.lightIntensity,
+                darkIntensity: msg.config.theme.darkIntensity,
                 intensity: msg.config.theme.intensity,
-                blur: msg.config.theme.blur
+                blur: msg.config.theme.blur,
+                customPresets: msg.config.theme.customPresets || []
               }));
+              if (Array.isArray(msg.config.theme.customPresets)) {
+                localStorage.setItem('ahk_custom_theme_presets', JSON.stringify(msg.config.theme.customPresets));
+              }
             } catch (e) {}
           }
         }
@@ -2111,6 +2343,8 @@
         {
           radius: state.config.theme.radius,
           distance: state.config.theme.distance,
+          lightIntensity: state.config.theme.lightIntensity,
+          darkIntensity: state.config.theme.darkIntensity,
           intensity: state.config.theme.intensity,
           blur: state.config.theme.blur
         }
@@ -2124,6 +2358,7 @@
     renderAppLauncher();
     initAutoClicker();
     updateGlobalIndicators();
+    renderCustomPresets();
   }
 
   // Startup

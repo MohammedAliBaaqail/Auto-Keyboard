@@ -118,6 +118,9 @@ InitConfig() {
                     if (!themeMap.Has("blur")) {
                         themeMap["blur"] := 8
                     }
+                    if (!themeMap.Has("customPresets")) {
+                        themeMap["customPresets"] := []
+                    }
                 }
             } else {
                 g_Config := GetDefaultConfig()
@@ -200,7 +203,8 @@ GetDefaultConfig() {
             "lightIntensity", 18,
             "darkIntensity", 18,
             "intensity", 18,
-            "blur", 8
+            "blur", 8,
+            "customPresets", []
         )
     )
 }
