@@ -63,6 +63,7 @@ global g_MacroLastTime := 0
 global g_MacroRealDelays := false
 global g_MacroDefDelay := 50
 global g_MacroActiveTimers := Map()
+global g_MacroActiveKeys := Map()
 global g_MacroIsExecuting := false
 
 LogMessage(msg) {
@@ -1184,27 +1185,28 @@ PlayMacroSteps(steps) {
 ; --- Low-Level Macro Recorder Hook ---
 
 StartMacroRecording(options := "") {
-    global g_MacroRecorderHook, g_MacroIsRecording, g_MacroLastTime, g_MacroRealDelays, g_MacroDefDelay
+    global g_MacroRecorderHook, g_MacroIsRecording, g_MacroLastTime, g_MacroRealDelays, g_MacroDefDelay, g_MacroActiveKeys
     
     StopMacroRecording()
     
     g_MacroIsRecording := true
-    g_MacroLastTime := A_TickCount
+    g_MacroLastTime := 0
     g_MacroDefDelay := 50
     g_MacroRealDelays := false
+    g_MacroActiveKeys := Map()
     
     if (IsObject(options)) {
         if (options.Has("defDelay"))
             g_MacroDefDelay := Max(10, Integer(options["defDelay"]))
         if (options.Has("realDelays"))
-            g_MacroRealDelays := !!options["realDelays"]
+            g_MacroRealDelays := (options["realDelays"] = true || options["realDelays"] = 1 || options["realDelays"] = "true")
     }
     
     ih := InputHook("I0")
     ih.KeyOpt("{All}", "+N")
     ih.VisibleNonText := false
-    ih.OnKeyDown := (hook, vk, sc) => OnMacroRecordKeyEvent(vk, sc, "Down")
-    ih.OnKeyUp := (hook, vk, sc) => OnMacroRecordKeyEvent(vk, sc, "Up")
+    ih.OnKeyDown := (hook, vk, sc) => OnMacroRecordKeyDown(vk, sc)
+    ih.OnKeyUp := (hook, vk, sc) => OnMacroRecordKeyUp(vk, sc)
     
     g_MacroRecorderHook := ih
     ih.Start()
@@ -1212,11 +1214,12 @@ StartMacroRecording(options := "") {
 }
 
 StopMacroRecording() {
-    global g_MacroRecorderHook, g_MacroIsRecording, g_Wv
+    global g_MacroRecorderHook, g_MacroIsRecording, g_MacroActiveKeys, g_Wv
     if (g_MacroRecorderHook) {
         try g_MacroRecorderHook.Stop()
         g_MacroRecorderHook := ""
     }
+    g_MacroActiveKeys := Map()
     if (g_MacroIsRecording) {
         g_MacroIsRecording := false
         SoundBeep(700, 70)
@@ -1226,8 +1229,39 @@ StopMacroRecording() {
     }
 }
 
-OnMacroRecordKeyEvent(vk, sc, action) {
-    global g_MacroIsRecording, g_MacroLastTime, g_MacroRealDelays, g_MacroDefDelay, g_Wv
+OnMacroRecordKeyDown(vk, sc) {
+    global g_MacroIsRecording, g_MacroLastTime, g_MacroRealDelays, g_MacroDefDelay, g_MacroActiveKeys, g_Wv
+    if (!g_MacroIsRecording || !g_Wv)
+        return
+        
+    kName := NormalizeRecordedKey(vk, sc)
+    if (kName = "")
+        return
+        
+    ; Ignore auto-repeat keydown
+    if (g_MacroActiveKeys.Has(kName))
+        return
+        
+    tNow := A_TickCount
+    del := (g_MacroRealDelays && g_MacroLastTime > 0) ? Max(10, tNow - g_MacroLastTime) : g_MacroDefDelay
+    g_MacroLastTime := tNow
+    g_MacroActiveKeys[kName] := tNow
+    
+    ahkKey := (StrLen(kName) = 1) ? StrLower(kName) : ((kName = "Win") ? "LWin" : kName)
+    
+    try {
+        msg := JSON.stringify(Map(
+            "type", "macroStepRecorded",
+            "action", "Down",
+            "key", ahkKey,
+            "delay", del
+        ))
+        g_Wv.PostWebMessageAsString(msg)
+    }
+}
+
+OnMacroRecordKeyUp(vk, sc) {
+    global g_MacroIsRecording, g_MacroLastTime, g_MacroRealDelays, g_MacroDefDelay, g_MacroActiveKeys, g_Wv
     if (!g_MacroIsRecording || !g_Wv)
         return
         
@@ -1236,7 +1270,14 @@ OnMacroRecordKeyEvent(vk, sc, action) {
         return
         
     tNow := A_TickCount
-    del := (g_MacroRealDelays && g_MacroLastTime > 0) ? Max(10, tNow - g_MacroLastTime) : g_MacroDefDelay
+    del := g_MacroDefDelay
+    if (g_MacroActiveKeys.Has(kName)) {
+        tDown := g_MacroActiveKeys[kName]
+        del := g_MacroRealDelays ? Max(10, tNow - tDown) : g_MacroDefDelay
+        g_MacroActiveKeys.Delete(kName)
+    } else if (g_MacroRealDelays && g_MacroLastTime > 0) {
+        del := Max(10, tNow - g_MacroLastTime)
+    }
     g_MacroLastTime := tNow
     
     ahkKey := (StrLen(kName) = 1) ? StrLower(kName) : ((kName = "Win") ? "LWin" : kName)
@@ -1244,7 +1285,7 @@ OnMacroRecordKeyEvent(vk, sc, action) {
     try {
         msg := JSON.stringify(Map(
             "type", "macroStepRecorded",
-            "action", action,
+            "action", "Up",
             "key", ahkKey,
             "delay", del
         ))
@@ -1519,7 +1560,15 @@ OnWebMessageReceived(thisPtr, senderPtr, argsPtr) {
                 ToggleAutoClicker()
 
             case "startMacroRecording":
-                StartMacroRecording(msg.Has("options") ? msg["options"] : "")
+                opts := msg.Has("options") ? msg["options"] : msg
+                StartMacroRecording(opts)
+
+            case "setMacroRecordingOptions":
+                global g_MacroRealDelays, g_MacroDefDelay
+                if (msg.Has("realDelays"))
+                    g_MacroRealDelays := (msg["realDelays"] = true || msg["realDelays"] = 1 || msg["realDelays"] = "true")
+                if (msg.Has("defDelay"))
+                    g_MacroDefDelay := Max(10, Integer(msg["defDelay"]))
 
             case "stopMacroRecording":
                 StopMacroRecording()

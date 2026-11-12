@@ -1453,15 +1453,19 @@
 
   function addMacroStep(action, key, delay = 50) {
     if (!macroState.steps) macroState.steps = [];
+    const stepDelay = (typeof delay === 'number' && !isNaN(delay)) ? Math.max(5, Math.round(delay)) : (parseInt(delay, 10) || 50);
     macroState.steps.push({
       action: action || 'Down',
       key: key || '',
-      delay: parseInt(delay, 10) || 50
+      delay: stepDelay
     });
     renderMacroTimeline();
   }
 
   function startMacroRecording() {
+    if (macroChkStandardDelays) {
+      macroState.useStandardDelays = macroChkStandardDelays.checked;
+    }
     macroState.isRecording = true;
     if (macroBtnRecordToggle) {
       macroBtnRecordToggle.classList.add('is-recording');
@@ -1476,6 +1480,10 @@
       macroStatusPill.style.color = '#ef4444';
     }
     sendToAhk('startMacroRecording', {
+      options: {
+        defDelay: macroState.standardDelay,
+        realDelays: !macroState.useStandardDelays
+      },
       defDelay: macroState.standardDelay,
       realDelays: !macroState.useStandardDelays
     });
@@ -1527,6 +1535,14 @@
     if (!state.config.macroRecorder) {
       state.config.macroRecorder = { enabled: true, items: [] };
     }
+
+    if (typeof state.config.macroRecorder.useStandardDelays === 'boolean') {
+      macroState.useStandardDelays = state.config.macroRecorder.useStandardDelays;
+      if (macroChkStandardDelays) {
+        macroChkStandardDelays.checked = macroState.useStandardDelays;
+      }
+    }
+
     const items = state.config.macroRecorder.items || [];
 
     if (macroCountBadge) {
@@ -1853,6 +1869,15 @@
     if (macroChkStandardDelays) {
       macroChkStandardDelays.addEventListener('change', () => {
         macroState.useStandardDelays = macroChkStandardDelays.checked;
+        if (!state.config.macroRecorder) {
+          state.config.macroRecorder = { enabled: true, items: [] };
+        }
+        state.config.macroRecorder.useStandardDelays = macroChkStandardDelays.checked;
+        syncConfig();
+        sendToAhk('setMacroRecordingOptions', {
+          defDelay: macroState.standardDelay,
+          realDelays: !macroState.useStandardDelays
+        });
       });
     }
 
@@ -3106,7 +3131,9 @@
         }
       } else if (msg.type === 'macroStepRecorded') {
         if (macroState.isRecording) {
-          const delay = macroState.useStandardDelays ? macroState.standardDelay : (msg.delay || 50);
+          const delay = macroState.useStandardDelays
+            ? macroState.standardDelay
+            : ((typeof msg.delay === 'number' && !isNaN(msg.delay)) ? msg.delay : 50);
           addMacroStep(msg.action, msg.key, delay);
         }
       } else if (msg.type === 'macroRecordingStopped') {
