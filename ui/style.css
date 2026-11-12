@@ -322,7 +322,7 @@ html, body {
 
 .segment-btn.active {
   background: var(--surface-color);
-  box-shadow: var(--raised-sm);
+  box-shadow: none;
   color: var(--green-primary);
   font-weight: 700;
 }
@@ -624,7 +624,7 @@ html, body {
 
 .al-type-btn.active {
   background: var(--surface-color);
-  box-shadow: var(--raised-sm);
+  box-shadow: none;
   color: var(--accent-primary);
 }
 
@@ -2472,7 +2472,7 @@ html, body {
 
 .macro-mode-btn.active {
   background: var(--surface-color);
-  box-shadow: var(--raised-sm);
+  box-shadow: none;
   color: var(--accent-primary);
   font-weight: 700;
 }
