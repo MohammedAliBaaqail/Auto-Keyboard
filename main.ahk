@@ -1391,6 +1391,20 @@ CreateMainWindow() {
     ; Suppress Windows default top non-client frame calculation to eliminate the top white line artifact
     OnMessage(0x0083, OnNcCalcSize)
     
+    ; Set App Icon for Windows Taskbar & System Tray
+    iconPath := A_ScriptDir . "\app-icon.ico"
+    if FileExist(iconPath) {
+        try {
+            TraySetIcon(iconPath)
+            hIconBig := DllCall("LoadImage", "ptr", 0, "str", iconPath, "uint", 1, "int", 32, "int", 32, "uint", 0x00000010, "ptr")
+            hIconSmall := DllCall("LoadImage", "ptr", 0, "str", iconPath, "uint", 1, "int", 16, "int", 16, "uint", 0x00000010, "ptr")
+            if (hIconBig)
+                SendMessage(0x0080, 1, hIconBig, g_MainGui.Hwnd)
+            if (hIconSmall)
+                SendMessage(0x0080, 0, hIconSmall, g_MainGui.Hwnd)
+        }
+    }
+
     g_MainGui.Show(Format("x{} y{} w{} h{}", posX, posY, APP_WIDTH, APP_HEIGHT))
     
     InitWebView2()
@@ -1676,6 +1690,11 @@ SendInitialStateToWeb() {
 
 SetupTrayMenu() {
     global g_MainGui, APP_NAME
+    
+    iconPath := A_ScriptDir . "\app-icon.ico"
+    if FileExist(iconPath) {
+        try TraySetIcon(iconPath)
+    }
     
     tray := A_TrayMenu
     tray.Delete()
