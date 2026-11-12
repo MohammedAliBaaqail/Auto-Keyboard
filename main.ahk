@@ -14,6 +14,16 @@
 #SingleInstance Force
 Persistent(true)
 
+; Ensure strictly only ONE AutoHotKeyboard instance is running across processes
+curPid := DllCall("GetCurrentProcessId")
+try {
+    for proc in ComObjGet("winmgmts:").ExecQuery("Select * from Win32_Process Where Name = 'AutoHotkey64.exe'") {
+        if (proc.ProcessId != curPid && InStr(proc.CommandLine, "main.ahk")) {
+            try ProcessClose(proc.ProcessId)
+        }
+    }
+}
+
 ; Suppress hotkey flood warning dialog (e.g. for key repeat or rapid auto-clicking)
 A_MaxHotkeysPerInterval := 50000
 A_HotkeyInterval := 2000
@@ -488,7 +498,10 @@ ApplyWindowManager() {
 }
 
 ToggleAlwaysOnTop() {
-    global g_MainGui, g_Wv
+    global g_MainGui, g_Wv, g_Config
+    if (g_Config.Has("windowManager") && g_Config["windowManager"].Has("alwaysOnTopEnabled") && !g_Config["windowManager"]["alwaysOnTopEnabled"]) {
+        return
+    }
     try {
         hwnd := WinGetID("A")
         if (hwnd = g_MainGui.Hwnd) {
@@ -510,7 +523,10 @@ ToggleAlwaysOnTop() {
 }
 
 CenterActiveWindow() {
-    global g_MainGui, g_Wv
+    global g_MainGui, g_Wv, g_Config
+    if (g_Config.Has("windowManager") && g_Config["windowManager"].Has("centerWindowEnabled") && !g_Config["windowManager"]["centerWindowEnabled"]) {
+        return
+    }
     try {
         hwnd := WinGetID("A")
         if (hwnd = g_MainGui.Hwnd) {
@@ -535,7 +551,10 @@ CenterActiveWindow() {
 }
 
 HideActiveWindow() {
-    global g_MainGui
+    global g_MainGui, g_Config
+    if (g_Config.Has("windowManager") && g_Config["windowManager"].Has("hideWindowEnabled") && !g_Config["windowManager"]["hideWindowEnabled"]) {
+        return
+    }
     try {
         hwnd := WinGetID("A")
         if (hwnd = g_MainGui.Hwnd) {
@@ -547,7 +566,10 @@ HideActiveWindow() {
 }
 
 AdjustActiveWindowTransparency(delta) {
-    global g_MainGui, g_Wv
+    global g_MainGui, g_Wv, g_Config
+    if (g_Config.Has("windowManager") && g_Config["windowManager"].Has("transparencyWheel") && !g_Config["windowManager"]["transparencyWheel"]) {
+        return
+    }
     try {
         hwnd := WinGetID("A")
         if (hwnd = g_MainGui.Hwnd) {
@@ -586,7 +608,10 @@ GetActiveExternalWindow() {
 }
 
 AdjustActiveAppVolume(delta) {
-    global g_MainGui, g_Wv
+    global g_MainGui, g_Wv, g_Config
+    if (g_Config.Has("windowManager") && g_Config["windowManager"].Has("appVolumeWheel") && !g_Config["windowManager"]["appVolumeWheel"]) {
+        return
+    }
     try {
         hwnd := GetActiveExternalWindow()
         if (!hwnd) {
@@ -626,7 +651,10 @@ AdjustActiveAppVolume(delta) {
 }
 
 ToggleActiveAppMute() {
-    global g_MainGui, g_Wv
+    global g_MainGui, g_Wv, g_Config
+    if (g_Config.Has("windowManager") && g_Config["windowManager"].Has("appVolumeMuteEnabled") && !g_Config["windowManager"]["appVolumeMuteEnabled"]) {
+        return
+    }
     try {
         hwnd := GetActiveExternalWindow()
         if (!hwnd) {

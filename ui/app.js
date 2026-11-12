@@ -781,7 +781,8 @@
       const badge = document.getElementById(badgeId);
       if (!sw) return;
 
-      const isEnabled = (wm[key] !== false && wm[key] !== 0);
+      const currWm = (state.config && state.config.windowManager) ? state.config.windowManager : {};
+      const isEnabled = (currWm[key] !== false && currWm[key] !== 0);
       sw.checked = isEnabled;
       if (badge) {
         badge.classList.toggle('is-disabled', !isEnabled);
@@ -790,7 +791,10 @@
       if (!sw.dataset.bound) {
         sw.dataset.bound = 'true';
         sw.addEventListener('change', () => {
-          wm[key] = sw.checked;
+          if (!state.config.windowManager) {
+            state.config.windowManager = {};
+          }
+          state.config.windowManager[key] = sw.checked ? 1 : 0;
           if (badge) {
             badge.classList.toggle('is-disabled', !sw.checked);
           }
