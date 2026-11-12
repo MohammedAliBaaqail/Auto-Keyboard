@@ -1,4 +1,4 @@
-﻿{
+{
   "activeTab":"windowManager",
   "appLauncher":{
     "enabled":1,
@@ -7,7 +7,7 @@
   "autoClicker":{
     "button":"Left",
     "clickType":"Single",
-    "cps":20,
+    "cps":21,
     "enabled":1,
     "hotkey":"F8",
     "limit":0
@@ -19,22 +19,23 @@
   },
   "macroRecorder":{
     "enabled":1,
-    "items":[{"enabled":1,"id":"macro-1794487451295","name":"ggc","playbackMode":"NoRepeat","repeatInterval":50,"steps":[{"action":"Down","delay":50,"key":"g"},{"action":"Up","delay":50,"key":"g"},{"action":"Down","delay":50,"key":"g"},{"action":"Up","delay":50,"key":"g"},{"action":"Down","delay":50,"key":"w"},{"action":"Up","delay":50,"key":"w"},{"action":"Down","delay":50,"key":"p"},{"action":"Up","delay":50,"key":"p"}],"trigger":"Ctrl+Shift+A"},{"enabled":1,"id":"macro-1794487451118","name":"ggc","playbackMode":"NoRepeat","repeatInterval":50,"steps":[{"action":"Down","delay":50,"key":"g"},{"action":"Up","delay":50,"key":"g"},{"action":"Down","delay":50,"key":"g"},{"action":"Up","delay":50,"key":"g"},{"action":"Down","delay":50,"key":"w"},{"action":"Up","delay":50,"key":"w"},{"action":"Down","delay":50,"key":"p"},{"action":"Up","delay":50,"key":"p"}],"trigger":"Ctrl+Shift+A"},{"enabled":1,"id":"macro-1794487450951","name":"ggc","playbackMode":"NoRepeat","repeatInterval":50,"steps":[{"action":"Down","delay":50,"key":"g"},{"action":"Up","delay":50,"key":"g"},{"action":"Down","delay":50,"key":"g"},{"action":"Up","delay":50,"key":"g"},{"action":"Down","delay":50,"key":"w"},{"action":"Up","delay":50,"key":"w"},{"action":"Down","delay":50,"key":"p"},{"action":"Up","delay":50,"key":"p"}],"trigger":"Ctrl+Shift+A"},{"enabled":1,"id":"macro-1794487450784","name":"ggc","playbackMode":"NoRepeat","repeatInterval":50,"steps":[{"action":"Down","delay":50,"key":"g"},{"action":"Up","delay":50,"key":"g"},{"action":"Down","delay":50,"key":"g"},{"action":"Up","delay":50,"key":"g"},{"action":"Down","delay":50,"key":"w"},{"action":"Up","delay":50,"key":"w"},{"action":"Down","delay":50,"key":"p"},{"action":"Up","delay":50,"key":"p"}],"trigger":"Ctrl+Shift+A"},{"enabled":1,"id":"macro-1794487436879","name":"ggc","playbackMode":"NoRepeat","repeatInterval":50,"steps":[{"action":"Down","delay":50,"key":"g"},{"action":"Up","delay":50,"key":"g"},{"action":"Down","delay":50,"key":"g"},{"action":"Up","delay":50,"key":"g"},{"action":"Down","delay":50,"key":"w"},{"action":"Up","delay":50,"key":"w"},{"action":"Down","delay":50,"key":"p"},{"action":"Up","delay":50,"key":"p"}],"trigger":"Ctrl+Shift+A"},{"enabled":1,"id":"macro-1794487436640","name":"ggc","playbackMode":"NoRepeat","repeatInterval":50,"steps":[{"action":"Down","delay":50,"key":"g"},{"action":"Up","delay":50,"key":"g"},{"action":"Down","delay":50,"key":"g"},{"action":"Up","delay":50,"key":"g"},{"action":"Down","delay":50,"key":"w"},{"action":"Up","delay":50,"key":"w"},{"action":"Down","delay":50,"key":"p"},{"action":"Up","delay":50,"key":"p"}],"trigger":"Ctrl+Shift+A"},{"enabled":1,"id":"macro-1794487436471","name":"ggc","playbackMode":"NoRepeat","repeatInterval":50,"steps":[{"action":"Down","delay":50,"key":"g"},{"action":"Up","delay":50,"key":"g"},{"action":"Down","delay":50,"key":"g"},{"action":"Up","delay":50,"key":"g"},{"action":"Down","delay":50,"key":"w"},{"action":"Up","delay":50,"key":"w"},{"action":"Down","delay":50,"key":"p"},{"action":"Up","delay":50,"key":"p"}],"trigger":"Ctrl+Shift+A"},{"enabled":1,"id":"macro-1794487436272","name":"ggc","playbackMode":"NoRepeat","repeatInterval":50,"steps":[{"action":"Down","delay":50,"key":"g"},{"action":"Up","delay":50,"key":"g"},{"action":"Down","delay":50,"key":"g"},{"action":"Up","delay":50,"key":"g"},{"action":"Down","delay":50,"key":"w"},{"action":"Up","delay":50,"key":"w"},{"action":"Down","delay":50,"key":"p"},{"action":"Up","delay":50,"key":"p"}],"trigger":"Ctrl+Shift+A"},{"enabled":1,"id":"macro-1794487436076","name":"ggc","playbackMode":"NoRepeat","repeatInterval":50,"steps":[{"action":"Down","delay":50,"key":"g"},{"action":"Up","delay":50,"key":"g"},{"action":"Down","delay":50,"key":"g"},{"action":"Up","delay":50,"key":"g"},{"action":"Down","delay":50,"key":"w"},{"action":"Up","delay":50,"key":"w"},{"action":"Down","delay":50,"key":"p"},{"action":"Up","delay":50,"key":"p"}],"trigger":"Ctrl+Shift+A"},{"enabled":1,"id":"macro-1794487435900","name":"ggc","playbackMode":"NoRepeat","repeatInterval":50,"steps":[{"action":"Down","delay":50,"key":"g"},{"action":"Up","delay":50,"key":"g"},{"action":"Down","delay":50,"key":"g"},{"action":"Up","delay":50,"key":"g"},{"action":"Down","delay":50,"key":"w"},{"action":"Up","delay":50,"key":"w"},{"action":"Down","delay":50,"key":"p"},{"action":"Up","delay":50,"key":"p"}],"trigger":"Ctrl+Shift+A"},{"enabled":1,"id":"macro-1794487435500","name":"ggc","playbackMode":"NoRepeat","repeatInterval":50,"steps":[{"action":"Down","delay":50,"key":"g"},{"action":"Up","delay":50,"key":"g"},{"action":"Down","delay":50,"key":"g"},{"action":"Up","delay":50,"key":"g"},{"action":"Down","delay":50,"key":"w"},{"action":"Up","delay":50,"key":"w"},{"action":"Down","delay":50,"key":"p"},{"action":"Up","delay":50,"key":"p"}],"trigger":"Ctrl+Shift+A"},{"enabled":1,"id":"macro-1794487424933","name":"gg","playbackMode":"NoRepeat","repeatInterval":50,"steps":[{"action":"Down","delay":50,"key":"g"},{"action":"Up","delay":50,"key":"g"},{"action":"Down","delay":50,"key":"g"},{"action":"Up","delay":50,"key":"g"},{"action":"Down","delay":50,"key":"w"},{"action":"Up","delay":50,"key":"w"},{"action":"Down","delay":50,"key":"p"},{"action":"Up","delay":50,"key":"p"}],"trigger":"Ctrl+Shift+A"},{"enabled":0,"id":"macro-1","name":"Fast Reload Combo","playbackMode":"NoRepeat","repeatInterval":50,"steps":[{"action":"Down","delay":40,"key":"r"},{"action":"Up","delay":100,"key":"r"},{"action":"Down","delay":40,"key":"1"},{"action":"Up","delay":50,"key":"1"}],"trigger":"F9"}]
+    "items":[{"enabled":0,"id":"macro-1794487435500","name":"ggc","playbackMode":"NoRepeat","repeatInterval":50,"steps":[{"action":"Down","delay":50,"key":"g"},{"action":"Up","delay":50,"key":"g"},{"action":"Down","delay":50,"key":"g"},{"action":"Up","delay":50,"key":"g"},{"action":"Down","delay":50,"key":"w"},{"action":"Up","delay":50,"key":"w"},{"action":"Down","delay":50,"key":"p"},{"action":"Up","delay":50,"key":"p"},{"action":"Down","delay":50,"key":"a"},{"action":"Up","delay":641,"key":"a"},{"action":"Down","delay":2219,"key":"d"},{"action":"Up","delay":1344,"key":"d"}],"trigger":"Ctrl+Shift+A"},{"enabled":0,"id":"macro-1","name":"Fast Reload Combo","playbackMode":"NoRepeat","repeatInterval":50,"steps":[{"action":"Down","delay":40,"key":"r"},{"action":"Up","delay":100,"key":"r"},{"action":"Down","delay":40,"key":"1"},{"action":"Up","delay":50,"key":"1"}],"trigger":"F9"}],
+    "useStandardDelays":0
   },
   "textExpander":{
     "enabled":1,
     "items":[{"id":"te-1","input":"@@1","multiline":0,"output":"myemail@gmail.com"},{"id":"te-2","input":"@@sig","multiline":1,"output":"Best regards,\nYour Name\nSenior Engineer"}]
   },
   "theme":{
-    "accentColor":"#d97706",
-    "bgColor":"#e8dfd5",
-    "blur":12,
+    "accentColor":"#04ff00",
+    "bgColor":"#1e222b",
+    "blur":6,
     "customPresets":[{"accentColor":"#22c55e","bgColor":"#e0e5ec","blur":11,"darkIntensity":3,"distance":4,"id":"custom_1794484507311","lightIntensity":12,"name":"1","radius":9},{"accentColor":"#c084fc","bgColor":"#2b2640","blur":10,"darkIntensity":42,"distance":5,"id":"custom_1794484519358","lightIntensity":22,"name":"3","radius":18}],
-    "darkIntensity":18,
-    "distance":5,
-    "intensity":32,
-    "lightIntensity":46,
-    "radius":30
+    "darkIntensity":12,
+    "distance":4,
+    "intensity":9,
+    "lightIntensity":5,
+    "radius":14
   },
   "windowManager":{
     "alwaysOnTopEnabled":1,

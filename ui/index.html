@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +10,7 @@
       try {
         function hexToHsl(hex) {
           hex = hex.replace('#', '').trim();
-          if (hex.length === 3) hex = hex.split('').map(function(x) { return x + x; }).join('');
+          if (hex.length === 3) hex = hex.split('').map(function (x) { return x + x; }).join('');
           var r = parseInt(hex.substring(0, 2), 16) / 255;
           var g = parseInt(hex.substring(2, 4), 16) / 255;
           var b = parseInt(hex.substring(4, 6), 16) / 255;
@@ -40,18 +41,18 @@
             function hue2rgb(p, q, t) {
               if (t < 0) t += 1;
               if (t > 1) t -= 1;
-              if (t < 1/6) return p + (q - p) * 6 * t;
-              if (t < 1/2) return q;
-              if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+              if (t < 1 / 6) return p + (q - p) * 6 * t;
+              if (t < 1 / 2) return q;
+              if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
               return p;
             }
             var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
             var p = 2 * l - q;
-            r = hue2rgb(p, q, h + 1/3);
+            r = hue2rgb(p, q, h + 1 / 3);
             g = hue2rgb(p, q, h);
-            b = hue2rgb(p, q, h - 1/3);
+            b = hue2rgb(p, q, h - 1 / 3);
           }
-          var toHex = function(x) {
+          var toHex = function (x) {
             var hex = Math.round(Math.max(0, Math.min(255, x * 255))).toString(16);
             return hex.length === 1 ? '0' + hex : hex;
           };
@@ -76,7 +77,7 @@
           if (t.lightIntensity !== undefined) root.style.setProperty('--neo-light-intensity', t.lightIntensity + '%');
           if (t.darkIntensity !== undefined) root.style.setProperty('--neo-dark-intensity', t.darkIntensity + '%');
           if (t.intensity !== undefined) root.style.setProperty('--neo-intensity', t.intensity + '%');
-          
+
           var lightInten = (t.lightIntensity !== undefined) ? parseInt(t.lightIntensity, 10) : ((t.intensity !== undefined) ? parseInt(t.intensity, 10) : 18);
           var darkInten = (t.darkIntensity !== undefined) ? parseInt(t.darkIntensity, 10) : ((t.intensity !== undefined) ? parseInt(t.intensity, 10) : 18);
           var hsl = hexToHsl(t.bgColor);
@@ -84,7 +85,7 @@
           var dd = Math.max(1, Math.min(100, darkInten)) / 100;
 
           // Lighter tint of base color for top light shadow
-          var lightL = hsl.l <= 0.7 
+          var lightL = hsl.l <= 0.7
             ? Math.min(0.96, hsl.l + (1 - hsl.l) * (dl * 1.5))
             : Math.min(0.995, hsl.l + (1 - hsl.l) * (dl * 2.5));
 
@@ -118,44 +119,22 @@
             }
           }
         }
-      } catch (e) {}
+      } catch (e) { }
     })();
   </script>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
   <!-- Main Frameless Neumorphic Card Window -->
   <div class="neumorphic-card" id="appCard">
-    
+
     <!-- Top Header Bar -->
     <header class="app-header" id="dragHeader">
       <div class="header-left">
-        <div class="squircle-btn logo-btn" title="AutoHotKeyboard Engine">
-          <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="2" y="4" width="20" height="16" rx="3"></rect>
-            <line x1="6" y1="8" x2="6.01" y2="8"></line>
-            <line x1="10" y1="8" x2="10.01" y2="8"></line>
-            <line x1="14" y1="8" x2="14.01" y2="8"></line>
-            <line x1="18" y1="8" x2="18.01" y2="8"></line>
-            <line x1="6" y1="12" x2="6.01" y2="12"></line>
-            <line x1="10" y1="12" x2="10.01" y2="12"></line>
-            <line x1="14" y1="12" x2="14.01" y2="12"></line>
-            <line x1="18" y1="12" x2="18.01" y2="12"></line>
-            <line x1="7" y1="16" x2="17" y2="16"></line>
-          </svg>
-        </div>
-        <div class="squircle-btn" id="btnStats" title="Active Items Count">
-          <span class="badge-num" id="activeCountBadge">0</span>
-        </div>
-        <div class="title-group">
-          <h1 class="app-title">AUTOHOTKEYBOARD</h1>
-          <span class="app-subtitle" id="statusSubtitle">Engine: <span class="status-indicator-text online">Active</span></span>
-        </div>
-      </div>
-
-      <!-- MAIN ON / OFF ROCKER SWITCH AT THE TOP OF THE APP -->
-      <div class="header-center">
-        <div class="vertical-rocker is-on header-rocker" id="mainEngineSwitch" title="Click to Toggle Script Engine ON / OFF">
+        <!-- Main Engine Physical Rocker Switch (replaces top-left keyboard button) -->
+        <div class="vertical-rocker is-on header-rocker" id="mainEngineSwitch"
+          title="Click to Toggle Script Engine ON / OFF">
           <div class="rocker-track rocker-off-track">
             <span class="rocker-label-off">OFF</span>
           </div>
@@ -163,6 +142,14 @@
             <span class="rocker-label-on">ON</span>
           </div>
           <div class="rocker-thumb"></div>
+        </div>
+        <div class="squircle-btn" id="btnStats" title="Active Items Count">
+          <span class="badge-num" id="activeCountBadge">0</span>
+        </div>
+        <div class="title-group">
+          <h1 class="app-title">AUTOHOTKEYBOARD</h1>
+          <span class="app-subtitle" id="statusSubtitle">Engine: <span
+              class="status-indicator-text online">Active</span></span>
         </div>
       </div>
 
@@ -173,7 +160,9 @@
             <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle>
             <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle>
             <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle>
-            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.992 6.012 17.461 2 12 2z"></path>
+            <path
+              d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.992 6.012 17.461 2 12 2z">
+            </path>
           </svg>
         </button>
         <button class="squircle-btn" id="btnRefresh" title="Reload / Re-sync Config">
@@ -209,7 +198,7 @@
 
     <!-- Main Module Panels Container with Smooth Overflow -->
     <main class="modules-container">
-      
+
       <!-- ====================================================================
            1. TEXT EXPANDER PANEL (with Multiline Expansion)
            ==================================================================== -->
@@ -220,7 +209,8 @@
               <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
               </svg>
-              <input type="text" id="teInputTrigger" placeholder="Trigger (e.g. @@1, @@sig)" autocomplete="off" spellcheck="false" />
+              <input type="text" id="teInputTrigger" placeholder="Trigger (e.g. @@1, @@sig)" autocomplete="off"
+                spellcheck="false" />
             </div>
 
             <!-- Single or Multiline Output Field -->
@@ -231,8 +221,10 @@
                 <line x1="16" y1="13" x2="8" y2="13"></line>
                 <line x1="16" y1="17" x2="8" y2="17"></line>
               </svg>
-              <input type="text" id="teInputOutput" placeholder="Replacement text or snippet..." autocomplete="off" spellcheck="false" />
-              <textarea id="teTextareaOutput" class="hidden-field" placeholder="Type multiline snippet / signature..."></textarea>
+              <input type="text" id="teInputOutput" placeholder="Replacement text or snippet..." autocomplete="off"
+                spellcheck="false" />
+              <textarea id="teTextareaOutput" class="hidden-field"
+                placeholder="Type multiline snippet / signature..."></textarea>
             </div>
 
             <!-- Multiline Toggle Pill -->
@@ -278,8 +270,10 @@
                 <rect x="2" y="4" width="20" height="16" rx="2"></rect>
                 <path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M7 16h10"></path>
               </svg>
-              <input type="text" id="krInputSource" class="key-combo-input" placeholder="Click to record source key..." readonly autocomplete="off" spellcheck="false" />
-              <button type="button" class="btn-combo-clear hidden-field" id="krBtnClearSource" title="Clear">&times;</button>
+              <input type="text" id="krInputSource" class="key-combo-input" placeholder="Click to record source key..."
+                readonly autocomplete="off" spellcheck="false" />
+              <button type="button" class="btn-combo-clear hidden-field" id="krBtnClearSource"
+                title="Clear">&times;</button>
             </div>
 
             <!-- Arrow Divider -->
@@ -291,13 +285,16 @@
             </div>
 
             <!-- Target Key Combination Box -->
-            <div class="inset-input-box key-combo-box" id="krTargetBox" title="Click to record target key or combination">
+            <div class="inset-input-box key-combo-box" id="krTargetBox"
+              title="Click to record target key or combination">
               <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="13 17 18 12 13 7"></polyline>
                 <polyline points="6 17 11 12 6 7"></polyline>
               </svg>
-              <input type="text" id="krInputTarget" class="key-combo-input" placeholder="Click to record target key..." readonly autocomplete="off" spellcheck="false" />
-              <button type="button" class="btn-combo-clear hidden-field" id="krBtnClearTarget" title="Clear">&times;</button>
+              <input type="text" id="krInputTarget" class="key-combo-input" placeholder="Click to record target key..."
+                readonly autocomplete="off" spellcheck="false" />
+              <button type="button" class="btn-combo-clear hidden-field" id="krBtnClearTarget"
+                title="Clear">&times;</button>
             </div>
 
             <button class="neumorphic-btn btn-go" id="krBtnSubmit" title="Add Key Remap">
@@ -305,7 +302,8 @@
             </button>
           </div>
           <div class="input-hints">
-            <span class="hint-tag">Click a box & press any key or combination (e.g. Ctrl+Shift+A, CapsLock, F1-F12, Esc)</span>
+            <span class="hint-tag">Click a box & press any key or combination (e.g. Ctrl+Shift+A, CapsLock, F1-F12,
+              Esc)</span>
           </div>
         </div>
 
@@ -328,7 +326,9 @@
               <div class="wm-icon-badge">
                 <svg class="wm-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <line x1="12" y1="17" x2="12" y2="22"></line>
-                  <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1v3.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"></path>
+                  <path
+                    d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1v3.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z">
+                  </path>
                 </svg>
               </div>
               <div class="wm-info">
@@ -538,14 +538,16 @@
           <div class="inputs-row">
             <!-- Trigger Type Selector: Text String vs Button Combination -->
             <div class="al-type-segmented" id="alTriggerTypeSelector">
-              <button type="button" class="al-type-btn active" id="alTypeString" data-type="string" title="Trigger by typing text (e.g. @calc)">
+              <button type="button" class="al-type-btn active" id="alTypeString" data-type="string"
+                title="Trigger by typing text (e.g. @calc)">
                 <svg class="al-type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="4 17 10 11 4 5"></polyline>
                   <line x1="12" y1="19" x2="20" y2="19"></line>
                 </svg>
                 <span>Text</span>
               </button>
-              <button type="button" class="al-type-btn" id="alTypeHotkey" data-type="hotkey" title="Trigger by pressing a button combination (e.g. Ctrl+Alt+C)">
+              <button type="button" class="al-type-btn" id="alTypeHotkey" data-type="hotkey"
+                title="Trigger by pressing a button combination (e.g. Ctrl+Alt+C)">
                 <svg class="al-type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <rect x="2" y="4" width="20" height="16" rx="2"></rect>
                   <path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M7 16h10"></path>
@@ -555,11 +557,13 @@
             </div>
 
             <div class="inset-input-box trigger-box" id="alTriggerBox">
-              <svg class="input-icon-svg" id="alTriggerIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <svg class="input-icon-svg" id="alTriggerIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
                 <polyline points="4 17 10 11 4 5"></polyline>
                 <line x1="12" y1="19" x2="20" y2="19"></line>
               </svg>
-              <input type="text" id="alInputTrigger" placeholder="Trigger (e.g. @calc, @yt)" autocomplete="off" spellcheck="false" />
+              <input type="text" id="alInputTrigger" placeholder="Trigger (e.g. @calc, @yt)" autocomplete="off"
+                spellcheck="false" />
             </div>
 
             <div class="inset-input-box output-box al-output-box" id="alOutputBox">
@@ -568,8 +572,10 @@
                 <polyline points="15 3 21 3 21 9"></polyline>
                 <line x1="10" y1="14" x2="21" y2="3"></line>
               </svg>
-              <input type="text" id="alInputTarget" placeholder="Target app path or URL..." autocomplete="off" spellcheck="false" />
-              <button type="button" class="btn-input-browse" id="alBtnBrowse" title="Browse for application or file (.exe, .lnk, etc.)">
+              <input type="text" id="alInputTarget" placeholder="Target app path or URL..." autocomplete="off"
+                spellcheck="false" />
+              <button type="button" class="btn-input-browse" id="alBtnBrowse"
+                title="Browse for application or file (.exe, .lnk, etc.)">
                 <svg class="browse-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
                 </svg>
@@ -590,7 +596,8 @@
             </button>
           </div>
           <div class="input-hints">
-            <span class="hint-tag" id="alHintTag">Typing trigger anywhere opens apps, websites, or commands instantly</span>
+            <span class="hint-tag" id="alHintTag">Typing trigger anywhere opens apps, websites, or commands
+              instantly</span>
           </div>
         </div>
 
@@ -650,7 +657,7 @@
             </div>
             <div class="cps-quick-row">
               <span class="hint-tag">1 CPS (Slow)</span>
-              <span class="hint-tag">20 CPS (Gaming)</span>
+              <span class="hint-tag">20 CPS</span>
               <span class="hint-tag">60 CPS (Max Speed)</span>
             </div>
           </div>
@@ -660,7 +667,8 @@
             <button class="neumorphic-btn ac-toggle-btn" id="acToggleBtn">
               <span id="acToggleBtnText">START (F8)</span>
             </button>
-            <span class="hint-tag" id="acStatusHint">Ready - Press F8 anywhere in Windows to start or stop clicking</span>
+            <span class="hint-tag" id="acStatusHint">Ready - Press F8 anywhere in Windows to start or stop
+              clicking</span>
           </div>
         </div>
       </section>
@@ -678,28 +686,36 @@
                 <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
                 <line x1="7" y1="7" x2="7.01" y2="7"></line>
               </svg>
-              <input type="text" id="macroInputName" placeholder="Macro Name (e.g. Fast Combo)" autocomplete="off" spellcheck="false" />
+              <input type="text" id="macroInputName" placeholder="Macro Name (e.g. Fast Combo)" autocomplete="off"
+                spellcheck="false" />
             </div>
 
             <!-- Trigger Hotkey Box -->
-            <div class="inset-input-box key-combo-box macro-trigger-box" id="macroTriggerBox" title="Click to record trigger hotkey">
+            <div class="inset-input-box key-combo-box macro-trigger-box" id="macroTriggerBox"
+              title="Click to record trigger hotkey">
               <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect x="2" y="4" width="20" height="16" rx="2"></rect>
                 <path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M7 16h10"></path>
               </svg>
-              <input type="text" id="macroInputTrigger" class="key-combo-input" placeholder="Trigger (e.g. F9)..." readonly autocomplete="off" spellcheck="false" />
-              <button type="button" class="btn-combo-clear hidden-field" id="macroBtnClearTrigger" title="Clear">&times;</button>
+              <input type="text" id="macroInputTrigger" class="key-combo-input" placeholder="Trigger (e.g. F9)..."
+                readonly autocomplete="off" spellcheck="false" />
+              <button type="button" class="btn-combo-clear hidden-field" id="macroBtnClearTrigger"
+                title="Clear">&times;</button>
             </div>
 
             <!-- Playback Mode Segmented Pill -->
             <div class="macro-mode-segmented" id="macroModeSelector" title="Macro Playback Mode">
-              <button type="button" class="macro-mode-btn active" data-mode="NoRepeat" title="Play sequence once on press">Once</button>
-              <button type="button" class="macro-mode-btn" data-mode="RepeatWhileHolding" title="Loop sequence while hotkey is held">Hold</button>
-              <button type="button" class="macro-mode-btn" data-mode="Toggle" title="Press to start loop, press again to stop">Toggle</button>
+              <button type="button" class="macro-mode-btn active" data-mode="NoRepeat"
+                title="Play sequence once on press">Once</button>
+              <button type="button" class="macro-mode-btn" data-mode="RepeatWhileHolding"
+                title="Loop sequence while hotkey is held">Hold</button>
+              <button type="button" class="macro-mode-btn" data-mode="Toggle"
+                title="Press to start loop, press again to stop">Toggle</button>
             </div>
 
             <!-- Repeat Interval (for Hold / Toggle) -->
-            <div class="inset-input-box macro-interval-box" id="macroIntervalBox" title="Repeat delay between loops (ms)">
+            <div class="inset-input-box macro-interval-box" id="macroIntervalBox"
+              title="Repeat delay between loops (ms)">
               <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <circle cx="12" cy="12" r="10"></circle>
                 <polyline points="12 6 12 12 16 14"></polyline>
@@ -719,7 +735,8 @@
             <div class="macro-deck-header">
               <div class="macro-deck-left">
                 <!-- Record Button with Pulsing Dot -->
-                <button type="button" class="neumorphic-btn-pill btn-record-macro" id="macroBtnRecordToggle" title="Start / Stop Hardware Keystroke Recording">
+                <button type="button" class="neumorphic-btn-pill btn-record-macro" id="macroBtnRecordToggle"
+                  title="Start / Stop Hardware Keystroke Recording">
                   <span class="rec-pulse-dot" id="macroRecDot"></span>
                   <span id="macroBtnRecordText">RECORD</span>
                 </button>
@@ -734,13 +751,16 @@
                   <button type="button" class="macro-inject-btn" id="macroBtnAddLClick" title="Inject Left Mouse Click">
                     <span>+ Left Click</span>
                   </button>
-                  <button type="button" class="macro-inject-btn" id="macroBtnAddRClick" title="Inject Right Mouse Click">
+                  <button type="button" class="macro-inject-btn" id="macroBtnAddRClick"
+                    title="Inject Right Mouse Click">
                     <span>+ Right Click</span>
                   </button>
-                  <button type="button" class="macro-inject-btn" id="macroBtnAddMClick" title="Inject Middle Mouse Click">
+                  <button type="button" class="macro-inject-btn" id="macroBtnAddMClick"
+                    title="Inject Middle Mouse Click">
                     <span>+ Mid Click</span>
                   </button>
-                  <button type="button" class="macro-inject-btn" id="macroBtnAddDelay" title="Inject Custom Delay (+50ms)">
+                  <button type="button" class="macro-inject-btn" id="macroBtnAddDelay"
+                    title="Inject Custom Delay (+50ms)">
                     <span>+ 50ms Delay</span>
                   </button>
                 </div>
@@ -748,22 +768,26 @@
 
               <div class="macro-deck-right">
                 <!-- Standard Delays Toggle -->
-                <label class="macro-delay-toggle" title="Use fixed 50ms delay between steps or record exact real-time timing">
+                <label class="macro-delay-toggle"
+                  title="Use fixed 50ms delay between steps or record exact real-time timing">
                   <input type="checkbox" id="macroChkStandardDelays" checked />
                   <span class="macro-delay-checkbox"></span>
                   <span class="macro-delay-label">Fixed Delay (50ms)</span>
                 </label>
 
                 <!-- Test Playback Button -->
-                <button type="button" class="neumorphic-btn-pill btn-test-macro" id="macroBtnTestPlay" title="Test Play Current Sequence">
-                  <svg class="macro-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <button type="button" class="neumorphic-btn-pill btn-test-macro" id="macroBtnTestPlay"
+                  title="Test Play Current Sequence">
+                  <svg class="macro-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2.5">
                     <polygon points="5 3 19 12 5 21 5 3"></polygon>
                   </svg>
                   <span>Test Play</span>
                 </button>
 
                 <!-- Clear Steps Button -->
-                <button type="button" class="neumorphic-btn-pill btn-clear-macro" id="macroBtnClearSteps" title="Clear all recorded steps">
+                <button type="button" class="neumorphic-btn-pill btn-clear-macro" id="macroBtnClearSteps"
+                  title="Clear all recorded steps">
                   <svg class="macro-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="3 6 5 6 21 6"></polyline>
                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -776,7 +800,8 @@
             <!-- Sequence Flow Timeline Track -->
             <div class="macro-timeline-track" id="macroTimelineTrack">
               <div class="macro-timeline-empty" id="macroTimelineEmpty">
-                <span>No sequence steps recorded yet. Click <strong>RECORD</strong> and press any keys, or click the <strong>+ Mouse / Delay</strong> buttons above.</span>
+                <span>No sequence steps recorded yet. Click <strong>RECORD</strong> and press any keys, or click the
+                  <strong>+ Mouse / Delay</strong> buttons above.</span>
               </div>
             </div>
           </div>
@@ -807,12 +832,15 @@
       <div class="modal-card theme-modal-card">
         <div class="modal-header">
           <div class="modal-title-row">
-            <svg class="icon-svg" style="color:var(--accent-primary);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg class="icon-svg" style="color:var(--accent-primary);" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2">
               <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle>
               <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle>
               <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle>
               <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle>
-              <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.992 6.012 17.461 2 12 2z"></path>
+              <path
+                d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.992 6.012 17.461 2 12 2z">
+              </path>
             </svg>
             <h3 class="modal-title">Theme & Appearance</h3>
           </div>
@@ -832,31 +860,38 @@
               <span class="theme-section-subtitle">Sets the clay base plane & automatic ambient lighting</span>
             </div>
             <div class="theme-swatches-grid" id="bgSwatchesGrid">
-              <button class="theme-swatch-chip active" data-preset="soft-gray" data-color="#e0e5ec" title="Soft Clay (Balanced Neumorphic, 20px Radius)">
+              <button class="theme-swatch-chip active" data-preset="soft-gray" data-color="#e0e5ec"
+                title="Soft Clay (Balanced Neumorphic, 20px Radius)">
                 <span class="swatch-color-circle" style="background:#e0e5ec;"></span>
                 <span class="swatch-name">Soft Clay</span>
               </button>
-              <button class="theme-swatch-chip" data-preset="obsidian" data-color="#1e222b" title="Obsidian Dark (Stealth Midnight, 14px Radius)">
+              <button class="theme-swatch-chip" data-preset="obsidian" data-color="#1e222b"
+                title="Obsidian Dark (Stealth Midnight, 14px Radius)">
                 <span class="swatch-color-circle" style="background:#1e222b;"></span>
                 <span class="swatch-name">Obsidian</span>
               </button>
-              <button class="theme-swatch-chip" data-preset="retro-sharp" data-color="#f2f4f7" title="Retro Sharp (Embossed 0px Blur, 6px Radius)">
+              <button class="theme-swatch-chip" data-preset="retro-sharp" data-color="#f2f4f7"
+                title="Retro Sharp (Embossed 0px Blur, 6px Radius)">
                 <span class="swatch-color-circle" style="background:#f2f4f7;"></span>
                 <span class="swatch-name">Retro Sharp</span>
               </button>
-              <button class="theme-swatch-chip" data-preset="warm-ceramic" data-color="#e8dfd5" title="Warm Ceramic (Pebble 30px Radius, Soft Light)">
+              <button class="theme-swatch-chip" data-preset="warm-ceramic" data-color="#e8dfd5"
+                title="Warm Ceramic (Pebble 30px Radius, Soft Light)">
                 <span class="swatch-color-circle" style="background:#e8dfd5;"></span>
                 <span class="swatch-name">Warm Sand</span>
               </button>
-              <button class="theme-swatch-chip" data-preset="cyber-violet" data-color="#2b2640" title="Cyber Violet (Moody Twilight, 18px Radius)">
+              <button class="theme-swatch-chip" data-preset="cyber-violet" data-color="#2b2640"
+                title="Cyber Violet (Moody Twilight, 18px Radius)">
                 <span class="swatch-color-circle" style="background:#2b2640;"></span>
                 <span class="swatch-name">Cyber Violet</span>
               </button>
-              <button class="theme-swatch-chip" data-preset="sage-mint" data-color="#dbe5de" title="Sage Mint (Botanical Pastel, 24px Radius)">
+              <button class="theme-swatch-chip" data-preset="sage-mint" data-color="#dbe5de"
+                title="Sage Mint (Botanical Pastel, 24px Radius)">
                 <span class="swatch-color-circle" style="background:#dbe5de;"></span>
                 <span class="swatch-name">Sage Mint</span>
               </button>
-              <button class="theme-swatch-chip" data-preset="arctic-frost" data-color="#edf2f7" title="Arctic Frost (High-Key Silver, 12px Radius)">
+              <button class="theme-swatch-chip" data-preset="arctic-frost" data-color="#edf2f7"
+                title="Arctic Frost (High-Key Silver, 12px Radius)">
                 <span class="swatch-color-circle" style="background:#edf2f7;"></span>
                 <span class="swatch-name">Arctic Frost</span>
               </button>
@@ -867,15 +902,19 @@
               <div class="color-picker-input-wrap">
                 <div class="color-picker-chip" title="Click to open color palette">
                   <input type="color" id="themeBgColorPicker" value="#e0e0e0" class="neumorphic-color-picker" />
-                  <svg class="color-picker-badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <svg class="color-picker-badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2.2">
                     <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle>
                     <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle>
                     <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle>
                     <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle>
-                    <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.992 6.012 17.461 2 12 2z"></path>
+                    <path
+                      d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.992 6.012 17.461 2 12 2z">
+                    </path>
                   </svg>
                 </div>
-                <input type="text" id="themeBgHex" value="#e0e0e0" maxlength="7" spellcheck="false" class="color-hex-input" />
+                <input type="text" id="themeBgHex" value="#e0e0e0" maxlength="7" spellcheck="false"
+                  class="color-hex-input" />
               </div>
             </div>
           </div>
@@ -918,15 +957,19 @@
               <div class="color-picker-input-wrap">
                 <div class="color-picker-chip" title="Click to open color palette">
                   <input type="color" id="themeAccentColorPicker" value="#22c55e" class="neumorphic-color-picker" />
-                  <svg class="color-picker-badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <svg class="color-picker-badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2.2">
                     <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle>
                     <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle>
                     <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle>
                     <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle>
-                    <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.992 6.012 17.461 2 12 2z"></path>
+                    <path
+                      d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.992 6.012 17.461 2 12 2z">
+                    </path>
                   </svg>
                 </div>
-                <input type="text" id="themeAccentHex" value="#22c55e" maxlength="7" spellcheck="false" class="color-hex-input" />
+                <input type="text" id="themeAccentHex" value="#22c55e" maxlength="7" spellcheck="false"
+                  class="color-hex-input" />
               </div>
             </div>
           </div>
@@ -935,7 +978,8 @@
           <div class="theme-section">
             <div class="theme-section-header">
               <span class="theme-section-title">Neumorphism Effect Controls</span>
-              <span class="theme-section-subtitle">Fine-tune the 3D clay elevation, softness, roundness & shadow contrast</span>
+              <span class="theme-section-subtitle">Fine-tune the 3D clay elevation, softness, roundness & shadow
+                contrast</span>
             </div>
             <div class="neo-sliders-grid">
               <!-- Radius Slider -->
@@ -945,7 +989,8 @@
                   <span class="neo-slider-badge" id="badgeRadius">22px</span>
                 </div>
                 <div class="neo-slider-track-wrap">
-                  <input type="range" id="themeSliderRadius" min="0" max="40" step="1" value="22" class="neumorphic-slider" />
+                  <input type="range" id="themeSliderRadius" min="0" max="40" step="1" value="22"
+                    class="neumorphic-slider" />
                 </div>
               </div>
 
@@ -956,7 +1001,8 @@
                   <span class="neo-slider-badge" id="badgeDistance">3px</span>
                 </div>
                 <div class="neo-slider-track-wrap">
-                  <input type="range" id="themeSliderDistance" min="1" max="15" step="1" value="3" class="neumorphic-slider" />
+                  <input type="range" id="themeSliderDistance" min="1" max="15" step="1" value="3"
+                    class="neumorphic-slider" />
                 </div>
               </div>
 
@@ -967,7 +1013,8 @@
                   <span class="neo-slider-badge" id="badgeLightIntensity">18%</span>
                 </div>
                 <div class="neo-slider-track-wrap">
-                  <input type="range" id="themeSliderLightIntensity" min="1" max="100" step="1" value="18" class="neumorphic-slider" />
+                  <input type="range" id="themeSliderLightIntensity" min="1" max="100" step="1" value="18"
+                    class="neumorphic-slider" />
                 </div>
               </div>
 
@@ -978,7 +1025,8 @@
                   <span class="neo-slider-badge" id="badgeDarkIntensity">18%</span>
                 </div>
                 <div class="neo-slider-track-wrap">
-                  <input type="range" id="themeSliderDarkIntensity" min="1" max="100" step="1" value="18" class="neumorphic-slider" />
+                  <input type="range" id="themeSliderDarkIntensity" min="1" max="100" step="1" value="18"
+                    class="neumorphic-slider" />
                 </div>
               </div>
 
@@ -989,7 +1037,8 @@
                   <span class="neo-slider-badge" id="badgeBlur">8px</span>
                 </div>
                 <div class="neo-slider-track-wrap">
-                  <input type="range" id="themeSliderBlur" min="0" max="25" step="1" value="8" class="neumorphic-slider" />
+                  <input type="range" id="themeSliderBlur" min="0" max="25" step="1" value="8"
+                    class="neumorphic-slider" />
                 </div>
               </div>
             </div>
@@ -999,9 +1048,10 @@
           <div class="theme-section">
             <div class="theme-section-header">
               <span class="theme-section-title">Custom Theme Presets</span>
-              <span class="theme-section-subtitle">Save your current color palette & 3D clay parameters as a reusable preset</span>
+              <span class="theme-section-subtitle">Save your current color palette & 3D clay parameters as a reusable
+                preset</span>
             </div>
-            
+
             <div class="custom-preset-save-row">
               <div class="inset-input-box custom-preset-input-box">
                 <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1009,9 +1059,11 @@
                   <polyline points="17 21 17 13 7 13 7 21"></polyline>
                   <polyline points="7 3 7 8 15 8"></polyline>
                 </svg>
-                <input type="text" id="inputCustomPresetName" placeholder="Preset name (e.g. My Dark Clay)..." autocomplete="off" spellcheck="false" class="custom-preset-name-input" />
+                <input type="text" id="inputCustomPresetName" placeholder="Preset name (e.g. My Dark Clay)..."
+                  autocomplete="off" spellcheck="false" class="custom-preset-name-input" />
               </div>
-              <button type="button" class="neumorphic-btn btn-go btn-save-preset" id="btnSaveCustomPreset" title="Save current theme as a custom preset">
+              <button type="button" class="neumorphic-btn btn-go btn-save-preset" id="btnSaveCustomPreset"
+                title="Save current theme as a custom preset">
                 <span>SAVE PRESET</span>
               </button>
             </div>
@@ -1038,4 +1090,5 @@
 
   <script src="app.js"></script>
 </body>
+
 </html>
