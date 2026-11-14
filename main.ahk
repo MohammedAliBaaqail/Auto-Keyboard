@@ -1438,12 +1438,9 @@ CheckAutoProfileSwitch() {
         if (!activeHwnd || (g_MainGui && activeHwnd == g_MainGui.Hwnd))
             return
 
-        if (!hasHoverProfiles && activeHwnd == g_LastActiveSwitchHwnd)
-            return
-
         activeProc := ""
         try activeProc := WinGetProcessName(activeHwnd)
-        if (activeProc == "" || activeProc = "AutoHotkey64.exe" || activeProc = "msedgewebview2.exe" || activeProc = "explorer.exe")
+        if (activeProc == "" || activeProc = "AutoHotkey64.exe" || activeProc = "msedgewebview2.exe")
             return
 
         g_LastActiveSwitchHwnd := activeHwnd
@@ -1485,11 +1482,21 @@ FindProfileForProcess(procName, hoverOnly := false) {
                 clean := StrLower(Trim(part))
                 if (clean == "")
                     continue
+                SplitPath(clean, &cleanFile)
+                if (cleanFile != "")
+                    clean := cleanFile
                 if (!InStr(clean, ".exe"))
                     clean .= ".exe"
                 if (clean == procLower)
                     return pName
             }
+        } else {
+            ; Fallback: if targetExe is not set, match against profile name if it matches the process name
+            pClean := StrLower(Trim(pName))
+            if (!InStr(pClean, ".exe"))
+                pClean .= ".exe"
+            if (pClean == procLower)
+                return pName
         }
     }
     return ""

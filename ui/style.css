@@ -141,20 +141,30 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-bottom: 8px;
+  gap: 12px;
+  padding-bottom: 12px;
   cursor: grab;
   border-bottom: none;
   flex-shrink: 0;
+  min-width: 0;
 }
 
 .app-header:active {
   cursor: grabbing;
 }
 
-.header-left, .header-right {
+.header-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .vertical-rocker.header-rocker {
@@ -237,16 +247,17 @@ html, body {
 .lgs-profiles-bar {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 6px 12px;
-  margin-bottom: 12px;
+  gap: 8px;
+  padding: 4px 8px;
+  margin-bottom: 0;
   background: var(--surface-color);
   box-shadow: var(--inset-sm);
   border-radius: var(--radius-card);
   position: relative;
   user-select: none;
-  flex-shrink: 0;
-  min-height: 60px;
+  flex: 1 1 0;
+  min-width: 0;
+  height: 50px;
   box-sizing: border-box;
 }
 
@@ -267,18 +278,18 @@ html, body {
   position: relative;
   display: flex;
   align-items: center;
-  width: 140px;
+  width: 110px;
 }
 
 .lgs-search-wrap input {
   width: 100%;
-  height: 34px;
+  height: 32px;
   background: var(--surface-color);
   border: none;
   box-shadow: var(--inset-sm);
   border-radius: var(--radius-btn);
-  padding: 0 10px 0 28px;
-  font-size: 11.5px;
+  padding: 0 8px 0 24px;
+  font-size: 11px;
   color: var(--text-primary);
   outline: none;
   font-family: inherit;
@@ -292,9 +303,9 @@ html, body {
 
 .search-mini-icon {
   position: absolute;
-  left: 8px;
-  width: 13px;
-  height: 13px;
+  left: 7px;
+  width: 12px;
+  height: 12px;
   color: var(--text-muted);
   pointer-events: none;
 }
@@ -302,12 +313,12 @@ html, body {
 .lgs-action-btns {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
 }
 
 .lgs-mini-btn {
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   padding: 0;
   border-radius: var(--radius-btn);
   display: flex;
@@ -350,7 +361,7 @@ html, body {
 
 .lgs-profile-separator {
   width: 1.5px;
-  height: 34px;
+  height: 30px;
   background: rgba(0, 0, 0, 0.08);
   flex-shrink: 0;
   margin: 0 2px;
@@ -367,14 +378,14 @@ html, body {
 }
 
 .lgs-scroll-btn {
-  width: 20px;
-  height: 42px;
+  width: 18px;
+  height: 36px;
   background: var(--surface-color);
   box-shadow: var(--raised-sm);
-  border-radius: 6px;
+  border-radius: 5px;
   border: none;
   color: var(--text-muted);
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   cursor: pointer;
   display: flex;
@@ -412,11 +423,11 @@ html, body {
 .lgs-profile-card {
   display: flex;
   align-items: center;
-  min-width: 155px;
-  max-width: 220px;
-  height: 46px;
-  padding: 5px 12px;
-  gap: 10px;
+  min-width: 135px;
+  max-width: 195px;
+  height: 40px;
+  padding: 4px 8px;
+  gap: 8px;
   border-radius: var(--radius-btn);
   background: var(--surface-color);
   box-shadow: var(--raised-sm);
@@ -455,9 +466,9 @@ html, body {
 }
 
 .lgs-icon-box {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -467,7 +478,7 @@ html, body {
 }
 
 .profile-card-img {
-  width: 24px;
+  width: 22px;
   height: 24px;
   object-fit: contain;
   background: transparent;

@@ -173,6 +173,60 @@
         </div>
       </div>
 
+      <!-- Application Profiles Ribbon Bar (OBM AHK Style) -->
+      <div class="lgs-profiles-bar" id="lgsProfilesBar">
+        <!-- Left Controls: Filter & Action Buttons -->
+        <div class="lgs-bar-controls">
+          <div class="lgs-search-row">
+            <div class="lgs-search-wrap">
+              <svg class="search-mini-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="text" id="profileSearchInput" placeholder="Filter profiles..." autocomplete="off" spellcheck="false" />
+            </div>
+            <div class="lgs-action-btns">
+              <button class="squircle-btn lgs-mini-btn" id="btnAddProfile" title="Add New Profile">
+                <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+              </button>
+              <button class="squircle-btn lgs-mini-btn" id="btnEditProfile" title="Configure Profile Settings & Auto-Switching">
+                <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="3"></circle>
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>
+              </button>
+              <button class="squircle-btn lgs-mini-btn btn-danger-profile" id="btnDeleteProfile" title="Delete Profile">
+                <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fixed Default Profile Slot -->
+        <div class="lgs-default-profile-slot" id="lgsDefaultProfileSlot"></div>
+
+        <!-- Vertical Divider Separator -->
+        <div class="lgs-profile-separator" id="lgsProfileSeparator" aria-hidden="true"></div>
+
+        <!-- Center/Right: App Profiles Carousel / Strip -->
+        <div class="lgs-carousel-wrap">
+          <button class="lgs-scroll-btn left" id="btnScrollProfilesLeft" title="Scroll Left">‹</button>
+          <div class="lgs-profiles-track" id="lgsProfilesTrack">
+            <!-- Dynamic profile cards injected here -->
+          </div>
+          <button class="lgs-scroll-btn right" id="btnScrollProfilesRight" title="Scroll Right">›</button>
+        </div>
+
+        <!-- Hidden select for backward compatibility -->
+        <select id="profileSelect" style="display:none;"></select>
+      </div>
+
       <div class="header-right">
         <button class="squircle-btn" id="btnTheme" title="Customize Theme (Background & Accent)">
           <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -203,58 +257,6 @@
         </button>
       </div>
     </header>
-
-    <!-- Application Profiles Ribbon Bar (OBM AHK Style) -->
-    <div class="lgs-profiles-bar" id="lgsProfilesBar">
-      <!-- Left Controls: Filter & Action Buttons -->
-      <div class="lgs-bar-controls">
-        <div class="lgs-search-row">
-          <div class="lgs-search-wrap">
-            <svg class="search-mini-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-            <input type="text" id="profileSearchInput" placeholder="Filter profiles..." autocomplete="off" spellcheck="false" />
-          </div>
-          <div class="lgs-action-btns">
-            <button class="squircle-btn lgs-mini-btn" id="btnAddProfile" title="Add New Profile">
-              <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-              </svg>
-            </button>
-            <button class="squircle-btn lgs-mini-btn" id="btnEditProfile" title="Configure Profile Settings & Auto-Switching">
-              <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="3"></circle>
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-              </svg>
-            </button>
-            <button class="squircle-btn lgs-mini-btn btn-danger-profile" id="btnDeleteProfile" title="Delete Profile">
-              <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="3 6 5 6 21 6"></polyline>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Fixed Default Profile Slot -->
-      <div class="lgs-default-profile-slot" id="lgsDefaultProfileSlot"></div>
-
-      <!-- Vertical Divider Separator -->
-      <div class="lgs-profile-separator" id="lgsProfileSeparator" aria-hidden="true"></div>
-
-      <!-- Center/Right: App Profiles Carousel / Strip -->
-      <div class="lgs-carousel-wrap">
-        <button class="lgs-scroll-btn left" id="btnScrollProfilesLeft" title="Scroll Left">‹</button>
-        <div class="lgs-profiles-track" id="lgsProfilesTrack"></div>
-        <button class="lgs-scroll-btn right" id="btnScrollProfilesRight" title="Scroll Right">›</button>
-      </div>
-
-      <!-- Hidden select for backward compatibility -->
-      <select id="profileSelect" style="display:none;"></select>
-    </div>
 
     <!-- Script Type / Feature Tabs Bar (Segmented Control from image) -->
     <div class="segmented-control-wrapper">
