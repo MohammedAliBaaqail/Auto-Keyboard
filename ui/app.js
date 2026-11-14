@@ -506,6 +506,13 @@
       card.appendChild(iconBox);
       card.appendChild(infoCol);
 
+      if (isActive) {
+        const activeTag = document.createElement('span');
+        activeTag.className = 'profile-active-tag';
+        activeTag.textContent = 'ACTIVE';
+        card.appendChild(activeTag);
+      }
+
       card.addEventListener('click', () => {
         if (state.config.activeProfile !== pName) {
           switchProfile(pName);
@@ -858,7 +865,10 @@
         if (btnConfirmProfileModal) btnConfirmProfileModal.textContent = 'Rename';
       }
 
-      // Request open running windows list from AHK backend
+      // Render immediately if cached running apps exist, then request fresh scan
+      if (cachedRunningApps && cachedRunningApps.length > 0) {
+        renderRunningAppsList();
+      }
       sendToAhk('getRunningApps');
     }
 
