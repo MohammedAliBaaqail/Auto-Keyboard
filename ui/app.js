@@ -416,17 +416,135 @@
     };
   }
 
-  function renderProfileSelect() {
-    if (!profileSelect) return;
-    profileSelect.innerHTML = '';
-    const profiles = Object.keys((state.config && state.config.profiles) || { 'Default': {} });
-    profiles.forEach(p => {
-      const opt = document.createElement('option');
-      opt.value = p;
-      opt.textContent = p;
-      if (p === (state.config && state.config.activeProfile)) opt.selected = true;
-      profileSelect.appendChild(opt);
+  function getProfileIconHtml(pName, prof) {
+    const isDefault = (pName === 'Default');
+    if (isDefault) {
+      return `<svg class="profile-card-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+        <line x1="8" y1="21" x2="16" y2="21"></line>
+        <line x1="12" y1="17" x2="12" y2="21"></line>
+      </svg>`;
+    }
+
+    const targetExe = (prof && prof.targetExe) ? prof.targetExe.trim() : '';
+    const firstExe = targetExe ? targetExe.split(',')[0].trim().replace(/\.exe$/i, '') : '';
+    const iconSrc = firstExe ? `icons/${encodeURIComponent(firstExe)}.png` : '';
+
+    if (iconSrc) {
+      return `
+        <img class="profile-card-img" src="${iconSrc}" alt="${escapeHtml(pName)}"
+             onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';" />
+        <div class="profile-card-fallback-badge" style="display:none;">
+          <span>${escapeHtml(pName.charAt(0).toUpperCase())}</span>
+        </div>`;
+    }
+
+    return `
+      <div class="profile-card-fallback-badge">
+        <span>${escapeHtml(pName.charAt(0).toUpperCase())}</span>
+      </div>`;
+  }
+
+  function renderProfilesRibbon() {
+    const track = document.getElementById('lgsProfilesTrack');
+    const defaultSlot = document.getElementById('lgsDefaultProfileSlot');
+    const select = document.getElementById('profileSelect');
+    if (!track) return;
+
+    const currentProfName = (state.config && state.config.activeProfile) || 'Default';
+    const profiles = (state.config && state.config.profiles) ? state.config.profiles : { 'Default': {} };
+    const allProfileNames = Object.keys(profiles);
+
+    if (select) {
+      select.innerHTML = '';
+      allProfileNames.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p;
+        opt.textContent = p;
+        if (p === currentProfName) opt.selected = true;
+        select.appendChild(opt);
+      });
+    }
+
+    const queryInput = document.getElementById('profileSearchInput');
+    const query = (queryInput ? queryInput.value : '').trim().toLowerCase();
+
+    const btnDelete = document.getElementById('btnDeleteProfile');
+    if (btnDelete) {
+      const canDelete = (currentProfName !== 'Default' && allProfileNames.length > 1);
+      btnDelete.disabled = !canDelete;
+      btnDelete.classList.toggle('is-disabled', !canDelete);
+      btnDelete.title = canDelete ? `Delete Profile "${currentProfName}"` : 'Cannot delete Default profile';
+    }
+
+    function createProfileCard(pName, isDef) {
+      const prof = profiles[pName] || {};
+      const isActive = (pName === currentProfName);
+      const card = document.createElement('div');
+      card.className = `lgs-profile-card ${isDef ? 'is-default' : ''} ${isActive ? 'active' : ''}`;
+      card.setAttribute('data-profile', pName);
+      card.title = isDef ? 'Default Profile (System Fallback)' : (prof.targetExe ? `${pName} (${prof.targetExe})` : pName);
+
+      const iconBox = document.createElement('div');
+      iconBox.className = 'lgs-icon-box';
+      iconBox.innerHTML = getProfileIconHtml(pName, prof);
+
+      const infoCol = document.createElement('div');
+      infoCol.className = 'lgs-profile-info';
+
+      const nameEl = document.createElement('div');
+      nameEl.className = 'lgs-profile-name';
+      nameEl.textContent = pName;
+
+      const exeEl = document.createElement('div');
+      exeEl.className = 'lgs-profile-exe';
+      exeEl.textContent = isDef ? 'Default (System)' : (prof.targetExe ? prof.targetExe.split(',')[0].trim() : 'Manual Switch');
+
+      infoCol.appendChild(nameEl);
+      infoCol.appendChild(exeEl);
+
+      card.appendChild(iconBox);
+      card.appendChild(infoCol);
+
+      card.addEventListener('click', () => {
+        if (state.config.activeProfile !== pName) {
+          switchProfile(pName);
+        }
+      });
+
+      card.addEventListener('dblclick', () => {
+        openProfileModal('edit');
+      });
+
+      return card;
+    }
+
+    // 1. Render Fixed Default Profile Slot
+    if (defaultSlot) {
+      defaultSlot.innerHTML = '';
+      if (!query || 'default'.includes(query) || ((profiles['Default'] && profiles['Default'].targetExe) || '').toLowerCase().includes(query)) {
+        defaultSlot.style.display = 'flex';
+        defaultSlot.appendChild(createProfileCard('Default', true));
+      } else {
+        defaultSlot.style.display = 'none';
+      }
+    }
+
+    // 2. Render App Profiles Track
+    track.innerHTML = '';
+    const otherNames = allProfileNames.filter(n => n !== 'Default');
+    otherNames.forEach(pName => {
+      const prof = profiles[pName] || {};
+      const targetLower = (prof.targetExe || '').toLowerCase();
+      if (query && !pName.toLowerCase().includes(query) && !targetLower.includes(query)) {
+        return;
+      }
+      track.appendChild(createProfileCard(pName, false));
     });
+  }
+
+  function renderProfileSelect() {
+    renderProfilesRibbon();
   }
 
   function switchProfile(name) {
@@ -3992,6 +4110,33 @@ function toggleMasterEngine() {
             openProfileModal('delete');
           });
         }
+        const btnScrollProfilesLeft = document.getElementById('btnScrollProfilesLeft');
+        const btnScrollProfilesRight = document.getElementById('btnScrollProfilesRight');
+        const lgsProfilesTrack = document.getElementById('lgsProfilesTrack');
+        if (btnScrollProfilesLeft && lgsProfilesTrack) {
+          btnScrollProfilesLeft.addEventListener('click', () => {
+            lgsProfilesTrack.scrollBy({ left: -220, behavior: 'smooth' });
+          });
+        }
+        if (btnScrollProfilesRight && lgsProfilesTrack) {
+          btnScrollProfilesRight.addEventListener('click', () => {
+            lgsProfilesTrack.scrollBy({ left: 220, behavior: 'smooth' });
+          });
+        }
+        if (lgsProfilesTrack) {
+          lgsProfilesTrack.addEventListener('wheel', (e) => {
+            if (e.deltaY) {
+              e.preventDefault();
+              lgsProfilesTrack.scrollLeft += e.deltaY;
+            }
+          }, { passive: false });
+        }
+        const profileSearchInput = document.getElementById('profileSearchInput');
+        if (profileSearchInput) {
+          profileSearchInput.addEventListener('input', () => {
+            renderProfilesRibbon();
+          });
+        }
         const btnBrowseProfileExe = document.getElementById('btnBrowseProfileExe');
         if (btnBrowseProfileExe) {
           btnBrowseProfileExe.addEventListener('click', () => {
@@ -4132,7 +4277,9 @@ function toggleMasterEngine() {
             e.target.closest('.macro-inject-btn') ||
             e.target.closest('[draggable="true"]') ||
             e.target.closest('#mainEngineSwitch') ||
-            e.target.closest('.vertical-rocker')
+            e.target.closest('.vertical-rocker') ||
+            e.target.closest('.lgs-profile-card') ||
+            e.target.closest('.lgs-profiles-bar')
           ) return;
           sendToAhk('startDrag');
         }
