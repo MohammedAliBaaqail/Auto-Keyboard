@@ -2979,10 +2979,12 @@ html, body {
 .theme-modal-body {
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  padding: 4px 6px 4px 2px;
+  gap: 16px;
+  padding: 20px 18px 16px 18px;
+  margin: -10px -18px -8px -18px;
   overflow-y: auto;
-  max-height: calc(90vh - 140px);
+  overflow-x: hidden;
+  max-height: calc(90vh - 130px);
 }
 
 .theme-modal-body::-webkit-scrollbar {
@@ -3065,12 +3067,6 @@ html, body {
   font-size: 11px;
   font-weight: 500;
   color: var(--text-muted);
-}
-
-.theme-swatches-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
 }
 
 .theme-swatch-chip {
@@ -3275,15 +3271,21 @@ html, body {
 }
 
 .custom-presets-grid {
-  display: flex;
+  display: flex !important;
   flex-wrap: wrap;
-  gap: 8px;
-  min-height: 40px;
+  gap: 12px;
+  min-height: 44px;
   align-items: center;
+  padding: 12px 14px 16px 14px;
+  margin: 0;
+  box-sizing: border-box;
 }
 
 .custom-preset-chip {
-  padding-right: 8px !important;
+  width: 44px !important;
+  height: 44px !important;
+  flex: 0 0 44px;
+  padding: 0 !important;
   position: relative;
 }
 
@@ -4003,8 +4005,10 @@ html, body {
 .theme-swatches-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
-  gap: 10px;
-  margin-top: 10px;
+  gap: 12px;
+  padding: 16px 14px 14px 14px;
+  margin: 0;
+  box-sizing: border-box;
 }
 
 .theme-card-chip {
