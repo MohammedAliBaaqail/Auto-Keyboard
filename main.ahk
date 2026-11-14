@@ -74,9 +74,14 @@ LogMessage(msg) {
 }
 
 ; Initialize Application
-InitConfig()
-CreateMainWindow()
-SetupTrayMenu()
+try {
+    InitConfig()
+    CreateMainWindow()
+    SetupTrayMenu()
+} catch as err {
+    FileAppend("Error: " . err.Message . "`n" . err.Stack . "`n", A_ScriptDir . "\ahk_error.log", "UTF-8")
+    MsgBox("Startup Error: " . err.Message, "Error", 16)
+}
 OnExit(OnAppExit)
 
 OnAppExit(exitReason, exitCode) {

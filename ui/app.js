@@ -807,7 +807,6 @@
 
       card.innerHTML = `
         <div class="card-info">
-          <span class="trigger-badge">${escapeHtml(item.input)}</span>
           <span class="trigger-badge ${isEnabled ? '' : 'is-disabled'}">${escapeHtml(item.input)}</span>
           <span class="arrow-divider"><svg class="arrow-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></span>
           <span class="expansion-text" title="${escapeHtml(item.output)}">${escapeHtml(previewText)}</span>
@@ -915,32 +914,32 @@
         exists.multiline = isMulti;
         updateItemAcrossProfiles('textExpander', exists);
       } else {
-        items.unshift({
-          const newItem = {
-            id: 'te-' + Date.now(),
-            input: trigger,
-            output: output,
-            multiline: isMulti
-          });
-        multiline: isMulti,
+        const newItem = {
+          id: 'te-' + Date.now(),
+          input: trigger,
+          output: output,
+          multiline: isMulti,
           enabled: 1
-      };
-      items.unshift(newItem);
-      addItemAcrossProfiles('textExpander', newItem);
-    }
+        items.unshift(newItem);
+        addItemAcrossProfiles('textExpander', newItem);
+      }
+    };
+    items.unshift(newItem);
+    addItemAcrossProfiles('textExpander', newItem);
   }
-
-  teInputTrigger.value = '';
-  teInputOutput.value = '';
-  teTextareaOutput.value = '';
-  toggleMultiline(false);
-  teInputTrigger.focus();
-
-  renderTextExpander();
-  syncConfig();
 }
 
-  function startEditTe(item) {
+  teInputTrigger.value = '';
+teInputOutput.value = '';
+teTextareaOutput.value = '';
+toggleMultiline(false);
+teInputTrigger.focus();
+
+renderTextExpander();
+syncConfig();
+}
+
+function startEditTe(item) {
   state.editingTeId = item.id;
   teInputTrigger.value = item.input;
   if (item.multiline || item.output.includes('\n')) {
@@ -1254,8 +1253,16 @@ function submitKeyRemapper() {
       name: `${src} → ${tgt}`
     });
   name: `${src} → ${tgt}`,
+  const newItem = {
+    id: 'kr-' + Date.now(),
+    source: src,
+    target: tgt,
+    name: `${src} → ${tgt}`,
     enabled: 1
+  };
 };
+state.config.keyRemapper.items.unshift(newItem);
+addItemAcrossProfiles('keyRemapper', newItem);
 
 state.config.keyRemapper.items.unshift(newItem);
 addItemAcrossProfiles('keyRemapper', newItem);
@@ -1716,11 +1723,21 @@ function submitAppLauncher() {
         name: name
       });
     name: name,
+    const newItem = {
+      id: 'al-' + Date.now(),
+      trigger: trigger,
+      triggerType: triggerType,
+      target: target,
+      name: name,
       enabled: 1
-  };
-  state.config.appLauncher.items.unshift(newItem);
-  addItemAcrossProfiles('appLauncher', newItem);
-}
+    };
+    state.config.appLauncher.items.unshift(newItem);
+    addItemAcrossProfiles('appLauncher', newItem);
+  }
+};
+state.config.appLauncher.items.unshift(newItem);
+addItemAcrossProfiles('appLauncher', newItem);
+  }
 
 alInputTrigger.value = '';
 alInputTarget.value = '';
@@ -2363,17 +2380,30 @@ function submitMacro() {
     addItemAcrossProfiles('macroRecorder', newMacro);
     showToast(`Created macro "${name}"`);
   }
+      const newMacro = {
+    id: 'macro-' + Date.now(),
+    name: name,
+    trigger: trig,
+    playbackMode: macroState.playbackMode,
+    repeatInterval: interval,
+    enabled: 1,
+    steps: JSON.parse(JSON.stringify(macroState.steps))
+  };
+  state.config.macroRecorder.items.unshift(newMacro);
+  addItemAcrossProfiles('macroRecorder', newMacro);
+  showToast(`Created macro "${name}"`);
+}
 
-      if (macroInputName) macroInputName.value = '';
-  if (macroInputTrigger) {
-    macroInputTrigger.value = '';
-    macroInputTrigger.placeholder = 'Click to record...';
-  }
-  if (macroBtnClearTrigger) macroBtnClearTrigger.classList.add('hidden-field');
-  macroState.steps = [];
-  renderMacroTimeline();
-  renderMacroRecorder();
-  syncConfig();
+if (macroInputName) macroInputName.value = '';
+if (macroInputTrigger) {
+  macroInputTrigger.value = '';
+  macroInputTrigger.placeholder = 'Click to record...';
+}
+if (macroBtnClearTrigger) macroBtnClearTrigger.classList.add('hidden-field');
+macroState.steps = [];
+renderMacroTimeline();
+renderMacroRecorder();
+syncConfig();
 } catch (err) {
   console.error('Error submitting macro:', err);
   showToast('Error saving macro: ' + err.message, 'error');
@@ -2583,6 +2613,8 @@ function updateSwitchUi() {
     if (mainEngineSwitch) {
       mainEngineSwitch.classList.remove('is-off');
       mainEngineSwitch.classList.add('is-on');
+      mainEngineSwitch.classList.toggle('is-on', state.enabled);
+      mainEngineSwitch.classList.toggle('is-off', !state.enabled);
     }
     if (switchCaptionText) switchCaptionText.textContent = 'ACTIVE';
     statusSubtitle.innerHTML = 'Engine: <span class="status-indicator-text online">Active</span>';
@@ -2593,1846 +2625,1995 @@ function updateSwitchUi() {
     if (mainEngineSwitch) {
       mainEngineSwitch.classList.remove('is-on');
       mainEngineSwitch.classList.add('is-off');
+      if (switchCaptionText) {
+        switchCaptionText.textContent = state.enabled ? 'ACTIVE' : 'SUSPENDED';
+      }
+      if (switchCaptionText) switchCaptionText.textContent = 'SUSPENDED';
+      statusSubtitle.innerHTML = 'Engine: <span class="status-indicator-text offline">Suspended</span>';
+      if (statusSubtitle) statusSubtitle.innerHTML = 'Engine: <span class="status-indicator-text offline">Suspended</span>';
+      if (statusSubtitle) {
+        statusSubtitle.innerHTML = state.enabled
+          ? 'Engine: <span class="status-indicator-text online">Active</span>'
+          : 'Engine: <span class="status-indicator-text offline">Suspended</span>';
+      }
     }
-    if (switchCaptionText) switchCaptionText.textContent = 'SUSPENDED';
-    statusSubtitle.innerHTML = 'Engine: <span class="status-indicator-text offline">Suspended</span>';
-    if (statusSubtitle) statusSubtitle.innerHTML = 'Engine: <span class="status-indicator-text offline">Suspended</span>';
   }
-}
 
-function updateGlobalIndicators() {
-  let totalItems = 0;
-  if (state.config.textExpander && state.config.textExpander.items) {
-    totalItems += state.config.textExpander.items.length;
-    const isEngActive = state.enabled && state.config && state.config.enabled !== false && state.config.enabled !== 0;
+  function updateGlobalIndicators() {
+    let totalItems = 0;
+    if (state.config.textExpander && state.config.textExpander.items) {
+      totalItems += state.config.textExpander.items.length;
+      function updateGlobalIndicators() {
+        let totalItems = 0;
+        const isEngActive = state.enabled && state.config && state.config.enabled !== false && state.config.enabled !== 0;
 
-    if (isEngActive && state.config) {
-      if (state.config.textExpander && state.config.textExpander.enabled !== false && state.config.textExpander.items) {
-        totalItems += state.config.textExpander.items.filter(i => i.enabled !== false && i.enabled !== 0).length;
-      }
-      if (state.config.keyRemapper && state.config.keyRemapper.enabled !== false && state.config.keyRemapper.items) {
-        totalItems += state.config.keyRemapper.items.filter(i => i.enabled !== false && i.enabled !== 0).length;
-      }
-      if (state.config.appLauncher && state.config.appLauncher.enabled !== false && state.config.appLauncher.items) {
-        totalItems += state.config.appLauncher.items.filter(i => i.enabled !== false && i.enabled !== 0).length;
-      }
-      if (state.config.macroRecorder && state.config.macroRecorder.enabled !== false && state.config.macroRecorder.items) {
-        totalItems += state.config.macroRecorder.items.filter(i => i.enabled !== false && i.enabled !== 0).length;
-      }
-      if (state.config.windowManager && state.config.windowManager.enabled !== false) {
-        const wm = state.config.windowManager;
-        const wmKeys = ['alwaysOnTopEnabled', 'centerWindowEnabled', 'hideWindowEnabled', 'borderlessEnabled', 'windowShadeEnabled', 'appVolumeWheel', 'appVolumeMuteEnabled', 'transparencyWheel', 'clickThroughGhost'];
-        for (const k of wmKeys) {
-          if (wm[k] === 1 || wm[k] === true) totalItems++;
+        if (isEngActive && state.config) {
+          if (state.config.textExpander && state.config.textExpander.enabled !== false && state.config.textExpander.items) {
+            totalItems += state.config.textExpander.items.filter(i => i.enabled !== false && i.enabled !== 0).length;
+          }
+          if (state.config.keyRemapper && state.config.keyRemapper.enabled !== false && state.config.keyRemapper.items) {
+            totalItems += state.config.keyRemapper.items.filter(i => i.enabled !== false && i.enabled !== 0).length;
+          }
+          if (state.config.appLauncher && state.config.appLauncher.enabled !== false && state.config.appLauncher.items) {
+            totalItems += state.config.appLauncher.items.filter(i => i.enabled !== false && i.enabled !== 0).length;
+          }
+          if (state.config.macroRecorder && state.config.macroRecorder.enabled !== false && state.config.macroRecorder.items) {
+            totalItems += state.config.macroRecorder.items.filter(i => i.enabled !== false && i.enabled !== 0).length;
+          }
+          if (state.config.windowManager && state.config.windowManager.enabled !== false) {
+            const wm = state.config.windowManager;
+            const wmKeys = ['alwaysOnTopEnabled', 'centerWindowEnabled', 'hideWindowEnabled', 'borderlessEnabled', 'windowShadeEnabled', 'appVolumeWheel', 'appVolumeMuteEnabled', 'transparencyWheel', 'clickThroughGhost'];
+            for (const k of wmKeys) {
+              if (wm[k] === 1 || wm[k] === true) totalItems++;
+            }
+          }
         }
-      }
-    }
-    if (state.config.keyRemapper && state.config.keyRemapper.items) {
-      totalItems += state.config.keyRemapper.items.length;
+        if (state.config.keyRemapper && state.config.keyRemapper.items) {
+          totalItems += state.config.keyRemapper.items.length;
 
-      if (activeCountBadge) {
-        activeCountBadge.textContent = totalItems;
-      }
-      if (state.config.appLauncher && state.config.appLauncher.items) {
-        totalItems += state.config.appLauncher.items.length;
-      }
-      if (state.config.macroRecorder && state.config.macroRecorder.items) {
-        totalItems += state.config.macroRecorder.items.length;
-      }
+          if (activeCountBadge) {
+            activeCountBadge.textContent = totalItems;
+          }
+          if (state.config.appLauncher && state.config.appLauncher.items) {
+            totalItems += state.config.appLauncher.items.length;
+          }
+          if (state.config.macroRecorder && state.config.macroRecorder.items) {
+            totalItems += state.config.macroRecorder.items.length;
+          }
 
-      activeCountBadge.textContent = totalItems;
+          if (activeCountBadge) {
+            activeCountBadge.textContent = totalItems;
+          }
 
-      if (gaugeCircle) {
-        const maxItems = 15;
-        const progress = Math.min(totalItems / maxItems, 1);
-        const circumference = 150.79;
-        const offset = circumference - (progress * circumference * 0.75);
-        gaugeCircle.style.strokeDashoffset = offset;
-      }
-    }
+          if (gaugeCircle) {
+            const maxItems = 15;
+            const progress = Math.min(totalItems / maxItems, 1);
+            const circumference = 150.79;
+            const offset = circumference - (progress * circumference * 0.75);
+            gaugeCircle.style.strokeDashoffset = offset;
+          }
+          if (gaugeCircle) {
+            const maxItems = 15;
+            const progress = Math.min(totalItems / maxItems, 1);
+            const circumference = 150.79;
+            const offset = circumference - (progress * circumference * 0.75);
+            gaugeCircle.style.strokeDashoffset = offset;
+          }
+        }
 
-    // ============================================================================
-    // Theme Engine (Primary Background & Secondary Elements Colors)
-    // ============================================================================
+        // ============================================================================
+        // Theme Engine (Primary Background & Secondary Elements Colors)
+        // ============================================================================
+        // Theme Engine (Primary Background & Secondary Elements Colors)
+        // ============================================================================
 
-    function hexToRgb(hex) {
-      let c = hex.replace('#', '').trim();
-      if (c.length === 3) c = c.split('').map(x => x + x).join('');
-      const num = parseInt(c, 16);
-      return {
-        r: (num >> 16) & 255,
-        g: (num >> 8) & 255,
-        b: num & 255
+        function hexToRgb(hex) {
+          let c = hex.replace('#', '').trim();
+          if (c.length === 3) c = c.split('').map(x => x + x).join('');
+          const num = parseInt(c, 16);
+          return {
+            r: (num >> 16) & 255,
+            g: (num >> 8) & 255,
+            b: num & 255
+          };
+        }
+
+        function rgbToHex(r, g, b) {
+          const clamp = v => Math.max(0, Math.min(255, Math.round(v)));
+          return '#' + [clamp(r), clamp(g), clamp(b)].map(x => x.toString(16).padStart(2, '0')).join('');
+        }
+
+        function hexToHsl(hex) {
+          let c = hex.replace('#', '').trim();
+          if (c.length === 3) c = c.split('').map(x => x + x).join('');
+          const r = parseInt(c.substring(0, 2), 16) / 255;
+          const g = parseInt(c.substring(2, 4), 16) / 255;
+          const b = parseInt(c.substring(4, 6), 16) / 255;
+          const max = Math.max(r, g, b), min = Math.min(r, g, b);
+          let h, s, l = (max + min) / 2;
+          if (max === min) {
+            h = s = 0;
+          } else {
+            const d = max - min;
+            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+            switch (max) {
+              case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+              case g: h = (b - r) / d + 2; break;
+              case b: h = (r - g) / d + 4; break;
+            }
+            h /= 6;
+          }
+          return { h, s, l };
+        }
+
+        function hslToHex(h, s, l) {
+          l = Math.max(0, Math.min(1, l));
+          s = Math.max(0, Math.min(1, s));
+          let r, g, b;
+          if (s === 0) {
+            r = g = b = l;
+          } else {
+            function hue2rgb(p, q, t) {
+              if (t < 0) t += 1;
+              if (t > 1) t -= 1;
+              if (t < 1 / 6) return p + (q - p) * 6 * t;
+              if (t < 1 / 2) return q;
+              if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+              return p;
+            }
+            const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+            const p = 2 * l - q;
+            r = hue2rgb(p, q, h + 1 / 3);
+            g = hue2rgb(p, q, h);
+            b = hue2rgb(p, q, h - 1 / 3);
+          }
+          const toHex = x => {
+            const hex = Math.round(Math.max(0, Math.min(255, x * 255))).toString(16);
+            return hex.length === 1 ? '0' + hex : hex;
+          };
+          return '#' + toHex(r) + toHex(g) + toHex(b);
+        }
+
+        // Hand-crafted Neumorphic Theme Presets with balanced light/dark shadows, varied radii & high contrast
+        // Hand-crafted Neumorphic Theme Presets: Rich, diverse, colorful clay base palettes (28 modern palettes)
+        const THEME_PRESETS = {
+          'ocean-azure': {
+            name: 'Ocean Azure',
+            bgColor: '#1e3a5f',
+            accentColor: '#38bdf8',
+            radius: 14,
+            distance: 3,
+            lightIntensity: 20,
+            darkIntensity: 30,
+            blur: 8
+          },
+          'forest-emerald': {
+            name: 'Forest Emerald',
+            bgColor: '#1b4332',
+            accentColor: '#52b788',
+            radius: 10,
+            distance: 3,
+            lightIntensity: 20,
+            darkIntensity: 30,
+            blur: 7
+          },
+          'sunset-terracotta': {
+            name: 'Sunset Terracotta',
+            bgColor: '#8c3a27',
+            accentColor: '#fcd34d',
+            radius: 12,
+            distance: 3,
+            lightIntensity: 22,
+            darkIntensity: 28,
+            blur: 8
+          },
+          'royal-violet': {
+            name: 'Royal Violet',
+            bgColor: '#442759',
+            accentColor: '#f472b6',
+            radius: 16,
+            distance: 4,
+            lightIntensity: 20,
+            darkIntensity: 32,
+            blur: 9
+          },
+          'laguna-teal': {
+            name: 'Laguna Teal',
+            bgColor: '#134e4a',
+            accentColor: '#2dd4bf',
+            radius: 12,
+            distance: 3,
+            lightIntensity: 20,
+            darkIntensity: 30,
+            blur: 8
+          },
+          'desert-caramel': {
+            name: 'Desert Caramel',
+            bgColor: '#c68b59',
+            accentColor: '#451a03',
+            radius: 8,
+            distance: 3,
+            lightIntensity: 25,
+            darkIntensity: 22,
+            blur: 7
+          },
+          'vintage-rose': {
+            name: 'Vintage Rose',
+            bgColor: '#b85d68',
+            accentColor: '#ffe4e6',
+            radius: 14,
+            distance: 3,
+            lightIntensity: 22,
+            darkIntensity: 24,
+            blur: 8
+          },
+          'nordic-slate': {
+            name: 'Nordic Slate',
+            bgColor: '#334155',
+            accentColor: '#60a5fa',
+            radius: 10,
+            distance: 3,
+            lightIntensity: 20,
+            darkIntensity: 28,
+            blur: 8
+          },
+          'soft-gray': {
+            name: 'Warm Clay (Default)',
+            bgColor: '#e8dfd5',
+            accentColor: '#d97706',
+            radius: 5,
+            distance: 3,
+            lightIntensity: 22,
+            darkIntensity: 14,
+            blur: 10
+          },
+          'sage-mint': {
+            name: 'Sage Mint',
+            bgColor: '#c8d6c0',
+            accentColor: '#166534',
+            radius: 18,
+            distance: 3,
+            lightIntensity: 24,
+            darkIntensity: 18,
+            blur: 7
+          },
+          'retro-sharp': {
+            name: 'Retro Paper',
+            bgColor: '#f2efe9',
+            accentColor: '#e11d48',
+            radius: 4,
+            distance: 3,
+            lightIntensity: 50,
+            darkIntensity: 16,
+            blur: 0
+          },
+          'midnight-onyx': {
+            name: 'Midnight Onyx',
+            bgColor: '#18181b',
+            accentColor: '#a855f7',
+            radius: 12,
+            distance: 3,
+            lightIntensity: 16,
+            darkIntensity: 45,
+            blur: 7
+          },
+          'tokyo-night': {
+            name: 'Tokyo Night',
+            bgColor: '#1a1b26',
+            accentColor: '#7aa2f7',
+            radius: 12,
+            distance: 3,
+            lightIntensity: 18,
+            darkIntensity: 38,
+            blur: 8
+          },
+          'catppuccin-mocha': {
+            name: 'Catppuccin Mocha',
+            bgColor: '#1e1e2e',
+            accentColor: '#cba6f7',
+            radius: 14,
+            distance: 3,
+            lightIntensity: 20,
+            darkIntensity: 35,
+            blur: 8
+          },
+          'dracula-classic': {
+            name: 'Dracula Classic',
+            bgColor: '#282a36',
+            accentColor: '#ff79c6',
+            radius: 10,
+            distance: 3,
+            lightIntensity: 20,
+            darkIntensity: 32,
+            blur: 7
+          },
+          'cyberpunk-neon': {
+            name: 'Cyberpunk Neon',
+            bgColor: '#12131a',
+            accentColor: '#fcee0a',
+            radius: 6,
+            distance: 3,
+            lightIntensity: 15,
+            darkIntensity: 45,
+            blur: 6
+          },
+          'synthwave-sunset': {
+            name: 'Synthwave Sunset',
+            bgColor: '#262335',
+            accentColor: '#ff7b00',
+            radius: 14,
+            distance: 4,
+            lightIntensity: 20,
+            darkIntensity: 32,
+            blur: 9
+          },
+          'matcha-cream': {
+            name: 'Matcha Cream',
+            bgColor: '#dbe4d2',
+            accentColor: '#3f5622',
+            radius: 16,
+            distance: 3,
+            lightIntensity: 26,
+            darkIntensity: 18,
+            blur: 8
+          },
+          'peach-fuzz': {
+            name: 'Peach Fuzz',
+            bgColor: '#fed7aa',
+            accentColor: '#c2410c',
+            radius: 16,
+            distance: 3,
+            lightIntensity: 28,
+            darkIntensity: 16,
+            blur: 7
+          },
+          'lavender-dream': {
+            name: 'Lavender Dream',
+            bgColor: '#e2d9f3',
+            accentColor: '#6b21a8',
+            radius: 14,
+            distance: 3,
+            lightIntensity: 28,
+            darkIntensity: 18,
+            blur: 8
+          },
+          'electric-cobalt': {
+            name: 'Electric Cobalt',
+            bgColor: '#1d3557',
+            accentColor: '#34d399',
+            radius: 10,
+            distance: 3,
+            lightIntensity: 20,
+            darkIntensity: 30,
+            blur: 8
+          },
+          'espresso-mocha': {
+            name: 'Espresso Mocha',
+            bgColor: '#2b1d14',
+            accentColor: '#f59e0b',
+            radius: 10,
+            distance: 3,
+            lightIntensity: 18,
+            darkIntensity: 36,
+            blur: 7
+          },
+          'sakura-blossom': {
+            name: 'Sakura Blossom',
+            bgColor: '#fce7f3',
+            accentColor: '#be123c',
+            radius: 18,
+            distance: 3,
+            lightIntensity: 30,
+            darkIntensity: 14,
+            blur: 8
+          },
+          'nord-frost': {
+            name: 'Nord Frost',
+            bgColor: '#e5e9f0',
+            accentColor: '#5e81ac',
+            radius: 8,
+            distance: 3,
+            lightIntensity: 32,
+            darkIntensity: 16,
+            blur: 7
+          },
+          'solarized-cream': {
+            name: 'Solarized Cream',
+            bgColor: '#fdf6e3',
+            accentColor: '#b58900',
+            radius: 6,
+            distance: 3,
+            lightIntensity: 32,
+            darkIntensity: 14,
+            blur: 6
+          },
+          'matrix-terminal': {
+            name: 'Matrix Terminal',
+            bgColor: '#0f1712',
+            accentColor: '#22c55e',
+            radius: 4,
+            distance: 3,
+            lightIntensity: 14,
+            darkIntensity: 46,
+            blur: 6
+          },
+          'monokai-charcoal': {
+            name: 'Monokai Charcoal',
+            bgColor: '#2d2a2e',
+            accentColor: '#ffd866',
+            radius: 10,
+            distance: 3,
+            lightIntensity: 18,
+            darkIntensity: 34,
+            blur: 7
+          },
+          'aqua-marine': {
+            name: 'Aqua Marine',
+            bgColor: '#cffafe',
+            accentColor: '#0369a1',
+            radius: 16,
+            distance: 3,
+            lightIntensity: 30,
+            darkIntensity: 16,
+            blur: 8
+          }
+        };
+        "custom-default": {
+          "name": "Custom Rose Clay (Default)",
+            "bgColor": "#b85d68",
+              "accentColor": "#00cc18",
+                "radius": 14,
+                  "distance": 3,
+                    "lightIntensity": 9,
+                      "darkIntensity": 8,
+                        "blur": 8
+          name: "Custom Rose Clay (Default)",
+            bgColor: "#b85d68",
+              accentColor: "#00cc18",
+                radius: 14,
+                  distance: 3,
+                    lightIntensity: 9,
+                      darkIntensity: 8,
+                        blur: 8
+        },
+        "brutalist-amber": {
+          "name": "Brutalist Amber",
+            "bgColor": "#f59e0b",
+              "accentColor": "#1e1b4b",
+                "radius": 2,
+                  "distance": 6,
+                    "lightIntensity": 65,
+                      "darkIntensity": 75,
+                        "blur": 0
+          name: "Brutalist Amber",
+            bgColor: "#f59e0b",
+              accentColor: "#1e1b4b",
+                radius: 2,
+                  distance: 6,
+                    lightIntensity: 65,
+                      darkIntensity: 75,
+                        blur: 0
+        },
+        "marshmallow-indigo": {
+          "name": "Marshmallow Indigo",
+            "bgColor": "#4f46e5",
+              "accentColor": "#fde047",
+                "radius": 42,
+                  "distance": 8,
+                    "lightIntensity": 40,
+                      "darkIntensity": 48,
+                        "blur": 18
+          name: "Marshmallow Indigo",
+            bgColor: "#4f46e5",
+              accentColor: "#fde047",
+                radius: 42,
+                  distance: 8,
+                    lightIntensity: 40,
+                      darkIntensity: 48,
+                        blur: 18
+        },
+        "porcelain-ceramic": {
+          "name": "Porcelain Ceramic",
+            "bgColor": "#f1f5f9",
+              "accentColor": "#2563eb",
+                "radius": 28,
+                  "distance": 7,
+                    "lightIntensity": 85,
+                      "darkIntensity": 20,
+                        "blur": 16
+          name: "Porcelain Ceramic",
+            bgColor: "#f1f5f9",
+              accentColor: "#2563eb",
+                radius: 28,
+                  distance: 7,
+                    lightIntensity: 85,
+                      darkIntensity: 20,
+                        blur: 16
+        },
+        "solar-tangerine": {
+          "name": "Solar Tangerine",
+            "bgColor": "#ea580c",
+              "accentColor": "#fef08a",
+                "radius": 34,
+                  "distance": 5,
+                    "lightIntensity": 38,
+                      "darkIntensity": 42,
+                        "blur": 12
+          name: "Solar Tangerine",
+            bgColor: "#ea580c",
+              accentColor: "#fef08a",
+                radius: 34,
+                  distance: 7,
+                    lightIntensity: 45,
+                      darkIntensity: 35,
+                        blur: 12
+        },
+        "matrix-terminal": {
+          "name": "Matrix CRT",
+            "bgColor": "#052e16",
+              "accentColor": "#22c55e",
+                "radius": 4,
+                  "distance": 2,
+                    "lightIntensity": 40,
+                      "darkIntensity": 70,
+                        "blur": 2
+          name: "Matrix CRT",
+            bgColor: "#052e16",
+              accentColor: "#22c55e",
+                radius: 4,
+                  distance: 2,
+                    lightIntensity: 20,
+                      darkIntensity: 65,
+                        blur: 2
+        },
+        "cyber-cyan": {
+          "name": "Cyber Cyan",
+            "bgColor": "#0891b2",
+              "accentColor": "#fef08a",
+                "radius": 18,
+                  "distance": 4,
+                    "lightIntensity": 35,
+                      "darkIntensity": 32,
+                        "blur": 6
+          name: "Cyber Cyan",
+            bgColor: "#0891b2",
+              accentColor: "#fef08a",
+                radius: 18,
+                  distance: 4,
+                    lightIntensity: 35,
+                      darkIntensity: 32,
+                        blur: 6
+        },
+        "brutalist-concrete": {
+          "name": "Brutalist Concrete",
+            "bgColor": "#78716c",
+              "accentColor": "#f97316",
+                "radius": 3,
+                  "distance": 5,
+                    "lightIntensity": 50,
+                      "darkIntensity": 60,
+                        "blur": 1
+          name: "Brutalist Concrete",
+            bgColor: "#78716c",
+              accentColor: "#f97316",
+                radius: 3,
+                  distance: 5,
+                    lightIntensity: 55,
+                      darkIntensity: 65,
+                        blur: 1
+        },
+        "midnight-violet": {
+          "name": "Midnight Violet",
+            "bgColor": "#3b0764",
+              "accentColor": "#f43f5e",
+                "radius": 24,
+                  "distance": 6,
+                    "lightIntensity": 32,
+                      "darkIntensity": 65,
+                        "blur": 14
+          name: "Midnight Violet",
+            bgColor: "#3b0764",
+              accentColor: "#f43f5e",
+                radius: 24,
+                  distance: 6,
+                    lightIntensity: 25,
+                      darkIntensity: 60,
+                        blur: 14
+        },
+        "spearmint-gelato": {
+          "name": "Spearmint Gelato",
+            "bgColor": "#6ee7b7",
+              "accentColor": "#831843",
+                "radius": 38,
+                  "distance": 6,
+                    "lightIntensity": 48,
+                      "darkIntensity": 28,
+                        "blur": 14
+          name: "Spearmint Gelato",
+            bgColor: "#6ee7b7",
+              accentColor: "#831843",
+                radius: 38,
+                  distance: 7,
+                    lightIntensity: 55,
+                      darkIntensity: 25,
+                        blur: 14
+        },
+        "garnet-obsidian": {
+          "name": "Garnet Obsidian",
+            "bgColor": "#450a0a",
+              "accentColor": "#fb7185",
+                "radius": 8,
+                  "distance": 4,
+                    "lightIntensity": 24,
+                      "darkIntensity": 70,
+                        "blur": 9
+          name: "Garnet Obsidian",
+            bgColor: "#450a0a",
+              accentColor: "#fb7185",
+                radius: 8,
+                  distance: 4,
+                    lightIntensity: 24,
+                      darkIntensity: 70,
+                        blur: 9
+        },
+        "abyssal-ocean": {
+          "name": "Abyssal Ocean",
+            "bgColor": "#0e2a47",
+              "accentColor": "#38bdf8",
+                "radius": 16,
+                  "distance": 5,
+                    "lightIntensity": 26,
+                      "darkIntensity": 55,
+                        "blur": 10
+          name: "Abyssal Ocean",
+            bgColor: "#0e2a47",
+              accentColor: "#38bdf8",
+                radius: 16,
+                  distance: 5,
+                    lightIntensity: 26,
+                      darkIntensity: 55,
+                        blur: 10
+        },
+        "roasted-cocoa": {
+          "name": "Roasted Cocoa",
+            "bgColor": "#351c14",
+              "accentColor": "#fbbf24",
+                "radius": 10,
+                  "distance": 3,
+                    "lightIntensity": 22,
+                      "darkIntensity": 60,
+                        "blur": 5
+          name: "Roasted Cocoa",
+            bgColor: "#351c14",
+              accentColor: "#fbbf24",
+                radius: 10,
+                  distance: 3,
+                    lightIntensity: 22,
+                      darkIntensity: 60,
+                        blur: 5
+        },
+        "bubblegum-magenta": {
+          "name": "Bubblegum Magenta",
+            "bgColor": "#db2777",
+              "accentColor": "#fef08a",
+                "radius": 30,
+                  "distance": 7,
+                    "lightIntensity": 42,
+                      "darkIntensity": 38,
+                        "blur": 15
+          name: "Bubblegum Magenta",
+            bgColor: "#db2777",
+              accentColor: "#fef08a",
+                radius: 30,
+                  distance: 7,
+                    lightIntensity: 42,
+                      darkIntensity: 38,
+                        blur: 15
+        },
+        "lilac-cloud": {
+          "name": "Lilac Cloud",
+            "bgColor": "#c4b5fd",
+              "accentColor": "#4c1d95",
+                "radius": 22,
+                  "distance": 4,
+                    "lightIntensity": 36,
+                      "darkIntensity": 22,
+                        "blur": 11
+          name: "Lilac Cloud",
+            bgColor: "#c4b5fd",
+              accentColor: "#4c1d95",
+                radius: 22,
+                  distance: 4,
+                    lightIntensity: 36,
+                      darkIntensity: 22,
+                        blur: 11
+        },
+        "matte-titanium": {
+          "name": "Matte Titanium",
+            "bgColor": "#1e293b",
+              "accentColor": "#06b6d4",
+                "radius": 12,
+                  "distance": 3,
+                    "lightIntensity": 22,
+                      "darkIntensity": 45,
+                        "blur": 7
+          name: "Matte Titanium",
+            bgColor: "#1e293b",
+              accentColor: "#06b6d4",
+                radius: 12,
+                  distance: 3,
+                    lightIntensity: 22,
+                      darkIntensity: 45,
+                        blur: 7
+        }
       };
-    }
 
-    function rgbToHex(r, g, b) {
-      const clamp = v => Math.max(0, Math.min(255, Math.round(v)));
-      return '#' + [clamp(r), clamp(g), clamp(b)].map(x => x.toString(16).padStart(2, '0')).join('');
-    }
+      function deriveRealisticShadows(bgColor, lightIntensity = 20, darkIntensity = 20) {
+        const rgb = hexToRgb(bgColor);
+        const lum = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b) / 255.0;
 
-    function hexToHsl(hex) {
-      let c = hex.replace('#', '').trim();
-      if (c.length === 3) c = c.split('').map(x => x + x).join('');
-      const r = parseInt(c.substring(0, 2), 16) / 255;
-      const g = parseInt(c.substring(2, 4), 16) / 255;
-      const b = parseInt(c.substring(4, 6), 16) / 255;
-      const max = Math.max(r, g, b), min = Math.min(r, g, b);
-      let h, s, l = (max + min) / 2;
-      if (max === min) {
-        h = s = 0;
-      } else {
-        const d = max - min;
-        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-        switch (max) {
-          case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-          case g: h = (b - r) / d + 2; break;
-          case b: h = (r - g) / d + 4; break;
-        }
-        h /= 6;
-      }
-      return { h, s, l };
-    }
-
-    function hslToHex(h, s, l) {
-      l = Math.max(0, Math.min(1, l));
-      s = Math.max(0, Math.min(1, s));
-      let r, g, b;
-      if (s === 0) {
-        r = g = b = l;
-      } else {
-        function hue2rgb(p, q, t) {
-          if (t < 0) t += 1;
-          if (t > 1) t -= 1;
-          if (t < 1 / 6) return p + (q - p) * 6 * t;
-          if (t < 1 / 2) return q;
-          if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
-          return p;
-        }
-        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-        const p = 2 * l - q;
-        r = hue2rgb(p, q, h + 1 / 3);
-        g = hue2rgb(p, q, h);
-        b = hue2rgb(p, q, h - 1 / 3);
-      }
-      const toHex = x => {
-        const hex = Math.round(Math.max(0, Math.min(255, x * 255))).toString(16);
-        return hex.length === 1 ? '0' + hex : hex;
-      };
-      return '#' + toHex(r) + toHex(g) + toHex(b);
-    }
-
-    // Hand-crafted Neumorphic Theme Presets with balanced light/dark shadows, varied radii & high contrast
-    // Hand-crafted Neumorphic Theme Presets: Rich, diverse, colorful clay base palettes (28 modern palettes)
-    const THEME_PRESETS = {
-      'ocean-azure': {
-        name: 'Ocean Azure',
-        bgColor: '#1e3a5f',
-        accentColor: '#38bdf8',
-        radius: 14,
-        distance: 3,
-        lightIntensity: 20,
-        darkIntensity: 30,
-        blur: 8
-      },
-      'forest-emerald': {
-        name: 'Forest Emerald',
-        bgColor: '#1b4332',
-        accentColor: '#52b788',
-        radius: 10,
-        distance: 3,
-        lightIntensity: 20,
-        darkIntensity: 30,
-        blur: 7
-      },
-      'sunset-terracotta': {
-        name: 'Sunset Terracotta',
-        bgColor: '#8c3a27',
-        accentColor: '#fcd34d',
-        radius: 12,
-        distance: 3,
-        lightIntensity: 22,
-        darkIntensity: 28,
-        blur: 8
-      },
-      'royal-violet': {
-        name: 'Royal Violet',
-        bgColor: '#442759',
-        accentColor: '#f472b6',
-        radius: 16,
-        distance: 4,
-        lightIntensity: 20,
-        darkIntensity: 32,
-        blur: 9
-      },
-      'laguna-teal': {
-        name: 'Laguna Teal',
-        bgColor: '#134e4a',
-        accentColor: '#2dd4bf',
-        radius: 12,
-        distance: 3,
-        lightIntensity: 20,
-        darkIntensity: 30,
-        blur: 8
-      },
-      'desert-caramel': {
-        name: 'Desert Caramel',
-        bgColor: '#c68b59',
-        accentColor: '#451a03',
-        radius: 8,
-        distance: 3,
-        lightIntensity: 25,
-        darkIntensity: 22,
-        blur: 7
-      },
-      'vintage-rose': {
-        name: 'Vintage Rose',
-        bgColor: '#b85d68',
-        accentColor: '#ffe4e6',
-        radius: 14,
-        distance: 3,
-        lightIntensity: 22,
-        darkIntensity: 24,
-        blur: 8
-      },
-      'nordic-slate': {
-        name: 'Nordic Slate',
-        bgColor: '#334155',
-        accentColor: '#60a5fa',
-        radius: 10,
-        distance: 3,
-        lightIntensity: 20,
-        darkIntensity: 28,
-        blur: 8
-      },
-      'soft-gray': {
-        name: 'Warm Clay (Default)',
-        bgColor: '#e8dfd5',
-        accentColor: '#d97706',
-        radius: 5,
-        distance: 3,
-        lightIntensity: 22,
-        darkIntensity: 14,
-        blur: 10
-      },
-      'sage-mint': {
-        name: 'Sage Mint',
-        bgColor: '#c8d6c0',
-        accentColor: '#166534',
-        radius: 18,
-        distance: 3,
-        lightIntensity: 24,
-        darkIntensity: 18,
-        blur: 7
-      },
-      'retro-sharp': {
-        name: 'Retro Paper',
-        bgColor: '#f2efe9',
-        accentColor: '#e11d48',
-        radius: 4,
-        distance: 3,
-        lightIntensity: 50,
-        darkIntensity: 16,
-        blur: 0
-      },
-      'midnight-onyx': {
-        name: 'Midnight Onyx',
-        bgColor: '#18181b',
-        accentColor: '#a855f7',
-        radius: 12,
-        distance: 3,
-        lightIntensity: 16,
-        darkIntensity: 45,
-        blur: 7
-      },
-      'tokyo-night': {
-        name: 'Tokyo Night',
-        bgColor: '#1a1b26',
-        accentColor: '#7aa2f7',
-        radius: 12,
-        distance: 3,
-        lightIntensity: 18,
-        darkIntensity: 38,
-        blur: 8
-      },
-      'catppuccin-mocha': {
-        name: 'Catppuccin Mocha',
-        bgColor: '#1e1e2e',
-        accentColor: '#cba6f7',
-        radius: 14,
-        distance: 3,
-        lightIntensity: 20,
-        darkIntensity: 35,
-        blur: 8
-      },
-      'dracula-classic': {
-        name: 'Dracula Classic',
-        bgColor: '#282a36',
-        accentColor: '#ff79c6',
-        radius: 10,
-        distance: 3,
-        lightIntensity: 20,
-        darkIntensity: 32,
-        blur: 7
-      },
-      'cyberpunk-neon': {
-        name: 'Cyberpunk Neon',
-        bgColor: '#12131a',
-        accentColor: '#fcee0a',
-        radius: 6,
-        distance: 3,
-        lightIntensity: 15,
-        darkIntensity: 45,
-        blur: 6
-      },
-      'synthwave-sunset': {
-        name: 'Synthwave Sunset',
-        bgColor: '#262335',
-        accentColor: '#ff7b00',
-        radius: 14,
-        distance: 4,
-        lightIntensity: 20,
-        darkIntensity: 32,
-        blur: 9
-      },
-      'matcha-cream': {
-        name: 'Matcha Cream',
-        bgColor: '#dbe4d2',
-        accentColor: '#3f5622',
-        radius: 16,
-        distance: 3,
-        lightIntensity: 26,
-        darkIntensity: 18,
-        blur: 8
-      },
-      'peach-fuzz': {
-        name: 'Peach Fuzz',
-        bgColor: '#fed7aa',
-        accentColor: '#c2410c',
-        radius: 16,
-        distance: 3,
-        lightIntensity: 28,
-        darkIntensity: 16,
-        blur: 7
-      },
-      'lavender-dream': {
-        name: 'Lavender Dream',
-        bgColor: '#e2d9f3',
-        accentColor: '#6b21a8',
-        radius: 14,
-        distance: 3,
-        lightIntensity: 28,
-        darkIntensity: 18,
-        blur: 8
-      },
-      'electric-cobalt': {
-        name: 'Electric Cobalt',
-        bgColor: '#1d3557',
-        accentColor: '#34d399',
-        radius: 10,
-        distance: 3,
-        lightIntensity: 20,
-        darkIntensity: 30,
-        blur: 8
-      },
-      'espresso-mocha': {
-        name: 'Espresso Mocha',
-        bgColor: '#2b1d14',
-        accentColor: '#f59e0b',
-        radius: 10,
-        distance: 3,
-        lightIntensity: 18,
-        darkIntensity: 36,
-        blur: 7
-      },
-      'sakura-blossom': {
-        name: 'Sakura Blossom',
-        bgColor: '#fce7f3',
-        accentColor: '#be123c',
-        radius: 18,
-        distance: 3,
-        lightIntensity: 30,
-        darkIntensity: 14,
-        blur: 8
-      },
-      'nord-frost': {
-        name: 'Nord Frost',
-        bgColor: '#e5e9f0',
-        accentColor: '#5e81ac',
-        radius: 8,
-        distance: 3,
-        lightIntensity: 32,
-        darkIntensity: 16,
-        blur: 7
-      },
-      'solarized-cream': {
-        name: 'Solarized Cream',
-        bgColor: '#fdf6e3',
-        accentColor: '#b58900',
-        radius: 6,
-        distance: 3,
-        lightIntensity: 32,
-        darkIntensity: 14,
-        blur: 6
-      },
-      'matrix-terminal': {
-        name: 'Matrix Terminal',
-        bgColor: '#0f1712',
-        accentColor: '#22c55e',
-        radius: 4,
-        distance: 3,
-        lightIntensity: 14,
-        darkIntensity: 46,
-        blur: 6
-      },
-      'monokai-charcoal': {
-        name: 'Monokai Charcoal',
-        bgColor: '#2d2a2e',
-        accentColor: '#ffd866',
-        radius: 10,
-        distance: 3,
-        lightIntensity: 18,
-        darkIntensity: 34,
-        blur: 7
-      },
-      'aqua-marine': {
-        name: 'Aqua Marine',
-        bgColor: '#cffafe',
-        accentColor: '#0369a1',
-        radius: 16,
-        distance: 3,
-        lightIntensity: 30,
-        darkIntensity: 16,
-        blur: 8
-      }
-    };
-    "custom-default": {
-      "name": "Custom Rose Clay (Default)",
-        "bgColor": "#b85d68",
-          "accentColor": "#00cc18",
-            "radius": 14,
-              "distance": 3,
-                "lightIntensity": 9,
-                  "darkIntensity": 8,
-                    "blur": 8
-    },
-    "brutalist-amber": {
-      "name": "Brutalist Amber",
-        "bgColor": "#f59e0b",
-          "accentColor": "#1e1b4b",
-            "radius": 2,
-              "distance": 6,
-                "lightIntensity": 65,
-                  "darkIntensity": 75,
-                    "blur": 0
-    },
-    "marshmallow-indigo": {
-      "name": "Marshmallow Indigo",
-        "bgColor": "#4f46e5",
-          "accentColor": "#fde047",
-            "radius": 42,
-              "distance": 8,
-                "lightIntensity": 40,
-                  "darkIntensity": 48,
-                    "blur": 18
-    },
-    "porcelain-ceramic": {
-      "name": "Porcelain Ceramic",
-        "bgColor": "#f1f5f9",
-          "accentColor": "#2563eb",
-            "radius": 28,
-              "distance": 7,
-                "lightIntensity": 85,
-                  "darkIntensity": 20,
-                    "blur": 16
-    },
-    "solar-tangerine": {
-      "name": "Solar Tangerine",
-        "bgColor": "#ea580c",
-          "accentColor": "#fef08a",
-            "radius": 34,
-              "distance": 5,
-                "lightIntensity": 38,
-                  "darkIntensity": 42,
-                    "blur": 12
-    },
-    "matrix-terminal": {
-      "name": "Matrix CRT",
-        "bgColor": "#052e16",
-          "accentColor": "#22c55e",
-            "radius": 4,
-              "distance": 2,
-                "lightIntensity": 40,
-                  "darkIntensity": 70,
-                    "blur": 2
-    },
-    "cyber-cyan": {
-      "name": "Cyber Cyan",
-        "bgColor": "#0891b2",
-          "accentColor": "#fef08a",
-            "radius": 18,
-              "distance": 4,
-                "lightIntensity": 35,
-                  "darkIntensity": 32,
-                    "blur": 6
-    },
-    "brutalist-concrete": {
-      "name": "Brutalist Concrete",
-        "bgColor": "#78716c",
-          "accentColor": "#f97316",
-            "radius": 3,
-              "distance": 5,
-                "lightIntensity": 50,
-                  "darkIntensity": 60,
-                    "blur": 1
-    },
-    "midnight-violet": {
-      "name": "Midnight Violet",
-        "bgColor": "#3b0764",
-          "accentColor": "#f43f5e",
-            "radius": 24,
-              "distance": 6,
-                "lightIntensity": 32,
-                  "darkIntensity": 65,
-                    "blur": 14
-    },
-    "spearmint-gelato": {
-      "name": "Spearmint Gelato",
-        "bgColor": "#6ee7b7",
-          "accentColor": "#831843",
-            "radius": 38,
-              "distance": 6,
-                "lightIntensity": 48,
-                  "darkIntensity": 28,
-                    "blur": 14
-    },
-    "garnet-obsidian": {
-      "name": "Garnet Obsidian",
-        "bgColor": "#450a0a",
-          "accentColor": "#fb7185",
-            "radius": 8,
-              "distance": 4,
-                "lightIntensity": 24,
-                  "darkIntensity": 70,
-                    "blur": 9
-    },
-    "abyssal-ocean": {
-      "name": "Abyssal Ocean",
-        "bgColor": "#0e2a47",
-          "accentColor": "#38bdf8",
-            "radius": 16,
-              "distance": 5,
-                "lightIntensity": 26,
-                  "darkIntensity": 55,
-                    "blur": 10
-    },
-    "roasted-cocoa": {
-      "name": "Roasted Cocoa",
-        "bgColor": "#351c14",
-          "accentColor": "#fbbf24",
-            "radius": 10,
-              "distance": 3,
-                "lightIntensity": 22,
-                  "darkIntensity": 60,
-                    "blur": 5
-    },
-    "bubblegum-magenta": {
-      "name": "Bubblegum Magenta",
-        "bgColor": "#db2777",
-          "accentColor": "#fef08a",
-            "radius": 30,
-              "distance": 7,
-                "lightIntensity": 42,
-                  "darkIntensity": 38,
-                    "blur": 15
-    },
-    "lilac-cloud": {
-      "name": "Lilac Cloud",
-        "bgColor": "#c4b5fd",
-          "accentColor": "#4c1d95",
-            "radius": 22,
-              "distance": 4,
-                "lightIntensity": 36,
-                  "darkIntensity": 22,
-                    "blur": 11
-    },
-    "matte-titanium": {
-      "name": "Matte Titanium",
-        "bgColor": "#1e293b",
-          "accentColor": "#06b6d4",
-            "radius": 12,
-              "distance": 3,
-                "lightIntensity": 22,
-                  "darkIntensity": 45,
-                    "blur": 7
-    }
-  };
-
-  function deriveRealisticShadows(bgColor, lightIntensity = 20, darkIntensity = 20) {
-    const rgb = hexToRgb(bgColor);
-    const lum = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b) / 255.0;
-
-    // Realistic specular light highlight (blended with pure white)
-    let lFactor;
-    if (lum < 0.25) {
-      lFactor = (lightIntensity / 100.0) * 0.45;
-    } else if (lum < 0.55) {
-      lFactor = (lightIntensity / 100.0) * 0.65;
-    } else {
-      lFactor = (lightIntensity / 100.0) * 0.95;
-    }
-    lFactor = Math.min(0.95, Math.max(0.03, lFactor));
-
-    const lightR = Math.min(255, Math.round(rgb.r + (255 - rgb.r) * lFactor));
-    const lightG = Math.min(255, Math.round(rgb.g + (255 - rgb.g) * lFactor));
-    const lightB = Math.min(255, Math.round(rgb.b + (255 - rgb.b) * lFactor));
-
-    // Realistic ambient occlusion shadow (blended with pure black)
-    let dFactor;
-    if (lum < 0.25) {
-      dFactor = (darkIntensity / 100.0) * 0.75;
-    } else if (lum < 0.55) {
-      dFactor = (darkIntensity / 100.0) * 0.95;
-    } else {
-      dFactor = (darkIntensity / 100.0) * 1.15;
-    }
-    dFactor = Math.min(0.95, Math.max(0.03, dFactor));
-
-    const darkR = Math.max(0, Math.round(rgb.r * (1.0 - dFactor)));
-    const darkG = Math.max(0, Math.round(rgb.g * (1.0 - dFactor)));
-    const darkB = Math.max(0, Math.round(rgb.b * (1.0 - dFactor)));
-
-    const deepFactor = Math.min(0.98, dFactor * 1.35);
-    const deepR = Math.max(0, Math.round(rgb.r * (1.0 - deepFactor)));
-    const deepG = Math.max(0, Math.round(rgb.g * (1.0 - deepFactor)));
-    const deepB = Math.max(0, Math.round(rgb.b * (1.0 - deepFactor)));
-
-    return {
-      shadowLight: rgbToHex(lightR, lightG, lightB),
-      shadowDark: rgbToHex(darkR, darkG, darkB),
-      shadowDarkDeep: rgbToHex(deepR, deepG, deepB)
-    };
-  }
-
-  function computePresetShadow(bgColor, lightIntensity = 20, darkIntensity = 20, distance = 3, blur = 8) {
-    const d = Math.max(2, Math.round(distance * 0.75));
-    const b = blur;
-    const darkAlpha = Math.min(0.55, Math.max(0.12, (darkIntensity / 100.0) * 1.1));
-    const lightAlpha = Math.min(0.65, Math.max(0.10, (lightIntensity / 100.0) * 1.1));
-    if (blur === 0) {
-      return `${d}px ${d}px 0px rgba(0, 0, 0, ${darkAlpha.toFixed(2)}), -${d}px -${d}px 0px rgba(255, 255, 255, ${lightAlpha.toFixed(2)})`;
-    }
-    return `${d}px ${d}px ${b}px rgba(0, 0, 0, ${darkAlpha.toFixed(2)}), -${d}px -${d}px ${b}px rgba(255, 255, 255, ${lightAlpha.toFixed(2)})`;
-  }
-
-  function lightenHex(hex, percent) {
-    const rgb = hexToRgb(hex);
-    const factor = percent / 100;
-    return rgbToHex(
-      rgb.r + (255 - rgb.r) * factor,
-      rgb.g + (255 - rgb.g) * factor,
-      rgb.b + (255 - rgb.b) * factor
-    );
-  }
-
-  function darkenHex(hex, percent) {
-    const rgb = hexToRgb(hex);
-    const factor = 1 - (percent / 100);
-    return rgbToHex(rgb.r * factor, rgb.g * factor, rgb.b * factor);
-  }
-
-  function getLuminance(r, g, b) {
-    const a = [r, g, b].map(v => {
-      v /= 255;
-      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
-    });
-    return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
-  }
-
-  function getContrastRatio(lum1, lum2) {
-    const lighter = Math.max(lum1, lum2);
-    const darker = Math.min(lum1, lum2);
-    return (lighter + 0.05) / (darker + 0.05);
-  }
-
-  function deriveHarmonicTypography(bgHex) {
-    const rgb = hexToRgb(bgHex);
-    const bgLum = getLuminance(rgb.r, rgb.g, rgb.b);
-    const hsl = hexToHsl(bgHex);
-
-    const contrastWhite = (1.0 + 0.05) / (bgLum + 0.05);
-    const contrastBlack = (bgLum + 0.05) / (0.0 + 0.05);
-
-    // Harmonic undertone saturation (keeps text naturally keyed to the base clay)
-    const harmSat = Math.min(0.22, Math.max(0.06, hsl.s * 0.45));
-    const useDarkText = contrastBlack >= contrastWhite;
-
-    let textPrimary, textSecondary, textMuted, textDisabled;
-
-    if (useDarkText) {
-      // Dark text mode (on light, beige, caramel, mint backgrounds)
-      textPrimary = hslToHex(hsl.h, harmSat, 0.09);
-
-      // Search lightness for secondary text (minimum contrast 5.5:1)
-      let secL = 0.09;
-      for (let l = 12; l <= 45; l++) {
-        const testHex = hslToHex(hsl.h, harmSat, l / 100);
-        const testRgb = hexToRgb(testHex);
-        const testLum = getLuminance(testRgb.r, testRgb.g, testRgb.b);
-        if (getContrastRatio(bgLum, testLum) >= 5.5) {
-          secL = l / 100;
+        // Realistic specular light highlight (blended with pure white)
+        let lFactor;
+        if (lum < 0.25) {
+          lFactor = (lightIntensity / 100.0) * 0.45;
+        } else if (lum < 0.55) {
+          lFactor = (lightIntensity / 100.0) * 0.65;
         } else {
-          break;
+          lFactor = (lightIntensity / 100.0) * 0.95;
         }
-      }
-      textSecondary = hslToHex(hsl.h, harmSat, secL);
+        lFactor = Math.min(0.95, Math.max(0.03, lFactor));
 
-      // Search lightness for muted text (guaranteed WCAG AA >= 4.5:1)
-      let mutedL = secL;
-      for (let l = Math.round(secL * 100); l <= 55; l++) {
-        const testHex = hslToHex(hsl.h, harmSat, l / 100);
-        const testRgb = hexToRgb(testHex);
-        const testLum = getLuminance(testRgb.r, testRgb.g, testRgb.b);
-        if (getContrastRatio(bgLum, testLum) >= 4.5) {
-          mutedL = l / 100;
+        const lightR = Math.min(255, Math.round(rgb.r + (255 - rgb.r) * lFactor));
+        const lightG = Math.min(255, Math.round(rgb.g + (255 - rgb.g) * lFactor));
+        const lightB = Math.min(255, Math.round(rgb.b + (255 - rgb.b) * lFactor));
+
+        // Realistic ambient occlusion shadow (blended with pure black)
+        let dFactor;
+        if (lum < 0.25) {
+          dFactor = (darkIntensity / 100.0) * 0.75;
+        } else if (lum < 0.55) {
+          dFactor = (darkIntensity / 100.0) * 0.95;
         } else {
-          break;
+          dFactor = (darkIntensity / 100.0) * 1.15;
         }
-      }
-      textMuted = hslToHex(hsl.h, harmSat, mutedL);
+        dFactor = Math.min(0.95, Math.max(0.03, dFactor));
 
-      // Search lightness for disabled text (minimum contrast 2.4:1)
-      let disL = mutedL;
-      for (let l = Math.round(mutedL * 100); l <= 75; l++) {
-        const testHex = hslToHex(hsl.h, harmSat, l / 100);
-        const testRgb = hexToRgb(testHex);
-        const testLum = getLuminance(testRgb.r, testRgb.g, testRgb.b);
-        if (getContrastRatio(bgLum, testLum) >= 2.4) {
-          disL = l / 100;
+        const darkR = Math.max(0, Math.round(rgb.r * (1.0 - dFactor)));
+        const darkG = Math.max(0, Math.round(rgb.g * (1.0 - dFactor)));
+        const darkB = Math.max(0, Math.round(rgb.b * (1.0 - dFactor)));
+
+        const deepFactor = Math.min(0.98, dFactor * 1.35);
+        const deepR = Math.max(0, Math.round(rgb.r * (1.0 - deepFactor)));
+        const deepG = Math.max(0, Math.round(rgb.g * (1.0 - deepFactor)));
+        const deepB = Math.max(0, Math.round(rgb.b * (1.0 - deepFactor)));
+
+        return {
+          shadowLight: rgbToHex(lightR, lightG, lightB),
+          shadowDark: rgbToHex(darkR, darkG, darkB),
+          shadowDarkDeep: rgbToHex(deepR, deepG, deepB)
+        };
+      }
+
+      function computePresetShadow(bgColor, lightIntensity = 20, darkIntensity = 20, distance = 3, blur = 8) {
+        const d = Math.max(2, Math.round(distance * 0.75));
+        const b = blur;
+        const darkAlpha = Math.min(0.55, Math.max(0.12, (darkIntensity / 100.0) * 1.1));
+        const lightAlpha = Math.min(0.65, Math.max(0.10, (lightIntensity / 100.0) * 1.1));
+        if (blur === 0) {
+          return `${d}px ${d}px 0px rgba(0, 0, 0, ${darkAlpha.toFixed(2)}), -${d}px -${d}px 0px rgba(255, 255, 255, ${lightAlpha.toFixed(2)})`;
+        }
+        return `${d}px ${d}px ${b}px rgba(0, 0, 0, ${darkAlpha.toFixed(2)}), -${d}px -${d}px ${b}px rgba(255, 255, 255, ${lightAlpha.toFixed(2)})`;
+      }
+
+      function lightenHex(hex, percent) {
+        const rgb = hexToRgb(hex);
+        const factor = percent / 100;
+        return rgbToHex(
+          rgb.r + (255 - rgb.r) * factor,
+          rgb.g + (255 - rgb.g) * factor,
+          rgb.b + (255 - rgb.b) * factor
+        );
+      }
+
+      function darkenHex(hex, percent) {
+        const rgb = hexToRgb(hex);
+        const factor = 1 - (percent / 100);
+        return rgbToHex(rgb.r * factor, rgb.g * factor, rgb.b * factor);
+      }
+
+      function getLuminance(r, g, b) {
+        const a = [r, g, b].map(v => {
+          v /= 255;
+          return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+        });
+        return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+      }
+
+      function getContrastRatio(lum1, lum2) {
+        const lighter = Math.max(lum1, lum2);
+        const darker = Math.min(lum1, lum2);
+        return (lighter + 0.05) / (darker + 0.05);
+      }
+
+      function deriveHarmonicTypography(bgHex) {
+        const rgb = hexToRgb(bgHex);
+        const bgLum = getLuminance(rgb.r, rgb.g, rgb.b);
+        const hsl = hexToHsl(bgHex);
+
+        const contrastWhite = (1.0 + 0.05) / (bgLum + 0.05);
+        const contrastBlack = (bgLum + 0.05) / (0.0 + 0.05);
+
+        // Harmonic undertone saturation (keeps text naturally keyed to the base clay)
+        const harmSat = Math.min(0.22, Math.max(0.06, hsl.s * 0.45));
+        const useDarkText = contrastBlack >= contrastWhite;
+
+        let textPrimary, textSecondary, textMuted, textDisabled;
+
+        if (useDarkText) {
+          // Dark text mode (on light, beige, caramel, mint backgrounds)
+          textPrimary = hslToHex(hsl.h, harmSat, 0.09);
+
+          // Search lightness for secondary text (minimum contrast 5.5:1)
+          let secL = 0.09;
+          for (let l = 12; l <= 45; l++) {
+            const testHex = hslToHex(hsl.h, harmSat, l / 100);
+            const testRgb = hexToRgb(testHex);
+            const testLum = getLuminance(testRgb.r, testRgb.g, testRgb.b);
+            if (getContrastRatio(bgLum, testLum) >= 5.5) {
+              secL = l / 100;
+            } else {
+              break;
+            }
+          }
+          textSecondary = hslToHex(hsl.h, harmSat, secL);
+
+          // Search lightness for muted text (guaranteed WCAG AA >= 4.5:1)
+          let mutedL = secL;
+          for (let l = Math.round(secL * 100); l <= 55; l++) {
+            const testHex = hslToHex(hsl.h, harmSat, l / 100);
+            const testRgb = hexToRgb(testHex);
+            const testLum = getLuminance(testRgb.r, testRgb.g, testRgb.b);
+            if (getContrastRatio(bgLum, testLum) >= 4.5) {
+              mutedL = l / 100;
+            } else {
+              break;
+            }
+          }
+          textMuted = hslToHex(hsl.h, harmSat, mutedL);
+
+          // Search lightness for disabled text (minimum contrast 2.4:1)
+          let disL = mutedL;
+          for (let l = Math.round(mutedL * 100); l <= 75; l++) {
+            const testHex = hslToHex(hsl.h, harmSat, l / 100);
+            const testRgb = hexToRgb(testHex);
+            const testLum = getLuminance(testRgb.r, testRgb.g, testRgb.b);
+            if (getContrastRatio(bgLum, testLum) >= 2.4) {
+              disL = l / 100;
+            } else {
+              break;
+            }
+          }
+          textDisabled = hslToHex(hsl.h, harmSat, disL);
         } else {
-          break;
+          // Light text mode (on dark, navy, emerald, terracotta, violet backgrounds)
+          textPrimary = hslToHex(hsl.h, harmSat * 0.5, 0.96);
+
+          // Search lightness for secondary text (minimum contrast 5.5:1)
+          let secL = 0.96;
+          for (let l = 92; l >= 50; l--) {
+            const testHex = hslToHex(hsl.h, harmSat, l / 100);
+            const testRgb = hexToRgb(testHex);
+            const testLum = getLuminance(testRgb.r, testRgb.g, testRgb.b);
+            if (getContrastRatio(bgLum, testLum) >= 5.5) {
+              secL = l / 100;
+            } else {
+              break;
+            }
+          }
+          textSecondary = hslToHex(hsl.h, harmSat, secL);
+
+          // Search lightness for muted text (guaranteed WCAG AA >= 4.5:1)
+          let mutedL = secL;
+          for (let l = Math.round(secL * 100); l >= 40; l--) {
+            const testHex = hslToHex(hsl.h, harmSat, l / 100);
+            const testRgb = hexToRgb(testHex);
+            const testLum = getLuminance(testRgb.r, testRgb.g, testRgb.b);
+            if (getContrastRatio(bgLum, testLum) >= 4.5) {
+              mutedL = l / 100;
+            } else {
+              break;
+            }
+          }
+          textMuted = hslToHex(hsl.h, harmSat, mutedL);
+
+          // Search lightness for disabled text (minimum contrast 2.4:1)
+          let disL = mutedL;
+          for (let l = Math.round(mutedL * 100); l >= 20; l--) {
+            const testHex = hslToHex(hsl.h, harmSat, l / 100);
+            const testRgb = hexToRgb(testHex);
+            const testLum = getLuminance(testRgb.r, testRgb.g, testRgb.b);
+            if (getContrastRatio(bgLum, testLum) >= 2.4) {
+              disL = l / 100;
+            } else {
+              break;
+            }
+          }
+          textDisabled = hslToHex(hsl.h, harmSat, disL);
         }
+
+        return {
+          textPrimary,
+          textSecondary,
+          textMuted,
+          textDisabled
+        };
       }
-      textDisabled = hslToHex(hsl.h, harmSat, disL);
-    } else {
-      // Light text mode (on dark, navy, emerald, terracotta, violet backgrounds)
-      textPrimary = hslToHex(hsl.h, harmSat * 0.5, 0.96);
 
-      // Search lightness for secondary text (minimum contrast 5.5:1)
-      let secL = 0.96;
-      for (let l = 92; l >= 50; l--) {
-        const testHex = hslToHex(hsl.h, harmSat, l / 100);
-        const testRgb = hexToRgb(testHex);
-        const testLum = getLuminance(testRgb.r, testRgb.g, testRgb.b);
-        if (getContrastRatio(bgLum, testLum) >= 5.5) {
-          secL = l / 100;
-        } else {
-          break;
-        }
-      }
-      textSecondary = hslToHex(hsl.h, harmSat, secL);
+      function applyTheme(bgColor, accentColor, save = false, neo = null) {
+        if (!bgColor) bgColor = '#e8dfd5';
+        if (!accentColor) accentColor = '#d97706';
+        if (!bgColor) bgColor = '#b85d68';
+        if (!accentColor) accentColor = '#00cc18';
+        if (!bgColor.startsWith('#')) bgColor = '#' + bgColor;
+        if (!accentColor.startsWith('#')) accentColor = '#' + accentColor;
 
-      // Search lightness for muted text (guaranteed WCAG AA >= 4.5:1)
-      let mutedL = secL;
-      for (let l = Math.round(secL * 100); l >= 40; l--) {
-        const testHex = hslToHex(hsl.h, harmSat, l / 100);
-        const testRgb = hexToRgb(testHex);
-        const testLum = getLuminance(testRgb.r, testRgb.g, testRgb.b);
-        if (getContrastRatio(bgLum, testLum) >= 4.5) {
-          mutedL = l / 100;
-        } else {
-          break;
-        }
-      }
-      textMuted = hslToHex(hsl.h, harmSat, mutedL);
-
-      // Search lightness for disabled text (minimum contrast 2.4:1)
-      let disL = mutedL;
-      for (let l = Math.round(mutedL * 100); l >= 20; l--) {
-        const testHex = hslToHex(hsl.h, harmSat, l / 100);
-        const testRgb = hexToRgb(testHex);
-        const testLum = getLuminance(testRgb.r, testRgb.g, testRgb.b);
-        if (getContrastRatio(bgLum, testLum) >= 2.4) {
-          disL = l / 100;
-        } else {
-          break;
-        }
-      }
-      textDisabled = hslToHex(hsl.h, harmSat, disL);
-    }
-
-    return {
-      textPrimary,
-      textSecondary,
-      textMuted,
-      textDisabled
-    };
-  }
-
-  function applyTheme(bgColor, accentColor, save = false, neo = null) {
-    if (!bgColor) bgColor = '#e8dfd5';
-    if (!accentColor) accentColor = '#d97706';
-    if (!bgColor) bgColor = '#b85d68';
-    if (!accentColor) accentColor = '#00cc18';
-    if (!bgColor.startsWith('#')) bgColor = '#' + bgColor;
-    if (!accentColor.startsWith('#')) accentColor = '#' + accentColor;
-
-    // Resolve Neumorphism Parameters (Radius, Distance, Light/Dark Intensity, Blur)
-    const radius = (neo && typeof neo.radius !== 'undefined')
-      ? parseInt(neo.radius, 10)
-      : ((state.config && state.config.theme && typeof state.config.theme.radius !== 'undefined') ? parseInt(state.config.theme.radius, 10) : 5);
+        // Resolve Neumorphism Parameters (Radius, Distance, Light/Dark Intensity, Blur)
+        const radius = (neo && typeof neo.radius !== 'undefined')
+          ? parseInt(neo.radius, 10)
+          : ((state.config && state.config.theme && typeof state.config.theme.radius !== 'undefined') ? parseInt(state.config.theme.radius, 10) : 5);
       : ((state.config && state.config.theme && typeof state.config.theme.radius !== 'undefined') ? parseInt(state.config.theme.radius, 10) : 14);
 
-    const distance = (neo && typeof neo.distance !== 'undefined')
-      ? parseInt(neo.distance, 10)
-      : ((state.config && state.config.theme && typeof state.config.theme.distance !== 'undefined') ? parseInt(state.config.theme.distance, 10) : 3);
+        const distance = (neo && typeof neo.distance !== 'undefined')
+          ? parseInt(neo.distance, 10)
+          : ((state.config && state.config.theme && typeof state.config.theme.distance !== 'undefined') ? parseInt(state.config.theme.distance, 10) : 3);
 
-    const lightIntensity = (neo && typeof neo.lightIntensity !== 'undefined')
-      ? parseInt(neo.lightIntensity, 10)
-      : ((state.config && state.config.theme && typeof state.config.theme.lightIntensity !== 'undefined')
-        ? parseInt(state.config.theme.lightIntensity, 10)
-        : ((state.config && state.config.theme && typeof state.config.theme.intensity !== 'undefined')
-          ? parseInt(state.config.theme.intensity, 10) : 22));
+        const lightIntensity = (neo && typeof neo.lightIntensity !== 'undefined')
+          ? parseInt(neo.lightIntensity, 10)
+          : ((state.config && state.config.theme && typeof state.config.theme.lightIntensity !== 'undefined')
+            ? parseInt(state.config.theme.lightIntensity, 10)
+            : ((state.config && state.config.theme && typeof state.config.theme.intensity !== 'undefined')
+              ? parseInt(state.config.theme.intensity, 10) : 22));
 
-    const darkIntensity = (neo && typeof neo.darkIntensity !== 'undefined')
-      ? parseInt(neo.darkIntensity, 10)
-      : ((state.config && state.config.theme && typeof state.config.theme.darkIntensity !== 'undefined')
-        ? parseInt(state.config.theme.darkIntensity, 10)
-        : ((state.config && state.config.theme && typeof state.config.theme.intensity !== 'undefined')
-          ? parseInt(state.config.theme.intensity, 10) : 6));
+        const darkIntensity = (neo && typeof neo.darkIntensity !== 'undefined')
+          ? parseInt(neo.darkIntensity, 10)
+          : ((state.config && state.config.theme && typeof state.config.theme.darkIntensity !== 'undefined')
+            ? parseInt(state.config.theme.darkIntensity, 10)
+            : ((state.config && state.config.theme && typeof state.config.theme.intensity !== 'undefined')
+              ? parseInt(state.config.theme.intensity, 10) : 6));
 
-    const blur = (neo && typeof neo.blur !== 'undefined')
-      ? parseInt(neo.blur, 10)
-      : ((state.config && state.config.theme && typeof state.config.theme.blur !== 'undefined') ? parseInt(state.config.theme.blur, 10) : 10);
+        const blur = (neo && typeof neo.blur !== 'undefined')
+          ? parseInt(neo.blur, 10)
+          : ((state.config && state.config.theme && typeof state.config.theme.blur !== 'undefined') ? parseInt(state.config.theme.blur, 10) : 10);
 
-    const avgIntensity = Math.round((lightIntensity + darkIntensity) / 2);
+        const avgIntensity = Math.round((lightIntensity + darkIntensity) / 2);
 
-    // Compute Chromatic Shadows: exact lighter tint for top and darker shade for bottom
-    const chromatic = deriveRealisticShadows(bgColor, lightIntensity, darkIntensity);
-    const shadowLight = chromatic.shadowLight;
-    const shadowDark = chromatic.shadowDark;
-    const shadowDarkDeep = chromatic.shadowDarkDeep;
+        // Compute Chromatic Shadows: exact lighter tint for top and darker shade for bottom
+        const chromatic = deriveRealisticShadows(bgColor, lightIntensity, darkIntensity);
+        const shadowLight = chromatic.shadowLight;
+        const shadowDark = chromatic.shadowDark;
+        const shadowDarkDeep = chromatic.shadowDarkDeep;
 
-    // Dynamic WCAG-compliant harmonic typography system (guaranteed >= 4.5:1 contrast)
-    const typography = deriveHarmonicTypography(bgColor);
-    const textPrimary = typography.textPrimary;
-    const textSecondary = typography.textSecondary;
-    const textMuted = typography.textMuted;
-    const textDisabled = typography.textDisabled;
+        // Dynamic WCAG-compliant harmonic typography system (guaranteed >= 4.5:1 contrast)
+        const typography = deriveHarmonicTypography(bgColor);
+        const textPrimary = typography.textPrimary;
+        const textSecondary = typography.textSecondary;
+        const textMuted = typography.textMuted;
+        const textDisabled = typography.textDisabled;
 
-    // Derived accent color shades
-    const accRgb = hexToRgb(accentColor);
-    const accLight = lightenHex(accentColor, 20);
-    const accPastel = lightenHex(accentColor, 45);
-    const accSuperPastel = lightenHex(accentColor, 60);
-    const accDark = darkenHex(accentColor, 18);
-    const accDeep = darkenHex(accentColor, 35);
-    const deepRgb = hexToRgb(accDeep);
+        // Derived accent color shades
+        const accRgb = hexToRgb(accentColor);
+        const accLight = lightenHex(accentColor, 20);
+        const accPastel = lightenHex(accentColor, 45);
+        const accSuperPastel = lightenHex(accentColor, 60);
+        const accDark = darkenHex(accentColor, 18);
+        const accDeep = darkenHex(accentColor, 35);
+        const deepRgb = hexToRgb(accDeep);
 
-    const accGlow = `0 4px 16px rgba(${accRgb.r}, ${accRgb.g}, ${accRgb.b}, 0.45)`;
-    const accGradient = `linear-gradient(135deg, ${accLight} 0%, ${accentColor} 100%)`;
-    const accTroughGrad = accentColor;
-    const accTroughShadow = `inset 0 2px 4px rgba(0, 0, 0, 0.35), 0 0 10px ${accentColor}`;
+        const accGlow = `0 4px 16px rgba(${accRgb.r}, ${accRgb.g}, ${accRgb.b}, 0.45)`;
+        const accGradient = `linear-gradient(135deg, ${accLight} 0%, ${accentColor} 100%)`;
+        const accTroughGrad = accentColor;
+        const accTroughShadow = `inset 0 2px 4px rgba(0, 0, 0, 0.35), 0 0 10px ${accentColor}`;
 
-    const root = document.documentElement;
-    root.style.setProperty('--bg-color', bgColor);
-    root.style.setProperty('--surface-color', bgColor);
-    root.style.setProperty('--shadow-light', shadowLight);
-    root.style.setProperty('--shadow-dark', shadowDark);
-    root.style.setProperty('--shadow-dark-deep', shadowDarkDeep);
-    root.style.setProperty('--text-primary', textPrimary);
-    root.style.setProperty('--text-secondary', textSecondary);
-    root.style.setProperty('--text-muted', textMuted);
-    root.style.setProperty('--text-disabled', textDisabled);
+        const root = document.documentElement;
+        root.style.setProperty('--bg-color', bgColor);
+        root.style.setProperty('--surface-color', bgColor);
+        root.style.setProperty('--shadow-light', shadowLight);
+        root.style.setProperty('--shadow-dark', shadowDark);
+        root.style.setProperty('--shadow-dark-deep', shadowDarkDeep);
+        root.style.setProperty('--text-primary', textPrimary);
+        root.style.setProperty('--text-secondary', textSecondary);
+        root.style.setProperty('--text-muted', textMuted);
+        root.style.setProperty('--text-disabled', textDisabled);
 
-    root.style.setProperty('--accent-primary', accentColor);
-    root.style.setProperty('--accent-light', accLight);
-    root.style.setProperty('--accent-pastel', accPastel);
-    root.style.setProperty('--accent-dark', accDark);
-    root.style.setProperty('--accent-deep', accDeep);
-    root.style.setProperty('--accent-glow', accGlow);
-    root.style.setProperty('--accent-gradient', accGradient);
-    root.style.setProperty('--accent-trough-gradient', accTroughGrad);
-    root.style.setProperty('--accent-trough-shadow', accTroughShadow);
+        root.style.setProperty('--accent-primary', accentColor);
+        root.style.setProperty('--accent-light', accLight);
+        root.style.setProperty('--accent-pastel', accPastel);
+        root.style.setProperty('--accent-dark', accDark);
+        root.style.setProperty('--accent-deep', accDeep);
+        root.style.setProperty('--accent-glow', accGlow);
+        root.style.setProperty('--accent-gradient', accGradient);
+        root.style.setProperty('--accent-trough-gradient', accTroughGrad);
+        root.style.setProperty('--accent-trough-shadow', accTroughShadow);
 
-    // Apply dynamic Neumorphism core parameters
-    root.style.setProperty('--neo-radius', `${radius}px`);
-    root.style.setProperty('--neo-dist', `${distance}px`);
-    root.style.setProperty('--neo-blur', `${blur}px`);
-    root.style.setProperty('--neo-light-intensity', `${lightIntensity}%`);
-    root.style.setProperty('--neo-dark-intensity', `${darkIntensity}%`);
-    root.style.setProperty('--neo-intensity', `${avgIntensity}%`);
+        // Apply dynamic Neumorphism core parameters
+        root.style.setProperty('--neo-radius', `${radius}px`);
+        root.style.setProperty('--neo-dist', `${distance}px`);
+        root.style.setProperty('--neo-blur', `${blur}px`);
+        root.style.setProperty('--neo-light-intensity', `${lightIntensity}%`);
+        root.style.setProperty('--neo-dark-intensity', `${darkIntensity}%`);
+        root.style.setProperty('--neo-intensity', `${avgIntensity}%`);
 
-    // Sync state
-    if (!state.config.theme) {
-      state.config.theme = {};
-    }
-    state.config.theme.bgColor = bgColor;
-    state.config.theme.accentColor = accentColor;
-    state.config.theme.radius = radius;
-    state.config.theme.distance = distance;
-    state.config.theme.lightIntensity = lightIntensity;
-    state.config.theme.darkIntensity = darkIntensity;
-    state.config.theme.intensity = avgIntensity;
-    state.config.theme.blur = blur;
+        // Sync state
+        if (!state.config.theme) {
+          state.config.theme = {};
+        }
+        state.config.theme.bgColor = bgColor;
+        state.config.theme.accentColor = accentColor;
+        state.config.theme.radius = radius;
+        state.config.theme.distance = distance;
+        state.config.theme.lightIntensity = lightIntensity;
+        state.config.theme.darkIntensity = darkIntensity;
+        state.config.theme.intensity = avgIntensity;
+        state.config.theme.blur = blur;
 
-    // Persist to localStorage immediately
-    try {
-      localStorage.setItem('ahk_theme', JSON.stringify({
-        bgColor,
-        accentColor,
-        radius,
-        distance,
-        lightIntensity,
-        darkIntensity,
-        intensity: avgIntensity,
-        blur
-      }));
-    } catch (e) { }
+        // Persist to localStorage immediately
+        try {
+          localStorage.setItem('ahk_theme', JSON.stringify({
+            bgColor,
+            accentColor,
+            radius,
+            distance,
+            lightIntensity,
+            darkIntensity,
+            intensity: avgIntensity,
+            blur
+          }));
+        } catch (e) { }
 
-    // Sync input controls if present
-    if (themeBgColorPicker) themeBgColorPicker.value = bgColor;
-    if (themeBgHex) themeBgHex.value = bgColor.toUpperCase();
-    if (themeAccentColorPicker) themeAccentColorPicker.value = accentColor;
-    if (themeAccentHex) themeAccentHex.value = accentColor.toUpperCase();
+        // Sync input controls if present
+        if (themeBgColorPicker) themeBgColorPicker.value = bgColor;
+        if (themeBgHex) themeBgHex.value = bgColor.toUpperCase();
+        if (themeAccentColorPicker) themeAccentColorPicker.value = accentColor;
+        if (themeAccentHex) themeAccentHex.value = accentColor.toUpperCase();
 
-    if (themeSliderRadius) {
-      themeSliderRadius.value = radius;
-      updateSliderProgress(themeSliderRadius);
-      if (badgeRadius) badgeRadius.textContent = `${radius}px`;
-    }
-    if (themeSliderDistance) {
-      themeSliderDistance.value = distance;
-      updateSliderProgress(themeSliderDistance);
-      if (badgeDistance) badgeDistance.textContent = `${distance}px`;
-    }
-    if (themeSliderLightIntensity) {
-      themeSliderLightIntensity.value = lightIntensity;
-      updateSliderProgress(themeSliderLightIntensity);
-      if (badgeLightIntensity) badgeLightIntensity.textContent = `${lightIntensity}%`;
-    }
-    if (themeSliderDarkIntensity) {
-      themeSliderDarkIntensity.value = darkIntensity;
-      updateSliderProgress(themeSliderDarkIntensity);
-      if (badgeDarkIntensity) badgeDarkIntensity.textContent = `${darkIntensity}%`;
-    }
-    if (themeSliderBlur) {
-      themeSliderBlur.value = blur;
-      updateSliderProgress(themeSliderBlur);
-      if (badgeBlur) badgeBlur.textContent = `${blur}px`;
-    }
+        if (themeSliderRadius) {
+          themeSliderRadius.value = radius;
+          updateSliderProgress(themeSliderRadius);
+          if (badgeRadius) badgeRadius.textContent = `${radius}px`;
+        }
+        if (themeSliderDistance) {
+          themeSliderDistance.value = distance;
+          updateSliderProgress(themeSliderDistance);
+          if (badgeDistance) badgeDistance.textContent = `${distance}px`;
+        }
+        if (themeSliderLightIntensity) {
+          themeSliderLightIntensity.value = lightIntensity;
+          updateSliderProgress(themeSliderLightIntensity);
+          if (badgeLightIntensity) badgeLightIntensity.textContent = `${lightIntensity}%`;
+        }
+        if (themeSliderDarkIntensity) {
+          themeSliderDarkIntensity.value = darkIntensity;
+          updateSliderProgress(themeSliderDarkIntensity);
+          if (badgeDarkIntensity) badgeDarkIntensity.textContent = `${darkIntensity}%`;
+        }
+        if (themeSliderBlur) {
+          themeSliderBlur.value = blur;
+          updateSliderProgress(themeSliderBlur);
+          if (badgeBlur) badgeBlur.textContent = `${blur}px`;
+        }
 
-    updateActivePresetChips();
+        updateActivePresetChips();
 
-    if (save) {
-      syncConfig();
-    }
-  }
-
-  function getCurrentThemeColors() {
-    const bg = (state.config && state.config.theme && state.config.theme.bgColor)
-      || document.documentElement.style.getPropertyValue('--bg-color')
-      || '#e8dfd5';
-      || '#b85d68';
-    const acc = (state.config && state.config.theme && state.config.theme.accentColor)
-      || document.documentElement.style.getPropertyValue('--accent-primary')
-      || '#d97706';
-      || '#00cc18';
-    const radius = (state.config && state.config.theme && typeof state.config.theme.radius !== 'undefined')
-      ? parseInt(state.config.theme.radius, 10) : 5;
-      ?parseInt(state.config.theme.radius, 10) : 14;
-    const distance = (state.config && state.config.theme && typeof state.config.theme.distance !== 'undefined')
-      ? parseInt(state.config.theme.distance, 10) : 3;
-    const lightIntensity = (state.config && state.config.theme && typeof state.config.theme.lightIntensity !== 'undefined')
-      ? parseInt(state.config.theme.lightIntensity, 10)
-      : ((state.config && state.config.theme && typeof state.config.theme.intensity !== 'undefined') ? parseInt(state.config.theme.intensity, 10) : 22);
-    const darkIntensity = (state.config && state.config.theme && typeof state.config.theme.darkIntensity !== 'undefined')
-      ? parseInt(state.config.theme.darkIntensity, 10)
-      : ((state.config && state.config.theme && typeof state.config.theme.intensity !== 'undefined') ? parseInt(state.config.theme.intensity, 10) : 6);
-    const blur = (state.config && state.config.theme && typeof state.config.theme.blur !== 'undefined')
-      ? parseInt(state.config.theme.blur, 10) : 10;
-    return {
-      bg: bg.trim(),
-      acc: acc.trim(),
-      radius,
-      distance,
-      lightIntensity,
-      darkIntensity,
-      intensity: Math.round((lightIntensity + darkIntensity) / 2),
-      blur
-    };
-  }
-
-  function getNeoSliderValues() {
-    return {
-      radius: themeSliderRadius ? parseInt(themeSliderRadius.value, 10) : 22,
-      distance: themeSliderDistance ? parseInt(themeSliderDistance.value, 10) : 3,
-      lightIntensity: themeSliderLightIntensity ? parseInt(themeSliderLightIntensity.value, 10) : 18,
-      darkIntensity: themeSliderDarkIntensity ? parseInt(themeSliderDarkIntensity.value, 10) : 18,
-      blur: themeSliderBlur ? parseInt(themeSliderBlur.value, 10) : 8
-    };
-  }
-
-  function getCustomThemePresets() {
-    if (state.config && state.config.theme && Array.isArray(state.config.theme.customPresets)) {
-      return state.config.theme.customPresets;
-    }
-    try {
-      const cached = localStorage.getItem('ahk_custom_theme_presets');
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed)) {
-          if (!state.config.theme) state.config.theme = {};
-          state.config.theme.customPresets = parsed;
-          return parsed;
+        if (save) {
+          syncConfig();
         }
       }
-    } catch (e) { }
-    return [];
-  }
 
-  function updateActivePresetChips() {
-    const currentColors = getCurrentThemeColors();
-    const currentSliders = getNeoSliderValues();
-
-    // Check built-in swatches
-    document.querySelectorAll('#bgSwatchesGrid .theme-swatch-chip').forEach(chip => {
-      const presetKey = chip.dataset.preset;
-      const preset = presetKey ? THEME_PRESETS[presetKey] : null;
-      let isMatch = false;
-      if (preset) {
-        isMatch = (
-          preset.bgColor.toLowerCase() === currentColors.bg.toLowerCase() &&
-          (preset.accentColor || currentColors.acc).toLowerCase() === currentColors.acc.toLowerCase() &&
-          parseInt(preset.radius, 10) === currentSliders.radius &&
-          parseInt(preset.distance, 10) === currentSliders.distance &&
-          parseInt(preset.blur, 10) === currentSliders.blur &&
-          parseInt(preset.lightIntensity, 10) === currentSliders.lightIntensity &&
-          parseInt(preset.darkIntensity, 10) === currentSliders.darkIntensity
-        );
-        chip.style.backgroundColor = preset.bgColor;
-        chip.style.borderColor = preset.accentColor;
-        chip.style.color = preset.accentColor;
-        chip.style.borderRadius = `${Math.min(22, Math.max(4, preset.radius))}px`;
-        chip.style.boxShadow = computePresetShadow(preset.bgColor, preset.lightIntensity, preset.darkIntensity, preset.distance, preset.blur);
-      } else if (chip.dataset.color) {
-        isMatch = (chip.dataset.color.toLowerCase() === currentColors.bg.toLowerCase());
-      }
-      chip.classList.toggle('active', isMatch);
-    });
-
-    document.querySelectorAll('#accentSwatchesGrid .theme-swatch-chip').forEach(chip => {
-      chip.classList.toggle('active', chip.dataset.color.toLowerCase() === currentColors.acc.toLowerCase());
-    });
-
-    // Check custom presets
-    const presets = getCustomThemePresets();
-    document.querySelectorAll('#customPresetsGrid .custom-preset-chip').forEach(chip => {
-      const p = presets.find(item => item.id === chip.dataset.presetId);
-      if (!p) {
-        chip.classList.remove('active');
-        return;
-      }
-      const isMatch = (
-        p.bgColor.toLowerCase() === currentColors.bg.toLowerCase() &&
-        p.accentColor.toLowerCase() === currentColors.acc.toLowerCase() &&
-        parseInt(p.radius, 10) === currentSliders.radius &&
-        parseInt(p.distance, 10) === currentSliders.distance &&
-        parseInt(p.blur, 10) === currentSliders.blur &&
-        (typeof p.lightIntensity === 'undefined' || parseInt(p.lightIntensity, 10) === currentSliders.lightIntensity) &&
-        (typeof p.darkIntensity === 'undefined' || parseInt(p.darkIntensity, 10) === currentSliders.darkIntensity)
-      );
-      chip.classList.toggle('active', isMatch);
-    });
-  }
-
-  function renderCustomPresets() {
-    const grid = document.getElementById('customPresetsGrid');
-    if (!grid) return;
-
-    const presets = getCustomThemePresets();
-    grid.innerHTML = '';
-
-    if (presets.length === 0) {
-      grid.innerHTML = '<span class="empty-custom-presets-hint">No custom presets saved yet. Adjust colors & sliders above, name your preset, and click Save Preset!</span>';
-      return;
-    }
-
-    const currentColors = getCurrentThemeColors();
-    const currentSliders = getNeoSliderValues();
-
-    presets.forEach(p => {
-      const chip = document.createElement('button');
-      chip.type = 'button';
-      chip.className = 'theme-swatch-chip theme-card-chip custom-preset-chip';
-      chip.dataset.presetId = p.id;
-      chip.title = `${p.name} (Background: ${p.bgColor}, Accent: ${p.accentColor}, Radius: ${p.radius}px, Blur: ${p.blur}px)`;
-      chip.setAttribute('aria-label', p.name);
-      chip.style.backgroundColor = p.bgColor;
-      chip.style.borderColor = p.accentColor;
-      chip.style.color = p.accentColor;
-      chip.style.borderRadius = `${Math.min(22, Math.max(4, p.radius || 10))}px`;
-      chip.style.boxShadow = computePresetShadow(
-        p.bgColor,
-        (typeof p.lightIntensity !== 'undefined') ? p.lightIntensity : 20,
-        (typeof p.darkIntensity !== 'undefined') ? p.darkIntensity : 20,
-        (typeof p.distance !== 'undefined') ? p.distance : 3,
-        (typeof p.blur !== 'undefined') ? p.blur : 8
-      );
-
-      const isMatch = (
-        p.bgColor.toLowerCase() === currentColors.bg.toLowerCase() &&
-        p.accentColor.toLowerCase() === currentColors.acc.toLowerCase() &&
-        parseInt(p.radius, 10) === currentSliders.radius &&
-        parseInt(p.distance, 10) === currentSliders.distance &&
-        parseInt(p.blur, 10) === currentSliders.blur &&
-        (typeof p.lightIntensity === 'undefined' || parseInt(p.lightIntensity, 10) === currentSliders.lightIntensity) &&
-        (typeof p.darkIntensity === 'undefined' || parseInt(p.darkIntensity, 10) === currentSliders.darkIntensity)
-      );
-
-      if (isMatch) {
-        chip.classList.add('active');
+      function getCurrentThemeColors() {
+        const bg = (state.config && state.config.theme && state.config.theme.bgColor)
+          || document.documentElement.style.getPropertyValue('--bg-color')
+          || '#e8dfd5';
+      || '#b85d68';
+        const acc = (state.config && state.config.theme && state.config.theme.accentColor)
+          || document.documentElement.style.getPropertyValue('--accent-primary')
+          || '#d97706';
+      || '#00cc18';
+        const radius = (state.config && state.config.theme && typeof state.config.theme.radius !== 'undefined')
+          ? parseInt(state.config.theme.radius, 10) : 5;
+      ?parseInt(state.config.theme.radius, 10) : 14;
+      ?parseInt(state.config.theme.radius, 10) : 14;
+        const distance = (state.config && state.config.theme && typeof state.config.theme.distance !== 'undefined')
+          ? parseInt(state.config.theme.distance, 10) : 3;
+        const lightIntensity = (state.config && state.config.theme && typeof state.config.theme.lightIntensity !== 'undefined')
+          ? parseInt(state.config.theme.lightIntensity, 10)
+          : ((state.config && state.config.theme && typeof state.config.theme.intensity !== 'undefined') ? parseInt(state.config.theme.intensity, 10) : 22);
+        const darkIntensity = (state.config && state.config.theme && typeof state.config.theme.darkIntensity !== 'undefined')
+          ? parseInt(state.config.theme.darkIntensity, 10)
+          : ((state.config && state.config.theme && typeof state.config.theme.intensity !== 'undefined') ? parseInt(state.config.theme.intensity, 10) : 6);
+        const blur = (state.config && state.config.theme && typeof state.config.theme.blur !== 'undefined')
+          ? parseInt(state.config.theme.blur, 10) : 10;
+        return {
+          bg: bg.trim(),
+          acc: acc.trim(),
+          radius,
+          distance,
+          lightIntensity,
+          darkIntensity,
+          intensity: Math.round((lightIntensity + darkIntensity) / 2),
+          blur
+        };
       }
 
-      chip.innerHTML = `
+      function getNeoSliderValues() {
+        return {
+          radius: themeSliderRadius ? parseInt(themeSliderRadius.value, 10) : 22,
+          distance: themeSliderDistance ? parseInt(themeSliderDistance.value, 10) : 3,
+          lightIntensity: themeSliderLightIntensity ? parseInt(themeSliderLightIntensity.value, 10) : 18,
+          darkIntensity: themeSliderDarkIntensity ? parseInt(themeSliderDarkIntensity.value, 10) : 18,
+          blur: themeSliderBlur ? parseInt(themeSliderBlur.value, 10) : 8
+        };
+      }
+
+      function getCustomThemePresets() {
+        if (state.config && state.config.theme && Array.isArray(state.config.theme.customPresets)) {
+          return state.config.theme.customPresets;
+        }
+        try {
+          const cached = localStorage.getItem('ahk_custom_theme_presets');
+          if (cached) {
+            const parsed = JSON.parse(cached);
+            if (Array.isArray(parsed)) {
+              if (!state.config.theme) state.config.theme = {};
+              state.config.theme.customPresets = parsed;
+              return parsed;
+            }
+          }
+        } catch (e) { }
+        return [];
+      }
+
+      function updateActivePresetChips() {
+        const currentColors = getCurrentThemeColors();
+        const currentSliders = getNeoSliderValues();
+
+        // Check built-in swatches
+        document.querySelectorAll('#bgSwatchesGrid .theme-swatch-chip').forEach(chip => {
+          const presetKey = chip.dataset.preset;
+          const preset = presetKey ? THEME_PRESETS[presetKey] : null;
+          let isMatch = false;
+          if (preset) {
+            isMatch = (
+              preset.bgColor.toLowerCase() === currentColors.bg.toLowerCase() &&
+              (preset.accentColor || currentColors.acc).toLowerCase() === currentColors.acc.toLowerCase() &&
+              parseInt(preset.radius, 10) === currentSliders.radius &&
+              parseInt(preset.distance, 10) === currentSliders.distance &&
+              parseInt(preset.blur, 10) === currentSliders.blur &&
+              parseInt(preset.lightIntensity, 10) === currentSliders.lightIntensity &&
+              parseInt(preset.darkIntensity, 10) === currentSliders.darkIntensity
+            );
+            chip.style.backgroundColor = preset.bgColor;
+            chip.style.borderColor = preset.accentColor;
+            chip.style.color = preset.accentColor;
+            chip.style.borderRadius = `${Math.min(22, Math.max(4, preset.radius))}px`;
+            chip.style.boxShadow = computePresetShadow(preset.bgColor, preset.lightIntensity, preset.darkIntensity, preset.distance, preset.blur);
+          } else if (chip.dataset.color) {
+            isMatch = (chip.dataset.color.toLowerCase() === currentColors.bg.toLowerCase());
+          }
+          chip.classList.toggle('active', isMatch);
+        });
+
+        document.querySelectorAll('#accentSwatchesGrid .theme-swatch-chip').forEach(chip => {
+          chip.classList.toggle('active', chip.dataset.color.toLowerCase() === currentColors.acc.toLowerCase());
+        });
+
+        // Check custom presets
+        const presets = getCustomThemePresets();
+        document.querySelectorAll('#customPresetsGrid .custom-preset-chip').forEach(chip => {
+          const p = presets.find(item => item.id === chip.dataset.presetId);
+          if (!p) {
+            chip.classList.remove('active');
+            return;
+          }
+          const isMatch = (
+            p.bgColor.toLowerCase() === currentColors.bg.toLowerCase() &&
+            p.accentColor.toLowerCase() === currentColors.acc.toLowerCase() &&
+            parseInt(p.radius, 10) === currentSliders.radius &&
+            parseInt(p.distance, 10) === currentSliders.distance &&
+            parseInt(p.blur, 10) === currentSliders.blur &&
+            (typeof p.lightIntensity === 'undefined' || parseInt(p.lightIntensity, 10) === currentSliders.lightIntensity) &&
+            (typeof p.darkIntensity === 'undefined' || parseInt(p.darkIntensity, 10) === currentSliders.darkIntensity)
+          );
+          chip.classList.toggle('active', isMatch);
+        });
+      }
+
+      function renderCustomPresets() {
+        const grid = document.getElementById('customPresetsGrid');
+        if (!grid) return;
+
+        const presets = getCustomThemePresets();
+        grid.innerHTML = '';
+
+        if (presets.length === 0) {
+          grid.innerHTML = '<span class="empty-custom-presets-hint">No custom presets saved yet. Adjust colors & sliders above, name your preset, and click Save Preset!</span>';
+          return;
+        }
+
+        const currentColors = getCurrentThemeColors();
+        const currentSliders = getNeoSliderValues();
+
+        presets.forEach(p => {
+          const chip = document.createElement('button');
+          chip.type = 'button';
+          chip.className = 'theme-swatch-chip theme-card-chip custom-preset-chip';
+          chip.dataset.presetId = p.id;
+          chip.title = `${p.name} (Background: ${p.bgColor}, Accent: ${p.accentColor}, Radius: ${p.radius}px, Blur: ${p.blur}px)`;
+          chip.setAttribute('aria-label', p.name);
+          chip.style.backgroundColor = p.bgColor;
+          chip.style.borderColor = p.accentColor;
+          chip.style.color = p.accentColor;
+          chip.style.borderRadius = `${Math.min(22, Math.max(4, p.radius || 10))}px`;
+          chip.style.boxShadow = computePresetShadow(
+            p.bgColor,
+            (typeof p.lightIntensity !== 'undefined') ? p.lightIntensity : 20,
+            (typeof p.darkIntensity !== 'undefined') ? p.darkIntensity : 20,
+            (typeof p.distance !== 'undefined') ? p.distance : 3,
+            (typeof p.blur !== 'undefined') ? p.blur : 8
+          );
+
+          const isMatch = (
+            p.bgColor.toLowerCase() === currentColors.bg.toLowerCase() &&
+            p.accentColor.toLowerCase() === currentColors.acc.toLowerCase() &&
+            parseInt(p.radius, 10) === currentSliders.radius &&
+            parseInt(p.distance, 10) === currentSliders.distance &&
+            parseInt(p.blur, 10) === currentSliders.blur &&
+            (typeof p.lightIntensity === 'undefined' || parseInt(p.lightIntensity, 10) === currentSliders.lightIntensity) &&
+            (typeof p.darkIntensity === 'undefined' || parseInt(p.darkIntensity, 10) === currentSliders.darkIntensity)
+          );
+
+          if (isMatch) {
+            chip.classList.add('active');
+          }
+
+          chip.innerHTML = `
         <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="20 6 9 17 4 12"></polyline>
         </svg>
         <span class="btn-delete-preset" data-delete-id="${p.id}" title="Delete preset">&times;</span>
       `;
 
-      chip.addEventListener('click', (e) => {
-        if (e.target.closest('.btn-delete-preset')) return;
+          chip.addEventListener('click', (e) => {
+            if (e.target.closest('.btn-delete-preset')) return;
 
-        applyTheme(p.bgColor, p.accentColor, true, {
-          radius: p.radius,
-          distance: p.distance,
-          lightIntensity: p.lightIntensity,
-          darkIntensity: p.darkIntensity,
-          blur: p.blur
-        });
+            applyTheme(p.bgColor, p.accentColor, true, {
+              radius: p.radius,
+              distance: p.distance,
+              lightIntensity: p.lightIntensity,
+              darkIntensity: p.darkIntensity,
+              blur: p.blur
+            });
 
-        updateActivePresetChips();
-      });
-
-      const btnDelete = chip.querySelector('.btn-delete-preset');
-      if (btnDelete) {
-        btnDelete.addEventListener('click', (e) => {
-          e.stopPropagation();
-          deleteCustomPreset(p.id);
-        });
-      }
-
-      grid.appendChild(chip);
-    });
-  }
-
-  function saveCurrentCustomPreset() {
-    const input = document.getElementById('inputCustomPresetName');
-    const nameVal = input ? input.value.trim() : '';
-
-    if (!state.config.theme) state.config.theme = {};
-    let presets = getCustomThemePresets();
-
-    const name = nameVal || `Custom Theme ${presets.length + 1}`;
-    const current = getCurrentThemeColors();
-    const sliders = getNeoSliderValues();
-
-    const existingIndex = presets.findIndex(p => p.name.toLowerCase() === name.toLowerCase());
-    const newPreset = {
-      id: (existingIndex >= 0) ? presets[existingIndex].id : ('custom_' + Date.now()),
-      name: name,
-      bgColor: current.bg,
-      accentColor: current.acc,
-      radius: sliders.radius,
-      distance: sliders.distance,
-      lightIntensity: sliders.lightIntensity,
-      darkIntensity: sliders.darkIntensity,
-      blur: sliders.blur
-    };
-
-    if (existingIndex >= 0) {
-      presets[existingIndex] = newPreset;
-    } else {
-      presets.push(newPreset);
-    }
-
-    state.config.theme.customPresets = presets;
-
-    try {
-      localStorage.setItem('ahk_custom_theme_presets', JSON.stringify(presets));
-    } catch (e) { }
-
-    syncConfig();
-
-    if (input) input.value = '';
-
-    renderCustomPresets();
-    updateActivePresetChips();
-
-    const btnSave = document.getElementById('btnSaveCustomPreset');
-    if (btnSave) {
-      const origText = btnSave.innerHTML;
-      btnSave.classList.add('btn-saved');
-      btnSave.innerHTML = '<span>SAVED!</span>';
-      setTimeout(() => {
-        btnSave.classList.remove('btn-saved');
-        btnSave.innerHTML = origText;
-      }, 1200);
-    }
-  }
-
-  function deleteCustomPreset(id) {
-    if (!state.config.theme) state.config.theme = {};
-    let presets = getCustomThemePresets();
-    presets = presets.filter(p => p.id !== id);
-    state.config.theme.customPresets = presets;
-
-    try {
-      localStorage.setItem('ahk_custom_theme_presets', JSON.stringify(presets));
-    } catch (e) { }
-
-    syncConfig();
-    renderCustomPresets();
-    updateActivePresetChips();
-  }
-
-  // ============================================================================
-  // Event Listeners & Initialization
-  // ============================================================================
-
-  function initListeners() {
-    // Master Switch
-    mainEngineSwitch.addEventListener('click', toggleMasterEngine);
-    if (mainEngineSwitch) {
-      mainEngineSwitch.addEventListener('click', toggleMasterEngine);
-    }
-
-    // Profile Management Listeners
-    if (profileSelect) {
-      profileSelect.addEventListener('change', (e) => {
-        switchProfile(e.target.value);
-      });
-    }
-    if (btnAddProfile) {
-      btnAddProfile.addEventListener('click', () => {
-        openProfileModal('add');
-      });
-    }
-    if (btnRenameProfile) {
-      btnRenameProfile.addEventListener('click', () => {
-        openProfileModal('rename');
-      });
-    }
-    if (btnDeleteProfile) {
-      btnDeleteProfile.addEventListener('click', () => {
-        openProfileModal('delete');
-      });
-    }
-    if (btnConfirmProfileModal) {
-      btnConfirmProfileModal.addEventListener('click', handleProfileModalConfirm);
-    }
-    if (btnCancelProfileModal) {
-      btnCancelProfileModal.addEventListener('click', closeProfileModal);
-    }
-    if (btnCloseProfileModal) {
-      btnCloseProfileModal.addEventListener('click', closeProfileModal);
-    }
-    if (profileNameInput) {
-      profileNameInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') handleProfileModalConfirm();
-        else if (e.key === 'Escape') closeProfileModal();
-      });
-    }
-
-    // Tab Bar
-    segmentedBar.addEventListener('click', (e) => {
-      const btn = e.target.closest('.segment-btn');
-      if (!btn) return;
-      switchTab(btn.dataset.tab);
-    });
-
-    window.addEventListener('resize', () => {
-      updateSegmentedGlider(true);
-    });
-
-    // Text Expander Listeners
-    teBtnSubmit.addEventListener('click', submitTextExpander);
-    teToggleMultiline.addEventListener('click', () => toggleMultiline());
-    teSearchFilter.addEventListener('input', renderTextExpander);
-
-    teInputTrigger.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        if (state.isMultiline) teTextareaOutput.focus();
-        else if (!teInputOutput.value.trim()) teInputOutput.focus();
-        else submitTextExpander();
-      }
-    });
-
-    teInputOutput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') submitTextExpander();
-    });
-
-    // Key Remapper Pure Key Combination Recorders
-    krBtnSubmit.addEventListener('click', submitKeyRemapper);
-    setupKeyCombinationBox(krSourceBox, krInputSource, krBtnClearSource, krTargetBox, submitKeyRemapper);
-    setupKeyCombinationBox(krTargetBox, krInputTarget, krBtnClearTarget, null, submitKeyRemapper);
-
-    // App Launcher Listeners
-    if (alTypeString) {
-      alTypeString.addEventListener('click', () => setAlTriggerType('string'));
-    }
-    if (alTypeHotkey) {
-      alTypeHotkey.addEventListener('click', () => setAlTriggerType('hotkey'));
-    }
-    if (alBtnSubmit) {
-      alBtnSubmit.addEventListener('click', submitAppLauncher);
-    }
-    if (alInputTrigger) {
-      alInputTrigger.addEventListener('keydown', handleAlTriggerKeydown);
-    }
-    if (alBtnBrowse) {
-      alBtnBrowse.addEventListener('click', (e) => {
-        e.preventDefault();
-        sendToAhk('browseApp');
-      });
-    }
-
-    if (alOutputBox) {
-      alOutputBox.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        alOutputBox.style.boxShadow = 'var(--inset-deep), inset 0 0 0 1.5px var(--accent-primary)';
-      });
-      alOutputBox.addEventListener('dragleave', () => {
-        alOutputBox.style.boxShadow = '';
-      });
-      alOutputBox.addEventListener('drop', (e) => {
-        e.preventDefault();
-        alOutputBox.style.boxShadow = '';
-        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
-          const file = e.dataTransfer.files[0];
-          if (file.path) {
-            alInputTarget.value = file.path;
-            const nameNoExt = file.name.replace(/\.[^/.]+$/, '');
-            if (!alInputName.value.trim()) {
-              alInputName.value = nameNoExt;
-            }
-            alInputTarget.focus();
-          }
-        }
-      });
-    }
-
-    if (alInputTarget) {
-      alInputTarget.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') submitAppLauncher();
-      });
-    }
-
-    if (alInputName) {
-      alInputName.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') submitAppLauncher();
-      });
-    }
-
-    // Window Dragging
-    function handleDragStart(e) {
-      if (
-        e.target.closest('button') ||
-        e.target.closest('input') ||
-        e.target.closest('textarea') ||
-        e.target.closest('select') ||
-        e.target.closest('.resize-handle') ||
-        e.target.closest('.shortcut-card') ||
-        e.target.closest('.macro-step-chip') ||
-        e.target.closest('.macro-timeline-track') ||
-        e.target.closest('.macro-inject-btn') ||
-        e.target.closest('[draggable="true"]') ||
-        e.target.closest('#mainEngineSwitch') ||
-        e.target.closest('.vertical-rocker')
-      ) return;
-      sendToAhk('startDrag');
-    }
-
-    dragHeader.addEventListener('mousedown', handleDragStart);
-    appCard.addEventListener('mousedown', (e) => {
-      if (
-        e.target === appCard ||
-        e.target.classList.contains('inputs-section') ||
-        e.target.classList.contains('input-hints') ||
-        e.target.classList.contains('list-section') ||
-        e.target.classList.contains('modules-container')
-      ) {
-        handleDragStart(e);
-      }
-    });
-
-    // Window Resizing via handles
-    document.querySelectorAll('.resize-handle').forEach(handle => {
-      handle.addEventListener('mousedown', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        sendToAhk('startResize', { dir: handle.dataset.direction });
-      });
-    });
-
-    // Window Controls
-    btnMinimize.addEventListener('click', () => sendToAhk('minimize'));
-    btnClose.addEventListener('click', () => sendToAhk('close'));
-    btnRefresh.addEventListener('click', () => sendToAhk('reload'));
-    if (btnExport) {
-      btnExport.addEventListener('click', () => sendToAhk('openConfig'));
-    }
-    if (btnHelp) {
-      btnHelp.addEventListener('click', () => {
-        const modal = document.getElementById('infoModal');
-        if (modal) modal.classList.remove('hidden-field');
-      });
-    }
-
-    const btnCloseModal = document.getElementById('btnCloseModal');
-    if (btnCloseModal) {
-      btnCloseModal.addEventListener('click', () => {
-        const modal = document.getElementById('infoModal');
-        if (modal) modal.classList.add('hidden-field');
-      });
-    }
-
-    const infoModal = document.getElementById('infoModal');
-    if (infoModal) {
-      infoModal.addEventListener('click', (e) => {
-        if (e.target === infoModal) {
-          infoModal.classList.add('hidden-field');
-        }
-      });
-    }
-
-    // Theme Settings Listeners
-    if (btnTheme) {
-      btnTheme.addEventListener('click', () => {
-        if (themeModal) {
-          const current = getCurrentThemeColors();
-          if (themeBgColorPicker) themeBgColorPicker.value = current.bg;
-          if (themeBgHex) themeBgHex.value = current.bg.toUpperCase();
-          if (themeAccentColorPicker) themeAccentColorPicker.value = current.acc;
-          if (themeAccentHex) themeAccentHex.value = current.acc.toUpperCase();
-
-          if (themeSliderRadius) {
-            themeSliderRadius.value = current.radius;
-            updateSliderProgress(themeSliderRadius);
-            if (badgeRadius) badgeRadius.textContent = `${current.radius}px`;
-          }
-          if (themeSliderDistance) {
-            themeSliderDistance.value = current.distance;
-            updateSliderProgress(themeSliderDistance);
-            if (badgeDistance) badgeDistance.textContent = `${current.distance}px`;
-          }
-          if (themeSliderLightIntensity) {
-            themeSliderLightIntensity.value = current.lightIntensity;
-            updateSliderProgress(themeSliderLightIntensity);
-            if (badgeLightIntensity) badgeLightIntensity.textContent = `${current.lightIntensity}%`;
-          }
-          if (themeSliderDarkIntensity) {
-            themeSliderDarkIntensity.value = current.darkIntensity;
-            updateSliderProgress(themeSliderDarkIntensity);
-            if (badgeDarkIntensity) badgeDarkIntensity.textContent = `${current.darkIntensity}%`;
-          }
-          if (themeSliderBlur) {
-            themeSliderBlur.value = current.blur;
-            updateSliderProgress(themeSliderBlur);
-            if (badgeBlur) badgeBlur.textContent = `${current.blur}px`;
-          }
-
-          updateActivePresetChips();
-          renderCustomPresets();
-
-          themeModal.classList.remove('hidden-field');
-        }
-      });
-    }
-
-    if (btnCloseThemeModal) {
-      btnCloseThemeModal.addEventListener('click', () => {
-        syncConfig();
-        if (themeModal) themeModal.classList.add('hidden-field');
-      });
-    }
-
-    if (themeModal) {
-      themeModal.addEventListener('click', (e) => {
-        if (e.target === themeModal) {
-          syncConfig();
-          themeModal.classList.add('hidden-field');
-        }
-      });
-    }
-
-    // Background Swatches - Auto-save immediately with curated preset parameters
-    if (bgSwatchesGrid) {
-      bgSwatchesGrid.addEventListener('click', (e) => {
-        const chip = e.target.closest('.theme-swatch-chip');
-        if (!chip) return;
-        const presetKey = chip.dataset.preset;
-        const preset = presetKey ? THEME_PRESETS[presetKey] : null;
-        const current = getCurrentThemeColors();
-        if (preset) {
-          applyTheme(preset.bgColor, preset.accentColor || current.acc, true, {
-            radius: preset.radius,
-            distance: preset.distance,
-            lightIntensity: preset.lightIntensity,
-            darkIntensity: preset.darkIntensity,
-            blur: preset.blur
+            updateActivePresetChips();
           });
-        } else if (chip.dataset.color) {
-          applyTheme(chip.dataset.color, current.acc, true, getNeoSliderValues());
-        }
-      });
-    }
 
-    // Custom Background Color Picker
-    if (themeBgColorPicker) {
-      themeBgColorPicker.addEventListener('input', (e) => {
-        const color = e.target.value;
-        const current = getCurrentThemeColors();
-        applyTheme(color, current.acc, false, getNeoSliderValues());
-      });
-      themeBgColorPicker.addEventListener('change', (e) => {
-        const color = e.target.value;
-        const current = getCurrentThemeColors();
-        applyTheme(color, current.acc, true, getNeoSliderValues());
-      });
-    }
+          const btnDelete = chip.querySelector('.btn-delete-preset');
+          if (btnDelete) {
+            btnDelete.addEventListener('click', (e) => {
+              e.stopPropagation();
+              deleteCustomPreset(p.id);
+            });
+          }
 
-    if (themeBgHex) {
-      themeBgHex.addEventListener('change', (e) => {
-        let val = e.target.value.trim();
-        if (!val.startsWith('#')) val = '#' + val;
-        if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
-          const current = getCurrentThemeColors();
-          applyTheme(val, current.acc, true, getNeoSliderValues());
-        }
-      });
-    }
-
-    // Accent Swatches - Auto-save immediately
-    if (accentSwatchesGrid) {
-      accentSwatchesGrid.addEventListener('click', (e) => {
-        const chip = e.target.closest('.theme-swatch-chip');
-        if (!chip) return;
-        const color = chip.dataset.color;
-        const current = getCurrentThemeColors();
-        applyTheme(current.bg, color, true, getNeoSliderValues());
-      });
-    }
-
-    // Custom Accent Color Picker
-    if (themeAccentColorPicker) {
-      themeAccentColorPicker.addEventListener('input', (e) => {
-        const color = e.target.value;
-        const current = getCurrentThemeColors();
-        applyTheme(current.bg, color, false, getNeoSliderValues());
-      });
-      themeAccentColorPicker.addEventListener('change', (e) => {
-        const color = e.target.value;
-        const current = getCurrentThemeColors();
-        applyTheme(current.bg, color, true, getNeoSliderValues());
-      });
-    }
-
-    if (themeAccentHex) {
-      themeAccentHex.addEventListener('change', (e) => {
-        let val = e.target.value.trim();
-        if (!val.startsWith('#')) val = '#' + val;
-        if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
-          const current = getCurrentThemeColors();
-          applyTheme(current.bg, val, true, getNeoSliderValues());
-        }
-      });
-    }
-
-    // Neumorphism Sliders Listeners (Live Preview on Input, Save on Change)
-    if (themeSliderRadius) {
-      themeSliderRadius.addEventListener('input', () => {
-        const val = parseInt(themeSliderRadius.value, 10);
-        if (badgeRadius) badgeRadius.textContent = `${val}px`;
-        updateSliderProgress(themeSliderRadius);
-        const current = getCurrentThemeColors();
-        applyTheme(current.bg, current.acc, false, { ...getNeoSliderValues(), radius: val });
-      });
-      themeSliderRadius.addEventListener('change', () => {
-        const current = getCurrentThemeColors();
-        applyTheme(current.bg, current.acc, true, getNeoSliderValues());
-      });
-    }
-
-    if (themeSliderDistance) {
-      themeSliderDistance.addEventListener('input', () => {
-        const val = parseInt(themeSliderDistance.value, 10);
-        if (badgeDistance) badgeDistance.textContent = `${val}px`;
-        updateSliderProgress(themeSliderDistance);
-        const current = getCurrentThemeColors();
-        applyTheme(current.bg, current.acc, false, { ...getNeoSliderValues(), distance: val });
-      });
-      themeSliderDistance.addEventListener('change', () => {
-        const current = getCurrentThemeColors();
-        applyTheme(current.bg, current.acc, true, getNeoSliderValues());
-      });
-    }
-
-    if (themeSliderLightIntensity) {
-      themeSliderLightIntensity.addEventListener('input', () => {
-        const val = parseInt(themeSliderLightIntensity.value, 10);
-        if (badgeLightIntensity) badgeLightIntensity.textContent = `${val}%`;
-        updateSliderProgress(themeSliderLightIntensity);
-        const current = getCurrentThemeColors();
-        applyTheme(current.bg, current.acc, false, { ...getNeoSliderValues(), lightIntensity: val });
-      });
-      themeSliderLightIntensity.addEventListener('change', () => {
-        const current = getCurrentThemeColors();
-        applyTheme(current.bg, current.acc, true, getNeoSliderValues());
-      });
-    }
-
-    if (themeSliderDarkIntensity) {
-      themeSliderDarkIntensity.addEventListener('input', () => {
-        const val = parseInt(themeSliderDarkIntensity.value, 10);
-        if (badgeDarkIntensity) badgeDarkIntensity.textContent = `${val}%`;
-        updateSliderProgress(themeSliderDarkIntensity);
-        const current = getCurrentThemeColors();
-        applyTheme(current.bg, current.acc, false, { ...getNeoSliderValues(), darkIntensity: val });
-      });
-      themeSliderDarkIntensity.addEventListener('change', () => {
-        const current = getCurrentThemeColors();
-        applyTheme(current.bg, current.acc, true, getNeoSliderValues());
-      });
-    }
-
-    if (themeSliderBlur) {
-      themeSliderBlur.addEventListener('input', () => {
-        const val = parseInt(themeSliderBlur.value, 10);
-        if (badgeBlur) badgeBlur.textContent = `${val}px`;
-        updateSliderProgress(themeSliderBlur);
-        const current = getCurrentThemeColors();
-        applyTheme(current.bg, current.acc, false, { ...getNeoSliderValues(), blur: val });
-      });
-      themeSliderBlur.addEventListener('change', () => {
-        const current = getCurrentThemeColors();
-        applyTheme(current.bg, current.acc, true, getNeoSliderValues());
-      });
-    }
-
-    // Reset Theme to Default Preset (Soft Clay)
-    // Reset Theme to Default Preset
-    if (btnResetTheme) {
-      btnResetTheme.addEventListener('click', () => {
-        const def = THEME_PRESETS['soft-gray'];
-        const def = THEME_PRESETS['custom-default'];
-        applyTheme(def.bgColor, def.accentColor, true, {
-          radius: def.radius,
-          distance: def.distance,
-          lightIntensity: def.lightIntensity,
-          darkIntensity: def.darkIntensity,
-          blur: def.blur
+          grid.appendChild(chip);
         });
-      });
-    }
+      }
 
-    // Save / Apply Theme
-    if (btnSaveTheme) {
-      btnSaveTheme.addEventListener('click', () => {
+      function saveCurrentCustomPreset() {
+        const input = document.getElementById('inputCustomPresetName');
+        const nameVal = input ? input.value.trim() : '';
+
+        if (!state.config.theme) state.config.theme = {};
+        let presets = getCustomThemePresets();
+
+        const name = nameVal || `Custom Theme ${presets.length + 1}`;
         const current = getCurrentThemeColors();
-        applyTheme(current.bg, current.acc, true, getNeoSliderValues());
-        if (themeModal) themeModal.classList.add('hidden-field');
-      });
-    }
+        const sliders = getNeoSliderValues();
 
-    // Save Custom Theme Preset Listeners
-    if (btnSaveCustomPreset) {
-      btnSaveCustomPreset.addEventListener('click', saveCurrentCustomPreset);
-    }
-    if (inputCustomPresetName) {
-      inputCustomPresetName.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          saveCurrentCustomPreset();
-        }
-      });
-    }
+        const existingIndex = presets.findIndex(p => p.name.toLowerCase() === name.toLowerCase());
+        const newPreset = {
+          id: (existingIndex >= 0) ? presets[existingIndex].id : ('custom_' + Date.now()),
+          name: name,
+          bgColor: current.bg,
+          accentColor: current.acc,
+          radius: sliders.radius,
+          distance: sliders.distance,
+          lightIntensity: sliders.lightIntensity,
+          darkIntensity: sliders.darkIntensity,
+          blur: sliders.blur
+        };
 
-    initMacroRecorder();
-  }
+        if (existingIndex >= 0) {
+          presets[existingIndex] = newPreset;
+        } else {
+          presets.push(newPreset);
+        }
 
-  // Handle IPC Messages from AHK
-  function onAhkMessage(event) {
-    try {
-      const msg = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+        state.config.theme.customPresets = presets;
 
-      if (msg.type === 'init' || msg.type === 'updateState') {
-        if (typeof msg.enabled === 'boolean') state.enabled = msg.enabled;
-        if (msg.config) {
-          state.config = msg.config;
-          ensureProfilesConfig(state.config);
-          if (msg.config.activeTab) state.activeTab = msg.config.activeTab;
-          if (msg.config.theme && msg.config.theme.bgColor && msg.config.theme.accentColor) {
-            applyTheme(
-              msg.config.theme.bgColor,
-              msg.config.theme.accentColor,
-              false,
-              {
-                radius: msg.config.theme.radius,
-                distance: msg.config.theme.distance,
-                lightIntensity: msg.config.theme.lightIntensity,
-                darkIntensity: msg.config.theme.darkIntensity,
-                intensity: msg.config.theme.intensity,
-                blur: msg.config.theme.blur
-              }
-            );
-            renderCustomPresets();
-            try {
-              localStorage.setItem('ahk_theme', JSON.stringify({
-                bgColor: msg.config.theme.bgColor,
-                accentColor: msg.config.theme.accentColor,
-                radius: msg.config.theme.radius,
-                distance: msg.config.theme.distance,
-                lightIntensity: msg.config.theme.lightIntensity,
-                darkIntensity: msg.config.theme.darkIntensity,
-                intensity: msg.config.theme.intensity,
-                blur: msg.config.theme.blur,
-                customPresets: msg.config.theme.customPresets || []
-              }));
-              if (Array.isArray(msg.config.theme.customPresets)) {
-                localStorage.setItem('ahk_custom_theme_presets', JSON.stringify(msg.config.theme.customPresets));
-              }
-            } catch (e) { }
-          }
-        }
-        if (typeof msg.autoClickerRunning === 'boolean') {
-          updateAutoClickerUi(msg.autoClickerRunning);
-        }
-        isInitialized = true;
-        renderAll(false);
-      } else if (msg.type === 'autoClickerState') {
-        updateAutoClickerUi(msg.running);
-      } else if (msg.type === 'appSelected') {
-        if (msg.path && alInputTarget) {
-          alInputTarget.value = msg.path;
-          if (alInputName && (!alInputName.value.trim() || alInputName.value === 'Launch') && msg.name) {
-            alInputName.value = msg.name;
-          }
-          alInputTarget.focus();
-        }
-      } else if (msg.type === 'activeAppVolumeChanged') {
-        if (msg.name) {
-          activeAppState.name = msg.name;
-          if (wmAppTargetBadge) {
-            wmAppTargetBadge.textContent = `Active: ${msg.name}`;
-          }
-        }
-        if (msg.pid) {
-          activeAppState.pid = msg.pid;
-        }
-        if (typeof msg.volume === 'number') {
-          if (msg.volume >= 0) {
-            activeAppState.volume = msg.volume;
-            if (wmAppVolumeSlider) {
-              wmAppVolumeSlider.value = msg.volume;
-              updateSliderProgress(wmAppVolumeSlider);
-            }
-            if (wmAppVolumeValue) {
-              wmAppVolumeValue.textContent = `${msg.volume}%`;
-            }
-          } else if (msg.volume === -1 && wmAppVolumeValue) {
-            wmAppVolumeValue.textContent = 'No Audio';
-          }
-        }
-        if (typeof msg.muted !== 'undefined') {
-          activeAppState.muted = Boolean(msg.muted);
-          if (wmBtnMuteActiveAppText) {
-            wmBtnMuteActiveAppText.textContent = activeAppState.muted ? 'Unmute App' : 'Mute App';
-          }
-          if (wmBtnMuteActiveApp) {
-            wmBtnMuteActiveApp.classList.toggle('is-muted', activeAppState.muted);
-          }
-        }
-      } else if (msg.type === 'macroStepRecorded') {
-        if (macroState.isRecording) {
-          const delay = macroState.useStandardDelays
-            ? macroState.standardDelay
-            : ((typeof msg.delay === 'number' && !isNaN(msg.delay)) ? msg.delay : 50);
-          addMacroStep(msg.action, msg.key, delay);
-        }
-      } else if (msg.type === 'macroRecordingStopped') {
-        if (macroState.isRecording) {
-          stopMacroRecording();
+        try {
+          localStorage.setItem('ahk_custom_theme_presets', JSON.stringify(presets));
+        } catch (e) { }
+
+        syncConfig();
+
+        if (input) input.value = '';
+
+        renderCustomPresets();
+        updateActivePresetChips();
+
+        const btnSave = document.getElementById('btnSaveCustomPreset');
+        if (btnSave) {
+          const origText = btnSave.innerHTML;
+          btnSave.classList.add('btn-saved');
+          btnSave.innerHTML = '<span>SAVED!</span>';
+          setTimeout(() => {
+            btnSave.classList.remove('btn-saved');
+            btnSave.innerHTML = origText;
+          }, 1200);
         }
       }
-    } catch (err) {
-      console.error('Error handling AHK message:', err);
-    }
-  }
 
-  // Resilient AHK Bridge Initializer with Polling & Queue Flushing
-  function initAhkBridge() {
-    function tryConnect() {
-      if (window.chrome && window.chrome.webview) {
-        if (!window.__ahkBridgeReady) {
-          window.__ahkBridgeReady = true;
-          window.chrome.webview.addEventListener('message', onAhkMessage);
-          flushAhkQueue();
-          sendToAhk('getInitialState');
-        }
-        return true;
+      function deleteCustomPreset(id) {
+        if (!state.config.theme) state.config.theme = {};
+        let presets = getCustomThemePresets();
+        presets = presets.filter(p => p.id !== id);
+        state.config.theme.customPresets = presets;
+
+        try {
+          localStorage.setItem('ahk_custom_theme_presets', JSON.stringify(presets));
+        } catch (e) { }
+
+        syncConfig();
+        renderCustomPresets();
+        updateActivePresetChips();
       }
-      return false;
-    }
 
-    if (!tryConnect()) {
-      let attempts = 0;
-      const interval = setInterval(() => {
-        attempts++;
-        if (tryConnect() || attempts > 60) {
-          clearInterval(interval);
+      // ============================================================================
+      // Event Listeners & Initialization
+      // ============================================================================
+
+      function initListeners() {
+        // Master Switch
+        mainEngineSwitch.addEventListener('click', toggleMasterEngine);
+        if (mainEngineSwitch) {
+          mainEngineSwitch.addEventListener('click', toggleMasterEngine);
         }
-      }, 50);
-    }
-  }
 
-  function renderAll(shouldSync = false) {
-    ensureProfilesConfig(state.config);
-    if (state.config && state.config.theme) {
-      applyTheme(
-        state.config.theme.bgColor,
-        state.config.theme.accentColor,
-        false,
-        {
-          radius: state.config.theme.radius,
-          distance: state.config.theme.distance,
-          lightIntensity: state.config.theme.lightIntensity,
-          darkIntensity: state.config.theme.darkIntensity,
-          intensity: state.config.theme.intensity,
-          blur: state.config.theme.blur
+        // Profile Management Listeners
+        if (profileSelect) {
+          profileSelect.addEventListener('change', (e) => {
+            switchProfile(e.target.value);
+          });
         }
-      );
-    }
-    renderProfileSelect();
-    updateSwitchUi();
-    switchTab(state.activeTab || 'textExpander', shouldSync);
-    renderTextExpander();
-    renderKeyRemapper();
-    initWindowManager();
-    renderAppLauncher();
-    initAutoClicker();
-    renderMacroRecorder();
-    updateGlobalIndicators();
-    renderCustomPresets();
-  }
+        if (btnAddProfile) {
+          btnAddProfile.addEventListener('click', () => {
+            openProfileModal('add');
+          });
+        }
+        if (btnRenameProfile) {
+          btnRenameProfile.addEventListener('click', () => {
+            openProfileModal('rename');
+          });
+        }
+        if (btnDeleteProfile) {
+          btnDeleteProfile.addEventListener('click', () => {
+            openProfileModal('delete');
+          });
+        }
+        if (btnConfirmProfileModal) {
+          btnConfirmProfileModal.addEventListener('click', handleProfileModalConfirm);
+        }
+        if (btnCancelProfileModal) {
+          btnCancelProfileModal.addEventListener('click', closeProfileModal);
+        }
+        if (btnCloseProfileModal) {
+          btnCloseProfileModal.addEventListener('click', closeProfileModal);
+        }
+        if (profileNameInput) {
+          profileNameInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') handleProfileModalConfirm();
+            else if (e.key === 'Escape') closeProfileModal();
+          });
+        }
 
-  // Startup
-  initListeners();
-  renderAll(false);
-  requestAnimationFrame(() => {
-    updateSegmentedGlider(true);
-  });
-  initAhkBridge();
+        // Tab Bar
+        segmentedBar.addEventListener('click', (e) => {
+          const btn = e.target.closest('.segment-btn');
+          if (!btn) return;
+          switchTab(btn.dataset.tab);
+        });
 
-}) ();
+        window.addEventListener('resize', () => {
+          updateSegmentedGlider(true);
+        });
+
+        // Text Expander Listeners
+        teBtnSubmit.addEventListener('click', submitTextExpander);
+        teToggleMultiline.addEventListener('click', () => toggleMultiline());
+        teSearchFilter.addEventListener('input', renderTextExpander);
+
+        teInputTrigger.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            if (state.isMultiline) teTextareaOutput.focus();
+            else if (!teInputOutput.value.trim()) teInputOutput.focus();
+            else submitTextExpander();
+          }
+        });
+
+        teInputOutput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') submitTextExpander();
+        });
+
+        // Key Remapper Pure Key Combination Recorders
+        krBtnSubmit.addEventListener('click', submitKeyRemapper);
+        setupKeyCombinationBox(krSourceBox, krInputSource, krBtnClearSource, krTargetBox, submitKeyRemapper);
+        setupKeyCombinationBox(krTargetBox, krInputTarget, krBtnClearTarget, null, submitKeyRemapper);
+
+        // App Launcher Listeners
+        if (alTypeString) {
+          alTypeString.addEventListener('click', () => setAlTriggerType('string'));
+        }
+        if (alTypeHotkey) {
+          alTypeHotkey.addEventListener('click', () => setAlTriggerType('hotkey'));
+        }
+        if (alBtnSubmit) {
+          alBtnSubmit.addEventListener('click', submitAppLauncher);
+        }
+        if (alInputTrigger) {
+          alInputTrigger.addEventListener('keydown', handleAlTriggerKeydown);
+        }
+        if (alBtnBrowse) {
+          alBtnBrowse.addEventListener('click', (e) => {
+            e.preventDefault();
+            sendToAhk('browseApp');
+          });
+        }
+
+        if (alOutputBox) {
+          alOutputBox.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            alOutputBox.style.boxShadow = 'var(--inset-deep), inset 0 0 0 1.5px var(--accent-primary)';
+          });
+          alOutputBox.addEventListener('dragleave', () => {
+            alOutputBox.style.boxShadow = '';
+          });
+          alOutputBox.addEventListener('drop', (e) => {
+            e.preventDefault();
+            alOutputBox.style.boxShadow = '';
+            if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+              const file = e.dataTransfer.files[0];
+              if (file.path) {
+                alInputTarget.value = file.path;
+                const nameNoExt = file.name.replace(/\.[^/.]+$/, '');
+                if (!alInputName.value.trim()) {
+                  alInputName.value = nameNoExt;
+                }
+                alInputTarget.focus();
+              }
+            }
+          });
+        }
+
+        if (alInputTarget) {
+          alInputTarget.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') submitAppLauncher();
+          });
+        }
+
+        if (alInputName) {
+          alInputName.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') submitAppLauncher();
+          });
+        }
+
+        // Window Dragging
+        function handleDragStart(e) {
+          if (
+            e.target.closest('button') ||
+            e.target.closest('input') ||
+            e.target.closest('textarea') ||
+            e.target.closest('select') ||
+            e.target.closest('.resize-handle') ||
+            e.target.closest('.shortcut-card') ||
+            e.target.closest('.macro-step-chip') ||
+            e.target.closest('.macro-timeline-track') ||
+            e.target.closest('.macro-inject-btn') ||
+            e.target.closest('[draggable="true"]') ||
+            e.target.closest('#mainEngineSwitch') ||
+            e.target.closest('.vertical-rocker')
+          ) return;
+          sendToAhk('startDrag');
+        }
+
+        dragHeader.addEventListener('mousedown', handleDragStart);
+        appCard.addEventListener('mousedown', (e) => {
+          if (
+            e.target === appCard ||
+            e.target.classList.contains('inputs-section') ||
+            e.target.classList.contains('input-hints') ||
+            e.target.classList.contains('list-section') ||
+            e.target.classList.contains('modules-container')
+          ) {
+            handleDragStart(e);
+          }
+        });
+
+        // Window Resizing via handles
+        document.querySelectorAll('.resize-handle').forEach(handle => {
+          handle.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            sendToAhk('startResize', { dir: handle.dataset.direction });
+          });
+        });
+
+        // Window Controls
+        btnMinimize.addEventListener('click', () => sendToAhk('minimize'));
+        btnClose.addEventListener('click', () => sendToAhk('close'));
+        btnRefresh.addEventListener('click', () => sendToAhk('reload'));
+        if (btnExport) {
+          btnExport.addEventListener('click', () => sendToAhk('openConfig'));
+        }
+        if (btnHelp) {
+          btnHelp.addEventListener('click', () => {
+            const modal = document.getElementById('infoModal');
+            if (modal) modal.classList.remove('hidden-field');
+          });
+        }
+
+        const btnCloseModal = document.getElementById('btnCloseModal');
+        if (btnCloseModal) {
+          btnCloseModal.addEventListener('click', () => {
+            const modal = document.getElementById('infoModal');
+            if (modal) modal.classList.add('hidden-field');
+          });
+        }
+
+        const infoModal = document.getElementById('infoModal');
+        if (infoModal) {
+          infoModal.addEventListener('click', (e) => {
+            if (e.target === infoModal) {
+              infoModal.classList.add('hidden-field');
+            }
+          });
+        }
+
+        // Theme Settings Listeners
+        if (btnTheme) {
+          btnTheme.addEventListener('click', () => {
+            if (themeModal) {
+              const current = getCurrentThemeColors();
+              if (themeBgColorPicker) themeBgColorPicker.value = current.bg;
+              if (themeBgHex) themeBgHex.value = current.bg.toUpperCase();
+              if (themeAccentColorPicker) themeAccentColorPicker.value = current.acc;
+              if (themeAccentHex) themeAccentHex.value = current.acc.toUpperCase();
+
+              if (themeSliderRadius) {
+                themeSliderRadius.value = current.radius;
+                updateSliderProgress(themeSliderRadius);
+                if (badgeRadius) badgeRadius.textContent = `${current.radius}px`;
+              }
+              if (themeSliderDistance) {
+                themeSliderDistance.value = current.distance;
+                updateSliderProgress(themeSliderDistance);
+                if (badgeDistance) badgeDistance.textContent = `${current.distance}px`;
+              }
+              if (themeSliderLightIntensity) {
+                themeSliderLightIntensity.value = current.lightIntensity;
+                updateSliderProgress(themeSliderLightIntensity);
+                if (badgeLightIntensity) badgeLightIntensity.textContent = `${current.lightIntensity}%`;
+              }
+              if (themeSliderDarkIntensity) {
+                themeSliderDarkIntensity.value = current.darkIntensity;
+                updateSliderProgress(themeSliderDarkIntensity);
+                if (badgeDarkIntensity) badgeDarkIntensity.textContent = `${current.darkIntensity}%`;
+              }
+              if (themeSliderBlur) {
+                themeSliderBlur.value = current.blur;
+                updateSliderProgress(themeSliderBlur);
+                if (badgeBlur) badgeBlur.textContent = `${current.blur}px`;
+              }
+
+              updateActivePresetChips();
+              renderCustomPresets();
+
+              themeModal.classList.remove('hidden-field');
+            }
+          });
+        }
+
+        if (btnCloseThemeModal) {
+          btnCloseThemeModal.addEventListener('click', () => {
+            syncConfig();
+            if (themeModal) themeModal.classList.add('hidden-field');
+          });
+        }
+
+        if (themeModal) {
+          themeModal.addEventListener('click', (e) => {
+            if (e.target === themeModal) {
+              syncConfig();
+              themeModal.classList.add('hidden-field');
+            }
+          });
+        }
+
+        // Background Swatches - Auto-save immediately with curated preset parameters
+        if (bgSwatchesGrid) {
+          bgSwatchesGrid.addEventListener('click', (e) => {
+            const chip = e.target.closest('.theme-swatch-chip');
+            if (!chip) return;
+            const presetKey = chip.dataset.preset;
+            const preset = presetKey ? THEME_PRESETS[presetKey] : null;
+            const current = getCurrentThemeColors();
+            if (preset) {
+              applyTheme(preset.bgColor, preset.accentColor || current.acc, true, {
+                radius: preset.radius,
+                distance: preset.distance,
+                lightIntensity: preset.lightIntensity,
+                darkIntensity: preset.darkIntensity,
+                blur: preset.blur
+              });
+            } else if (chip.dataset.color) {
+              applyTheme(chip.dataset.color, current.acc, true, getNeoSliderValues());
+            }
+          });
+        }
+
+        // Custom Background Color Picker
+        if (themeBgColorPicker) {
+          themeBgColorPicker.addEventListener('input', (e) => {
+            const color = e.target.value;
+            const current = getCurrentThemeColors();
+            applyTheme(color, current.acc, false, getNeoSliderValues());
+          });
+          themeBgColorPicker.addEventListener('change', (e) => {
+            const color = e.target.value;
+            const current = getCurrentThemeColors();
+            applyTheme(color, current.acc, true, getNeoSliderValues());
+          });
+        }
+
+        if (themeBgHex) {
+          themeBgHex.addEventListener('change', (e) => {
+            let val = e.target.value.trim();
+            if (!val.startsWith('#')) val = '#' + val;
+            if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+              const current = getCurrentThemeColors();
+              applyTheme(val, current.acc, true, getNeoSliderValues());
+            }
+          });
+        }
+
+        // Accent Swatches - Auto-save immediately
+        if (accentSwatchesGrid) {
+          accentSwatchesGrid.addEventListener('click', (e) => {
+            const chip = e.target.closest('.theme-swatch-chip');
+            if (!chip) return;
+            const color = chip.dataset.color;
+            const current = getCurrentThemeColors();
+            applyTheme(current.bg, color, true, getNeoSliderValues());
+          });
+        }
+
+        // Custom Accent Color Picker
+        if (themeAccentColorPicker) {
+          themeAccentColorPicker.addEventListener('input', (e) => {
+            const color = e.target.value;
+            const current = getCurrentThemeColors();
+            applyTheme(current.bg, color, false, getNeoSliderValues());
+          });
+          themeAccentColorPicker.addEventListener('change', (e) => {
+            const color = e.target.value;
+            const current = getCurrentThemeColors();
+            applyTheme(current.bg, color, true, getNeoSliderValues());
+          });
+        }
+
+        if (themeAccentHex) {
+          themeAccentHex.addEventListener('change', (e) => {
+            let val = e.target.value.trim();
+            if (!val.startsWith('#')) val = '#' + val;
+            if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+              const current = getCurrentThemeColors();
+              applyTheme(current.bg, val, true, getNeoSliderValues());
+            }
+          });
+        }
+
+        // Neumorphism Sliders Listeners (Live Preview on Input, Save on Change)
+        if (themeSliderRadius) {
+          themeSliderRadius.addEventListener('input', () => {
+            const val = parseInt(themeSliderRadius.value, 10);
+            if (badgeRadius) badgeRadius.textContent = `${val}px`;
+            updateSliderProgress(themeSliderRadius);
+            const current = getCurrentThemeColors();
+            applyTheme(current.bg, current.acc, false, { ...getNeoSliderValues(), radius: val });
+          });
+          themeSliderRadius.addEventListener('change', () => {
+            const current = getCurrentThemeColors();
+            applyTheme(current.bg, current.acc, true, getNeoSliderValues());
+          });
+        }
+
+        if (themeSliderDistance) {
+          themeSliderDistance.addEventListener('input', () => {
+            const val = parseInt(themeSliderDistance.value, 10);
+            if (badgeDistance) badgeDistance.textContent = `${val}px`;
+            updateSliderProgress(themeSliderDistance);
+            const current = getCurrentThemeColors();
+            applyTheme(current.bg, current.acc, false, { ...getNeoSliderValues(), distance: val });
+          });
+          themeSliderDistance.addEventListener('change', () => {
+            const current = getCurrentThemeColors();
+            applyTheme(current.bg, current.acc, true, getNeoSliderValues());
+          });
+        }
+
+        if (themeSliderLightIntensity) {
+          themeSliderLightIntensity.addEventListener('input', () => {
+            const val = parseInt(themeSliderLightIntensity.value, 10);
+            if (badgeLightIntensity) badgeLightIntensity.textContent = `${val}%`;
+            updateSliderProgress(themeSliderLightIntensity);
+            const current = getCurrentThemeColors();
+            applyTheme(current.bg, current.acc, false, { ...getNeoSliderValues(), lightIntensity: val });
+          });
+          themeSliderLightIntensity.addEventListener('change', () => {
+            const current = getCurrentThemeColors();
+            applyTheme(current.bg, current.acc, true, getNeoSliderValues());
+          });
+        }
+
+        if (themeSliderDarkIntensity) {
+          themeSliderDarkIntensity.addEventListener('input', () => {
+            const val = parseInt(themeSliderDarkIntensity.value, 10);
+            if (badgeDarkIntensity) badgeDarkIntensity.textContent = `${val}%`;
+            updateSliderProgress(themeSliderDarkIntensity);
+            const current = getCurrentThemeColors();
+            applyTheme(current.bg, current.acc, false, { ...getNeoSliderValues(), darkIntensity: val });
+          });
+          themeSliderDarkIntensity.addEventListener('change', () => {
+            const current = getCurrentThemeColors();
+            applyTheme(current.bg, current.acc, true, getNeoSliderValues());
+          });
+        }
+
+        if (themeSliderBlur) {
+          themeSliderBlur.addEventListener('input', () => {
+            const val = parseInt(themeSliderBlur.value, 10);
+            if (badgeBlur) badgeBlur.textContent = `${val}px`;
+            updateSliderProgress(themeSliderBlur);
+            const current = getCurrentThemeColors();
+            applyTheme(current.bg, current.acc, false, { ...getNeoSliderValues(), blur: val });
+          });
+          themeSliderBlur.addEventListener('change', () => {
+            const current = getCurrentThemeColors();
+            applyTheme(current.bg, current.acc, true, getNeoSliderValues());
+          });
+        }
+
+        // Reset Theme to Default Preset (Soft Clay)
+        // Reset Theme to Default Preset
+        if (btnResetTheme) {
+          btnResetTheme.addEventListener('click', () => {
+            const def = THEME_PRESETS['soft-gray'];
+            const def = THEME_PRESETS['custom-default'];
+            applyTheme(def.bgColor, def.accentColor, true, {
+              radius: def.radius,
+              distance: def.distance,
+              lightIntensity: def.lightIntensity,
+              darkIntensity: def.darkIntensity,
+              blur: def.blur
+            });
+          });
+        }
+
+        // Save / Apply Theme
+        if (btnSaveTheme) {
+          btnSaveTheme.addEventListener('click', () => {
+            const current = getCurrentThemeColors();
+            applyTheme(current.bg, current.acc, true, getNeoSliderValues());
+            if (themeModal) themeModal.classList.add('hidden-field');
+          });
+        }
+
+        // Save Custom Theme Preset Listeners
+        if (btnSaveCustomPreset) {
+          btnSaveCustomPreset.addEventListener('click', saveCurrentCustomPreset);
+        }
+        if (inputCustomPresetName) {
+          inputCustomPresetName.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              saveCurrentCustomPreset();
+            }
+          });
+        }
+
+        initMacroRecorder();
+      }
+
+      // Handle IPC Messages from AHK
+      function onAhkMessage(event) {
+        try {
+          const msg = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+
+          if (msg.type === 'init' || msg.type === 'updateState') {
+            if (typeof msg.enabled === 'boolean') state.enabled = msg.enabled;
+            if (msg.config) {
+              state.config = msg.config;
+              ensureProfilesConfig(state.config);
+              if (msg.config.activeTab) state.activeTab = msg.config.activeTab;
+              if (msg.config.theme && msg.config.theme.bgColor && msg.config.theme.accentColor) {
+                applyTheme(
+                  msg.config.theme.bgColor,
+                  msg.config.theme.accentColor,
+                  false,
+                  {
+                    radius: msg.config.theme.radius,
+                    distance: msg.config.theme.distance,
+                    lightIntensity: msg.config.theme.lightIntensity,
+                    darkIntensity: msg.config.theme.darkIntensity,
+                    intensity: msg.config.theme.intensity,
+                    blur: msg.config.theme.blur
+                  }
+                );
+                renderCustomPresets();
+                try {
+                  localStorage.setItem('ahk_theme', JSON.stringify({
+                    bgColor: msg.config.theme.bgColor,
+                    accentColor: msg.config.theme.accentColor,
+                    radius: msg.config.theme.radius,
+                    distance: msg.config.theme.distance,
+                    lightIntensity: msg.config.theme.lightIntensity,
+                    darkIntensity: msg.config.theme.darkIntensity,
+                    intensity: msg.config.theme.intensity,
+                    blur: msg.config.theme.blur,
+                    customPresets: msg.config.theme.customPresets || []
+                  }));
+                  if (Array.isArray(msg.config.theme.customPresets)) {
+                    localStorage.setItem('ahk_custom_theme_presets', JSON.stringify(msg.config.theme.customPresets));
+                  }
+                } catch (e) { }
+              }
+            }
+            if (typeof msg.autoClickerRunning === 'boolean') {
+              updateAutoClickerUi(msg.autoClickerRunning);
+            }
+            isInitialized = true;
+            renderAll(false);
+          } else if (msg.type === 'autoClickerState') {
+            updateAutoClickerUi(msg.running);
+          } else if (msg.type === 'appSelected') {
+            if (msg.path && alInputTarget) {
+              alInputTarget.value = msg.path;
+              if (alInputName && (!alInputName.value.trim() || alInputName.value === 'Launch') && msg.name) {
+                alInputName.value = msg.name;
+              }
+              alInputTarget.focus();
+            }
+          } else if (msg.type === 'activeAppVolumeChanged') {
+            if (msg.name) {
+              activeAppState.name = msg.name;
+              if (wmAppTargetBadge) {
+                wmAppTargetBadge.textContent = `Active: ${msg.name}`;
+              }
+            }
+            if (msg.pid) {
+              activeAppState.pid = msg.pid;
+            }
+            if (typeof msg.volume === 'number') {
+              if (msg.volume >= 0) {
+                activeAppState.volume = msg.volume;
+                if (wmAppVolumeSlider) {
+                  wmAppVolumeSlider.value = msg.volume;
+                  updateSliderProgress(wmAppVolumeSlider);
+                }
+                if (wmAppVolumeValue) {
+                  wmAppVolumeValue.textContent = `${msg.volume}%`;
+                }
+              } else if (msg.volume === -1 && wmAppVolumeValue) {
+                wmAppVolumeValue.textContent = 'No Audio';
+              }
+            }
+            if (typeof msg.muted !== 'undefined') {
+              activeAppState.muted = Boolean(msg.muted);
+              if (wmBtnMuteActiveAppText) {
+                wmBtnMuteActiveAppText.textContent = activeAppState.muted ? 'Unmute App' : 'Mute App';
+              }
+              if (wmBtnMuteActiveApp) {
+                wmBtnMuteActiveApp.classList.toggle('is-muted', activeAppState.muted);
+              }
+            }
+          } else if (msg.type === 'macroStepRecorded') {
+            if (macroState.isRecording) {
+              const delay = macroState.useStandardDelays
+                ? macroState.standardDelay
+                : ((typeof msg.delay === 'number' && !isNaN(msg.delay)) ? msg.delay : 50);
+              addMacroStep(msg.action, msg.key, delay);
+            }
+          } else if (msg.type === 'macroRecordingStopped') {
+            if (macroState.isRecording) {
+              stopMacroRecording();
+            }
+          }
+        } catch (err) {
+          console.error('Error handling AHK message:', err);
+        }
+      }
+
+      // Resilient AHK Bridge Initializer with Polling & Queue Flushing
+      function initAhkBridge() {
+        function tryConnect() {
+          if (window.chrome && window.chrome.webview) {
+            if (!window.__ahkBridgeReady) {
+              window.__ahkBridgeReady = true;
+              window.chrome.webview.addEventListener('message', onAhkMessage);
+              flushAhkQueue();
+              sendToAhk('getInitialState');
+            }
+            return true;
+          }
+          return false;
+        }
+
+        if (!tryConnect()) {
+          let attempts = 0;
+          const interval = setInterval(() => {
+            attempts++;
+            if (tryConnect() || attempts > 60) {
+              clearInterval(interval);
+            }
+          }, 50);
+        }
+      }
+
+      function renderAll(shouldSync = false) {
+        ensureProfilesConfig(state.config);
+        if (state.config && state.config.theme) {
+          applyTheme(
+            state.config.theme.bgColor,
+            state.config.theme.accentColor,
+            false,
+            {
+              radius: state.config.theme.radius,
+              distance: state.config.theme.distance,
+              lightIntensity: state.config.theme.lightIntensity,
+              darkIntensity: state.config.theme.darkIntensity,
+              intensity: state.config.theme.intensity,
+              blur: state.config.theme.blur
+            }
+          );
+        }
+        renderProfileSelect();
+        updateSwitchUi();
+        switchTab(state.activeTab || 'textExpander', shouldSync);
+        renderTextExpander();
+        renderKeyRemapper();
+        initWindowManager();
+        renderAppLauncher();
+        initAutoClicker();
+        renderMacroRecorder();
+        updateGlobalIndicators();
+        renderCustomPresets();
+      }
+
+      // Startup
+      initListeners();
+      renderAll(false);
+      requestAnimationFrame(() => {
+        updateSegmentedGlider(true);
+      });
+      initAhkBridge();
+
+    }) ();
