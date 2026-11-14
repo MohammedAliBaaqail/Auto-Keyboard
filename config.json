@@ -1,6 +1,6 @@
 {
   "activeProfile":"Default",
-  "activeTab":"appLauncher",
+  "activeTab":"macroRecorder",
   "appLauncher":{
     "enabled":1,
     "items":[{"enabled":1,"id":"al-1794403819689","name":"Everything","target":"C:\\Program Files (x86)\\Everything\\Everything.exe","trigger":"Ctrl+Alt+Shift+E","triggerType":"hotkey"},{"enabled":1,"id":"al-1","name":"Calculator","target":"calc.exe","trigger":"@calc","triggerType":"string"},{"enabled":1,"id":"al-2","name":"YouTube","target":"https://www.youtube.com","trigger":"@yt","triggerType":"string"},{"enabled":1,"id":"al-3","name":"GitHub","target":"https://github.com","trigger":"@gh","triggerType":"string"}]
@@ -43,8 +43,8 @@
     "radius":5
   },
   "window":{
-    "height":774,
-    "width":1334
+    "height":830,
+    "width":1390
   },
   "windowManager":{
     "alwaysOnTopEnabled":0,

@@ -324,37 +324,69 @@ html, body {
   width: 100%;
 }
 
+#profileModal.modal-overlay {
+  padding: 0;
+  background: var(--bg-color);
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+#profileModal.modal-overlay.has-mode-delete {
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.40);
+  align-items: center;
+  justify-content: center;
+}
+
 .profile-config-dialog {
-  max-width: 960px;
-  width: 94vw;
-  max-height: 88vh;
+  max-width: 100vw;
+  width: 100vw;
+  max-height: 100vh;
+  height: 100vh;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 20px 28px;
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
+  animation: none;
+  background: var(--surface-color);
 }
 
 .profile-config-dialog.mode-delete {
   max-width: 440px;
+  width: 100%;
+  height: auto;
+  max-height: 88vh;
+  border-radius: var(--radius-card);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.45), 0 6px 16px rgba(0, 0, 0, 0.25);
+  padding: 22px 26px;
+  animation: modalPop 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .profile-config-body {
   display: flex;
-  gap: 22px;
+  gap: 28px;
   overflow: hidden;
-  max-height: calc(88vh - 140px);
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
 }
 
 .profile-config-dialog.mode-delete .profile-config-body {
   flex-direction: column;
+  height: auto;
   max-height: none;
 }
 
 .profile-form-column {
-  flex: 0 0 380px;
+  flex: 0 0 440px;
+  max-width: 460px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
   overflow-y: auto;
-  padding-right: 6px;
+  padding-right: 12px;
 }
 
 .profile-config-dialog.mode-delete .profile-form-column {
@@ -370,7 +402,7 @@ html, body {
   background: var(--surface-color);
   box-shadow: var(--inset-sm);
   border-radius: var(--radius-card);
-  padding: 14px;
+  padding: 18px 20px;
   overflow: hidden;
   min-width: 0;
 }
@@ -502,17 +534,19 @@ html, body {
 /* Apps Column Header */
 .apps-column-header {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding-bottom: 10px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 12px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .apps-header-titles {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
+  min-width: 0;
 }
 
 .apps-col-title {
@@ -531,11 +565,14 @@ html, body {
   display: flex;
   align-items: center;
   gap: 8px;
-  height: 34px;
+  height: 36px;
+  width: 240px;
+  max-width: 100%;
+  flex-shrink: 0;
   background: var(--surface-color);
   box-shadow: var(--inset-sm);
   border-radius: var(--radius-btn);
-  padding: 0 10px;
+  padding: 0 12px;
   color: var(--text-muted);
 }
 
@@ -550,11 +587,13 @@ html, body {
 
 .running-apps-scroll-area {
   flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding-right: 4px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 10px;
+  align-content: start;
+  padding-right: 6px;
 }
 
 .running-apps-scroll-area::-webkit-scrollbar {
@@ -567,10 +606,11 @@ html, body {
 }
 
 .apps-empty-state {
+  grid-column: 1 / -1;
   text-align: center;
-  padding: 30px 10px;
+  padding: 40px 10px;
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: 13px;
 }
 
 /* Running App Card Item */

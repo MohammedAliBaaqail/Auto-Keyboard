@@ -651,6 +651,9 @@
 
     if (runningAppsFilterInput) runningAppsFilterInput.value = '';
 
+    const isCompact = (mode === 'delete' || mode === 'rename');
+    profileModal.classList.toggle('has-mode-delete', isCompact);
+
     if (mode === 'delete') {
       if (profileConfigCard) profileConfigCard.classList.add('mode-delete');
       if (profileModalTitle) profileModalTitle.textContent = 'DELETE PROFILE';
@@ -668,7 +671,7 @@
         btnConfirmProfileModal.classList.add('danger');
       }
     } else {
-      if (profileConfigCard) profileConfigCard.classList.remove('mode-delete');
+      if (profileConfigCard) profileConfigCard.classList.toggle('mode-delete', isCompact);
       if (profileDeleteNotice) profileDeleteNotice.classList.add('hidden-field');
       if (profileNameGroup) profileNameGroup.classList.remove('hidden-field');
       if (profileExeGroup) profileExeGroup.classList.remove('hidden-field');
