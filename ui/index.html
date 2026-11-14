@@ -64,7 +64,25 @@
           t = window.__INITIAL_CONFIG__.theme;
         } else {
           var cached = localStorage.getItem('ahk_theme');
-          if (cached) t = JSON.parse(cached);
+          if (cached) {
+            try {
+              var parsed = JSON.parse(cached);
+              if (parsed && (parsed.bgColor === '#e8dfd5' || !parsed.bgColor)) {
+                parsed.bgColor = '#b85d68';
+                parsed.accentColor = '#00cc18';
+                parsed.radius = 14;
+                parsed.distance = 3;
+                parsed.lightIntensity = 9;
+                parsed.darkIntensity = 8;
+                parsed.blur = 8;
+                localStorage.setItem('ahk_theme', JSON.stringify(parsed));
+              }
+              t = parsed;
+            } catch (e) {}
+          }
+        }
+        if (!t || !t.bgColor) {
+          t = { bgColor: '#b85d68', accentColor: '#00cc18', radius: 14, distance: 3, lightIntensity: 9, darkIntensity: 8, blur: 8 };
         }
         if (t && t.bgColor && t.accentColor) {
           var root = document.documentElement;
@@ -153,13 +171,39 @@
         <div class="squircle-btn" id="btnStats" title="Active Items Count">
           <span class="badge-num" id="activeCountBadge">0</span>
         </div>
-        <div class="title-group">
-          <div class="app-title-row">
-            <img src="app-icon.svg" class="app-brand-icon" alt="App Icon" />
-            <h1 class="app-title">AUTOHOTKEYBOARD</h1>
+        <!-- Profile System Selector & Actions -->
+        <div class="profile-bar-wrap" id="profileBarWrap">
+          <div class="profile-selector-box" title="Active Profile">
+            <svg class="profile-selector-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <select id="profileSelect" class="profile-select-dropdown" aria-label="Select Profile">
+              <option value="Default">Default</option>
+            </select>
+            <svg class="profile-arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
           </div>
-          <span class="app-subtitle" id="statusSubtitle">Engine: <span
-              class="status-indicator-text online">Active</span></span>
+          <div class="profile-actions-bar">
+            <button class="squircle-btn profile-action-btn" id="btnAddProfile" title="Add New Profile (Copies all items, all OFF by default)">
+              <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </button>
+            <button class="squircle-btn profile-action-btn" id="btnRenameProfile" title="Rename Current Profile">
+              <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+              </svg>
+            </button>
+            <button class="squircle-btn profile-action-btn btn-danger-profile" id="btnDeleteProfile" title="Delete Current Profile">
+              <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -197,12 +241,65 @@
     <!-- Script Type / Feature Tabs Bar (Segmented Control from image) -->
     <div class="segmented-control-wrapper">
       <div class="segmented-control" id="segmentedBar">
-        <button class="segment-btn active" data-tab="textExpander">Text Expander</button>
-        <button class="segment-btn" data-tab="keyRemapper">Key Remapper</button>
-        <button class="segment-btn" data-tab="windowManager">Window Manager</button>
-        <button class="segment-btn" data-tab="appLauncher">App Launcher</button>
-        <button class="segment-btn" data-tab="autoClicker">Auto Clicker</button>
-        <button class="segment-btn" data-tab="macroRecorder">Macro Recorder</button>
+        <div class="segmented-glider" id="segmentedGlider"></div>
+        <button class="segment-btn active" data-tab="textExpander">
+          <svg class="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 5H3"></path>
+            <path d="M21 12H8"></path>
+            <path d="M21 19H8"></path>
+            <path d="M3 12v7"></path>
+          </svg>
+          <span class="tab-label">Text Expander</span>
+        </button>
+        <button class="segment-btn" data-tab="keyRemapper">
+          <svg class="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+            <path d="M10 8h.01"></path>
+            <path d="M12 12h.01"></path>
+            <path d="M14 8h.01"></path>
+            <path d="M16 12h.01"></path>
+            <path d="M18 8h.01"></path>
+            <path d="M6 8h.01"></path>
+            <path d="M7 16h10"></path>
+            <path d="M8 12h.01"></path>
+          </svg>
+          <span class="tab-label">Key Remapper</span>
+        </button>
+        <button class="segment-btn" data-tab="windowManager">
+          <svg class="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+            <path d="M10 4v4"></path>
+            <path d="M2 8h20"></path>
+            <path d="M6 4v4"></path>
+          </svg>
+          <span class="tab-label">Window Manager</span>
+        </button>
+        <button class="segment-btn" data-tab="appLauncher">
+          <svg class="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path>
+            <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09"></path>
+            <path d="M9 12a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.4 22.4 0 0 1-4 2z"></path>
+            <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 .05 5 .05"></path>
+          </svg>
+          <span class="tab-label">App Launcher</span>
+        </button>
+        <button class="segment-btn" data-tab="autoClicker">
+          <svg class="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 4.1 12 6"></path>
+            <path d="m5.1 8-2.9-.8"></path>
+            <path d="m6 12-1.9 2"></path>
+            <path d="M7.2 2.2 8 5.1"></path>
+            <path d="M9.037 9.69a.498.498 0 0 1 .653-.653l11 4.5a.5.5 0 0 1-.074.949l-4.349 1.041a1 1 0 0 0-.74.739l-1.04 4.35a.5.5 0 0 1-.95.074z"></path>
+          </svg>
+          <span class="tab-label">Auto Clicker</span>
+        </button>
+        <button class="segment-btn" data-tab="macroRecorder">
+          <svg class="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <circle cx="12" cy="12" r="3.5" fill="currentColor"></circle>
+          </svg>
+          <span class="tab-label">Macro Recorder</span>
+        </button>
       </div>
     </div>
 
@@ -579,11 +676,12 @@
            ==================================================================== -->
       <section class="module-panel" id="panel-appLauncher">
         <div class="inputs-section">
-          <div class="inputs-row">
+          <!-- Row 1: Trigger Mode & Trigger Key/String Definition -->
+          <div class="inputs-row al-row-trigger">
             <!-- Trigger Type Selector: Text String vs Button Combination -->
             <div class="al-type-segmented" id="alTriggerTypeSelector">
               <button type="button" class="al-type-btn active" id="alTypeString" data-type="string"
-                title="Trigger by typing text (e.g. @calc)">
+                title="Trigger by typing text (e.g. @calc, @yt)">
                 <svg class="al-type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="4 17 10 11 4 5"></polyline>
                   <line x1="12" y1="19" x2="20" y2="19"></line>
@@ -600,23 +698,26 @@
               </button>
             </div>
 
-            <div class="inset-input-box trigger-box" id="alTriggerBox">
+            <div class="inset-input-box trigger-box al-trigger-box" id="alTriggerBox">
               <svg class="input-icon-svg" id="alTriggerIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                 stroke-width="2">
                 <polyline points="4 17 10 11 4 5"></polyline>
                 <line x1="12" y1="19" x2="20" y2="19"></line>
               </svg>
-              <input type="text" id="alInputTrigger" placeholder="Trigger (e.g. @calc, @yt)" autocomplete="off"
+              <input type="text" id="alInputTrigger" placeholder="Trigger (e.g. @calc, @yt, @work)" autocomplete="off"
                 spellcheck="false" />
             </div>
+          </div>
 
+          <!-- Row 2: Target App Path/URL + Browse, Friendly Name, and ADD/SAVE Action -->
+          <div class="inputs-row al-row-target">
             <div class="inset-input-box output-box al-output-box" id="alOutputBox">
               <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
                 <polyline points="15 3 21 3 21 9"></polyline>
                 <line x1="10" y1="14" x2="21" y2="3"></line>
               </svg>
-              <input type="text" id="alInputTarget" placeholder="Target app path or URL..." autocomplete="off"
+              <input type="text" id="alInputTarget" placeholder="Target app path, URL, or command..." autocomplete="off"
                 spellcheck="false" />
               <button type="button" class="btn-input-browse" id="alBtnBrowse"
                 title="Browse for application or file (.exe, .lnk, etc.)">
@@ -627,21 +728,21 @@
               </button>
             </div>
 
-            <div class="inset-input-box label-box">
+            <div class="inset-input-box label-box al-label-box">
               <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
                 <line x1="7" y1="7" x2="7.01" y2="7"></line>
               </svg>
-              <input type="text" id="alInputName" placeholder="Name..." autocomplete="off" spellcheck="false" />
+              <input type="text" id="alInputName" placeholder="Name (optional)..." autocomplete="off" spellcheck="false" />
             </div>
 
-            <button class="neumorphic-btn btn-go" id="alBtnSubmit">
+            <button class="neumorphic-btn btn-go al-btn-submit" id="alBtnSubmit">
               <span id="alBtnSubmitText">ADD</span>
             </button>
           </div>
+
           <div class="input-hints">
-            <span class="hint-tag" id="alHintTag">Typing trigger anywhere opens apps, websites, or commands
-              instantly</span>
+            <span class="hint-tag" id="alHintTag">Typing trigger anywhere opens apps, websites, or commands instantly</span>
           </div>
         </div>
 
@@ -866,10 +967,18 @@
 
     </main>
 
-    <!-- Window Resize Handles -->
-    <div class="resize-handle handle-e" data-direction="e" title="Resize Width"></div>
+    <!-- Window Resize Handles (Full perimeter: 4 edges + 4 corners) -->
+    <div class="resize-handle handle-n" data-direction="n" title="Resize Height"></div>
     <div class="resize-handle handle-s" data-direction="s" title="Resize Height"></div>
-    <div class="resize-handle handle-se" data-direction="se" title="Resize Window"></div>
+    <div class="resize-handle handle-e" data-direction="e" title="Resize Width"></div>
+    <div class="resize-handle handle-w" data-direction="w" title="Resize Width"></div>
+    <div class="resize-handle handle-nw" data-direction="nw" title="Resize Window"></div>
+    <div class="resize-handle handle-ne" data-direction="ne" title="Resize Window"></div>
+    <div class="resize-handle handle-sw" data-direction="sw" title="Resize Window"></div>
+    <div class="resize-handle handle-se" data-direction="se" title="Resize Window">
+      <span class="resize-grip-line"></span>
+      <span class="resize-grip-line"></span>
+    </div>
 
     <!-- Neumorphic Theme Customizer Modal -->
     <div class="modal-overlay hidden-field" id="themeModal">
@@ -903,41 +1012,86 @@
               <span class="theme-section-title">Background Color (Primary)</span>
               <span class="theme-section-subtitle">Sets the clay base plane & automatic ambient lighting</span>
             </div>
-            <div class="theme-swatches-grid" id="bgSwatchesGrid">
-              <button class="theme-swatch-chip active" data-preset="soft-gray" data-color="#e8dfd5"
-                title="Warm Clay (Default, 5px Radius)">
-                <span class="swatch-color-circle" style="background:#e8dfd5;"></span>
-                <span class="swatch-name">Warm Clay</span>
+                        <div class="theme-swatches-grid" id="bgSwatchesGrid">
+              <button class="theme-swatch-chip theme-card-chip active" data-preset="custom-default" data-color="#b85d68"
+                title="Custom Rose Clay (Default) (Default rich rose clay with vivid neon emerald accent)" aria-label="Custom Rose Clay (Default)"
+                style="background-color: #b85d68; border-color: #00cc18; color: #00cc18; border-radius: 14px; box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.12), -2px -2px 8px rgba(255, 255, 255, 0.10);">
+                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
               </button>
-              <button class="theme-swatch-chip" data-preset="obsidian" data-color="#1e222b"
-                title="Obsidian Dark (Stealth Midnight, 14px Radius)">
-                <span class="swatch-color-circle" style="background:#1e222b;"></span>
-                <span class="swatch-name">Obsidian</span>
+              <button class="theme-swatch-chip theme-card-chip" data-preset="brutalist-amber" data-color="#f59e0b"
+                title="Brutalist Amber (Vivid amber pop with zero blur hard-edge comic shadows and chiseled edges)" aria-label="Brutalist Amber"
+                style="background-color: #f59e0b; border-color: #1e1b4b; color: #1e1b4b; border-radius: 2px; box-shadow: 5px 5px 0px rgba(0, 0, 0, 0.55), -5px -5px 0px rgba(255, 255, 255, 0.65);">
+                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
               </button>
-              <button class="theme-swatch-chip" data-preset="retro-sharp" data-color="#f2f4f7"
-                title="Retro Sharp (Embossed 0px Blur, 6px Radius)">
-                <span class="swatch-color-circle" style="background:#f2f4f7;"></span>
-                <span class="swatch-name">Retro Sharp</span>
+              <button class="theme-swatch-chip theme-card-chip" data-preset="marshmallow-indigo" data-color="#4f46e5"
+                title="Marshmallow Indigo (Electric indigo with soft lemon cream in an ultra-pill marshmallow 3D cloud)" aria-label="Marshmallow Indigo"
+                style="background-color: #4f46e5; border-color: #fde047; color: #fde047; border-radius: 42px; box-shadow: 6px 6px 18px rgba(0, 0, 0, 0.53), -6px -6px 18px rgba(255, 255, 255, 0.44);">
+                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
               </button>
-              <button class="theme-swatch-chip" data-preset="warm-ceramic" data-color="#e8dfd5"
-                title="Warm Ceramic (Pebble 30px Radius, Soft Light)">
-                <span class="swatch-color-circle" style="background:#e8dfd5;"></span>
-                <span class="swatch-name">Warm Sand</span>
+              <button class="theme-swatch-chip theme-card-chip" data-preset="porcelain-ceramic" data-color="#f1f5f9"
+                title="Porcelain Ceramic (High-key sculpted slate white ceramic with royal sapphire blue and specular glow)" aria-label="Porcelain Ceramic"
+                style="background-color: #f1f5f9; border-color: #2563eb; color: #2563eb; border-radius: 28px; box-shadow: 5px 5px 16px rgba(0, 0, 0, 0.22), -5px -5px 16px rgba(255, 255, 255, 0.65);">
+                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
               </button>
-              <button class="theme-swatch-chip" data-preset="cyber-violet" data-color="#2b2640"
-                title="Cyber Violet (Moody Twilight, 18px Radius)">
-                <span class="swatch-color-circle" style="background:#2b2640;"></span>
-                <span class="swatch-name">Cyber Violet</span>
+              <button class="theme-swatch-chip theme-card-chip" data-preset="solar-tangerine" data-color="#ea580c"
+                title="Solar Tangerine (Punchy fire tangerine orange clay with radiant sunbeam cream highlights)" aria-label="Solar Tangerine"
+                style="background-color: #ea580c; border-color: #fef08a; color: #fef08a; border-radius: 34px; box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.46), -4px -4px 12px rgba(255, 255, 255, 0.42);">
+                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
               </button>
-              <button class="theme-swatch-chip" data-preset="sage-mint" data-color="#dbe5de"
-                title="Sage Mint (Botanical Pastel, 24px Radius)">
-                <span class="swatch-color-circle" style="background:#dbe5de;"></span>
-                <span class="swatch-name">Sage Mint</span>
+              <button class="theme-swatch-chip theme-card-chip" data-preset="matrix-terminal" data-color="#052e16"
+                title="Matrix CRT (Deep phosphor CRT green terminal with crisp sunken bevel and phosphor laser text)" aria-label="Matrix CRT"
+                style="background-color: #052e16; border-color: #22c55e; color: #22c55e; border-radius: 4px; box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.55), -2px -2px 2px rgba(255, 255, 255, 0.44);">
+                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
               </button>
-              <button class="theme-swatch-chip" data-preset="arctic-frost" data-color="#edf2f7"
-                title="Arctic Frost (High-Key Silver, 12px Radius)">
-                <span class="swatch-color-circle" style="background:#edf2f7;"></span>
-                <span class="swatch-name">Arctic Frost</span>
+              <button class="theme-swatch-chip theme-card-chip" data-preset="cyber-cyan" data-color="#0891b2"
+                title="Cyber Cyan (Vivid Mediterranean electric cyan clay with high-saturation lemon triggers)" aria-label="Cyber Cyan"
+                style="background-color: #0891b2; border-color: #fef08a; color: #fef08a; border-radius: 18px; box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.35), -3px -3px 6px rgba(255, 255, 255, 0.39);">
+                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </button>
+              <button class="theme-swatch-chip theme-card-chip" data-preset="brutalist-concrete" data-color="#78716c"
+                title="Brutalist Concrete (Raw architectural concrete stone with safety orange and 1px hard-relief shadow)" aria-label="Brutalist Concrete"
+                style="background-color: #78716c; border-color: #f97316; color: #f97316; border-radius: 3px; box-shadow: 4px 4px 1px rgba(0, 0, 0, 0.55), -4px -4px 1px rgba(255, 255, 255, 0.55);">
+                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </button>
+              <button class="theme-swatch-chip theme-card-chip" data-preset="midnight-violet" data-color="#3b0764"
+                title="Midnight Violet (Deep royal ultraviolet plum with fluorescent neon fuchsia pop)" aria-label="Midnight Violet"
+                style="background-color: #3b0764; border-color: #f43f5e; color: #f43f5e; border-radius: 24px; box-shadow: 5px 5px 14px rgba(0, 0, 0, 0.55), -5px -5px 14px rgba(255, 255, 255, 0.35);">
+                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </button>
+              <button class="theme-swatch-chip theme-card-chip" data-preset="spearmint-gelato" data-color="#6ee7b7"
+                title="Spearmint Gelato (Fresh spearmint gelato clay with deep blackberry wine contrast and high-radius curve)" aria-label="Spearmint Gelato"
+                style="background-color: #6ee7b7; border-color: #831843; color: #831843; border-radius: 38px; box-shadow: 5px 5px 14px rgba(0, 0, 0, 0.31), -5px -5px 14px rgba(255, 255, 255, 0.53);">
+                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </button>
+              <button class="theme-swatch-chip theme-card-chip" data-preset="garnet-obsidian" data-color="#450a0a"
+                title="Garnet Obsidian (Deep chiseled crimson mahogany gemstone with coral rose illumination)" aria-label="Garnet Obsidian"
+                style="background-color: #450a0a; border-color: #fb7185; color: #fb7185; border-radius: 8px; box-shadow: 3px 3px 9px rgba(0, 0, 0, 0.55), -3px -3px 9px rgba(255, 255, 255, 0.26);">
+                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </button>
+              <button class="theme-swatch-chip theme-card-chip" data-preset="abyssal-ocean" data-color="#0e2a47"
+                title="Abyssal Ocean (Deep navy sapphire oceanic abyss with electric cyan telemetry glow)" aria-label="Abyssal Ocean"
+                style="background-color: #0e2a47; border-color: #38bdf8; color: #38bdf8; border-radius: 16px; box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.55), -4px -4px 10px rgba(255, 255, 255, 0.29);">
+                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </button>
+              <button class="theme-swatch-chip theme-card-chip" data-preset="roasted-cocoa" data-color="#351c14"
+                title="Roasted Cocoa (Dark artisanal roasted coffee and cocoa bean with molten amber gold accents)" aria-label="Roasted Cocoa"
+                style="background-color: #351c14; border-color: #fbbf24; color: #fbbf24; border-radius: 10px; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.55), -2px -2px 5px rgba(255, 255, 255, 0.24);">
+                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </button>
+              <button class="theme-swatch-chip theme-card-chip" data-preset="bubblegum-magenta" data-color="#db2777"
+                title="Bubblegum Magenta (Bold electric hot magenta clay with sunburst yellow highlights)" aria-label="Bubblegum Magenta"
+                style="background-color: #db2777; border-color: #fef08a; color: #fef08a; border-radius: 30px; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.42), -5px -5px 15px rgba(255, 255, 255, 0.46);">
+                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </button>
+              <button class="theme-swatch-chip theme-card-chip" data-preset="lilac-cloud" data-color="#c4b5fd"
+                title="Lilac Cloud (Soft dream lavender lilac clay with regal royal violet depth)" aria-label="Lilac Cloud"
+                style="background-color: #c4b5fd; border-color: #4c1d95; color: #4c1d95; border-radius: 22px; box-shadow: 3px 3px 11px rgba(0, 0, 0, 0.24), -3px -3px 11px rgba(255, 255, 255, 0.40);">
+                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </button>
+              <button class="theme-swatch-chip theme-card-chip" data-preset="matte-titanium" data-color="#1e293b"
+                title="Matte Titanium (Tactical gunmetal stealth titanium with hyper cyan aerospace accents)" aria-label="Matte Titanium"
+                style="background-color: #1e293b; border-color: #06b6d4; color: #06b6d4; border-radius: 12px; box-shadow: 2px 2px 7px rgba(0, 0, 0, 0.50), -2px -2px 7px rgba(255, 255, 255, 0.24);">
+                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
               </button>
             </div>
             <!-- Custom Background Color Picker Row -->
@@ -945,7 +1099,7 @@
               <span class="custom-label">Custom Background Color:</span>
               <div class="color-picker-input-wrap">
                 <div class="color-picker-chip" title="Click to open color palette">
-                  <input type="color" id="themeBgColorPicker" value="#e8dfd5" class="neumorphic-color-picker" />
+                  <input type="color" id="themeBgColorPicker" value="#b85d68" class="neumorphic-color-picker" />
                   <svg class="color-picker-badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                     stroke-width="2.2">
                     <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle>
@@ -957,7 +1111,7 @@
                     </path>
                   </svg>
                 </div>
-                <input type="text" id="themeBgHex" value="#E8DFD5" maxlength="7" spellcheck="false"
+                <input type="text" id="themeBgHex" value="#B85D68" maxlength="7" spellcheck="false"
                   class="color-hex-input" />
               </div>
             </div>
@@ -969,38 +1123,12 @@
               <span class="theme-section-title">Elements Color (Secondary / Accent)</span>
               <span class="theme-section-subtitle">Styles active states, switches, sliders, badges & buttons</span>
             </div>
-            <div class="theme-swatches-grid" id="accentSwatchesGrid">
-              <button class="theme-swatch-chip active" data-color="#d97706" title="Warm Amber (Default)">
-                <span class="swatch-color-circle" style="background:#d97706;"></span>
-                <span class="swatch-name">Amber</span>
-              </button>
-              <button class="theme-swatch-chip" data-color="#22c55e" title="Emerald Green">
-                <span class="swatch-color-circle" style="background:#22c55e;"></span>
-                <span class="swatch-name">Emerald</span>
-              </button>
-              <button class="theme-swatch-chip" data-color="#fb7185" title="Cybercore Pink (Reference)">
-                <span class="swatch-color-circle" style="background:#fb7185;"></span>
-                <span class="swatch-name">Cyber Pink</span>
-              </button>
-              <button class="theme-swatch-chip" data-color="#0284c7" title="Pacific Blue">
-                <span class="swatch-color-circle" style="background:#0284c7;"></span>
-                <span class="swatch-name">Pacific Blue</span>
-              </button>
-              <button class="theme-swatch-chip" data-color="#a855f7" title="Electric Purple">
-                <span class="swatch-color-circle" style="background:#a855f7;"></span>
-                <span class="swatch-name">Violet</span>
-              </button>
-              <button class="theme-swatch-chip" data-color="#64748b" title="Graphite Slate">
-                <span class="swatch-color-circle" style="background:#64748b;"></span>
-                <span class="swatch-name">Graphite</span>
-              </button>
-            </div>
             <!-- Custom Accent Color Picker Row -->
             <div class="custom-color-row">
               <span class="custom-label">Custom Accent Color:</span>
               <div class="color-picker-input-wrap">
                 <div class="color-picker-chip" title="Click to open color palette">
-                  <input type="color" id="themeAccentColorPicker" value="#d97706" class="neumorphic-color-picker" />
+                  <input type="color" id="themeAccentColorPicker" value="#00cc18" class="neumorphic-color-picker" />
                   <svg class="color-picker-badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                     stroke-width="2.2">
                     <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle>
@@ -1012,7 +1140,7 @@
                     </path>
                   </svg>
                 </div>
-                <input type="text" id="themeAccentHex" value="#D97706" maxlength="7" spellcheck="false"
+                <input type="text" id="themeAccentHex" value="#00CC18" maxlength="7" spellcheck="false"
                   class="color-hex-input" />
               </div>
             </div>
@@ -1033,7 +1161,7 @@
                   <span class="neo-slider-badge" id="badgeRadius">5px</span>
                 </div>
                 <div class="neo-slider-track-wrap">
-                  <input type="range" id="themeSliderRadius" min="0" max="40" step="1" value="5"
+                  <input type="range" id="themeSliderRadius" min="0" max="60" step="1" value="5"
                     class="neumorphic-slider" />
                 </div>
               </div>
@@ -1123,6 +1251,35 @@
           <button class="neumorphic-btn btn-go" id="btnSaveTheme">
             <span>APPLY</span>
           </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile Name Prompt / Confirmation Modal -->
+    <div class="modal-overlay hidden-field" id="profileModal">
+      <div class="modal-card profile-modal-card">
+        <div class="modal-header">
+          <div class="modal-title-row">
+            <svg class="icon-svg" style="color:var(--accent-primary);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <h3 class="modal-title" id="profileModalTitle">Profile</h3>
+          </div>
+          <button class="squircle-btn btn-mini" id="btnCloseProfileModal" title="Close">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body profile-modal-body">
+          <p class="profile-modal-desc" id="profileModalDesc">Enter a name for the new profile:</p>
+          <input type="text" class="profile-modal-input" id="profileNameInput" placeholder="e.g. Work, Gaming, Coding..." maxlength="24" autocomplete="off" spellcheck="false" />
+        </div>
+        <div class="modal-footer profile-modal-footer">
+          <button class="neumorphic-btn btn-chip" id="btnCancelProfileModal">Cancel</button>
+          <button class="neumorphic-btn btn-chip btn-primary-chip" id="btnConfirmProfileModal">Confirm</button>
         </div>
       </div>
     </div>

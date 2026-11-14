@@ -124,19 +124,19 @@ InitConfig() {
                 if (g_Config.Has("theme") && IsObject(g_Config["theme"])) {
                     themeMap := g_Config["theme"]
                     if (!themeMap.Has("radius")) {
-                        themeMap["radius"] := 22
+                        themeMap["radius"] := 14
                     }
                     if (!themeMap.Has("distance")) {
                         themeMap["distance"] := 3
                     }
                     if (!themeMap.Has("intensity")) {
-                        themeMap["intensity"] := 18
+                        themeMap["intensity"] := 10
                     }
                     if (!themeMap.Has("lightIntensity")) {
-                        themeMap["lightIntensity"] := (themeMap.Has("intensity") ? themeMap["intensity"] : 18)
+                        themeMap["lightIntensity"] := (themeMap.Has("intensity") ? themeMap["intensity"] : 9)
                     }
                     if (!themeMap.Has("darkIntensity")) {
-                        themeMap["darkIntensity"] := (themeMap.Has("intensity") ? themeMap["intensity"] : 18)
+                        themeMap["darkIntensity"] := (themeMap.Has("intensity") ? themeMap["intensity"] : 8)
                     }
                     if (!themeMap.Has("blur")) {
                         themeMap["blur"] := 8
@@ -238,14 +238,14 @@ GetDefaultConfig() {
             ]
         ),
         "theme", Map(
-            "bgColor", "#e8dfd5",
-            "accentColor", "#d97706",
-            "radius", 5,
+            "bgColor", "#b85d68",
+            "accentColor", "#00cc18",
+            "radius", 14,
             "distance", 3,
-            "lightIntensity", 22,
-            "darkIntensity", 6,
-            "intensity", 14,
-            "blur", 10,
+            "lightIntensity", 9,
+            "darkIntensity", 8,
+            "intensity", 10,
+            "blur", 8,
             "customPresets", []
         )
     )
@@ -325,7 +325,8 @@ ApplyTextExpander() {
         if (IsObject(item) && item.Has("input") && item.Has("output")) {
             trig := Trim(item["input"])
             outText := item["output"]
-            if (trig != "" && outText != "") {
+            isEnabled := (!item.Has("enabled") || item["enabled"] = true || item["enabled"] = 1 || item["enabled"] = "1")
+            if (trig != "" && outText != "" && isEnabled) {
                 try {
                     handler := CreateExpanderHandler(trig, outText)
                     Hotstring(":*:" . trig, handler, "On")
@@ -383,7 +384,8 @@ ApplyKeyRemapper() {
         if (IsObject(item) && item.Has("source") && item.Has("target")) {
             src := Trim(item["source"])
             tgt := Trim(item["target"])
-            if (src != "" && tgt != "") {
+            isEnabled := (!item.Has("enabled") || item["enabled"] = true || item["enabled"] = 1 || item["enabled"] = "1")
+            if (src != "" && tgt != "" && isEnabled) {
                 try {
                     RegisterSingleRemap(src, tgt)
                 } catch as err {
@@ -932,7 +934,8 @@ ApplyAppLauncher() {
             target := Trim(item["target"])
             type := item.Has("triggerType") ? item["triggerType"] : "string"
             
-            if (trig != "" && target != "") {
+            isEnabled := (!item.Has("enabled") || item["enabled"] = true || item["enabled"] = 1 || item["enabled"] = "1")
+            if (trig != "" && target != "" && isEnabled) {
                 try {
                     handler := CreateLauncherHandler(trig, target)
                     if (type = "hotkey" || type = "shortcut") {
@@ -1522,9 +1525,9 @@ CreateMainWindow() {
     global g_MainGui, g_Wvc, g_Wv, APP_WIDTH, APP_HEIGHT, APP_NAME, g_Config
     
     g_MainGui := Gui("-Caption +Resize", APP_NAME)
-    g_MainGui.Opt("+MinSize800x680")
+    g_MainGui.Opt("+MinSize720x520")
     
-    initBg := "e8dfd5"
+    initBg := "b85d68"
     if (g_Config.Has("theme") && g_Config["theme"].Has("bgColor")) {
         cleanHex := StrReplace(g_Config["theme"]["bgColor"], "#", "")
         if (StrLen(cleanHex) = 6) {
@@ -1703,32 +1706,20 @@ OnWebMessageReceived(thisPtr, senderPtr, argsPtr) {
                 }
                 
             case "startResize":
-                CoordMode("Mouse", "Screen")
-                MouseGetPos(&initMouseX, &initMouseY)
-                g_MainGui.GetPos(&initWinX, &initWinY, &initWinW, &initWinH)
                 dir := msg.Has("dir") ? msg["dir"] : "se"
-                minW := 600, minH := 520
-                
-                while GetKeyState("LButton", "P") {
-                    MouseGetPos(&curX, &curY)
-                    dx := curX - initMouseX
-                    dy := curY - initMouseY
-                    newW := initWinW
-                    newH := initWinH
-                    
-                    if InStr(dir, "e") {
-                        newW := Max(minW, initWinW + dx)
-                    }
-                    if InStr(dir, "s") {
-                        newH := Max(minH, initWinH + dy)
-                    }
-                    
-                    g_MainGui.Move(,,, newW, newH)
-                    if (g_Wvc) {
-                        try g_Wvc.Fill()
-                    }
-                    Sleep(8)
+                dirCode := 8
+                switch dir {
+                    case "w":  dirCode := 1  ; Left
+                    case "e":  dirCode := 2  ; Right
+                    case "n":  dirCode := 3  ; Top
+                    case "nw": dirCode := 4  ; Top-left
+                    case "ne": dirCode := 5  ; Top-right
+                    case "s":  dirCode := 6  ; Bottom
+                    case "sw": dirCode := 7  ; Bottom-left
+                    case "se": dirCode := 8  ; Bottom-right
                 }
+                DllCall("ReleaseCapture")
+                PostMessage(0x0112, 0xF000 + dirCode, 0, g_MainGui.Hwnd)
                 
             case "runLauncher":
                 if (msg.Has("target")) {
