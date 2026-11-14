@@ -450,26 +450,29 @@ html, body {
 }
 
 .lgs-profile-card.active .lgs-icon-box {
-  box-shadow: var(--raised-sm);
-  background: var(--surface-color);
+  background: transparent;
+  box-shadow: none;
 }
 
 .lgs-icon-box {
-  width: 30px;
-  height: 30px;
-  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   overflow: hidden;
-  background: rgba(0, 0, 0, 0.04);
+  background: transparent;
 }
 
 .profile-card-img {
   width: 24px;
   height: 24px;
   object-fit: contain;
+  background: transparent;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 .profile-card-svg {

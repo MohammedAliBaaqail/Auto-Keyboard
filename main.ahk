@@ -200,6 +200,7 @@ InitConfig() {
     
     ApplyAllModules()
     ProfileAppScanner.EnsureAllProfileIcons()
+    ProfileAppScanner.CleanAllCachedIcons()
 }
 
 GetDefaultConfig() {
@@ -994,6 +995,7 @@ class ProfileAppScanner {
                 DllCall("gdiplus\GdipCreateBitmapFromHICON", "Ptr", hIcon, "Ptr*", &pBitmap)
                 DllCall("user32\DestroyIcon", "Ptr", hIcon)
                 if (pBitmap) {
+                    this.CleanWhiteCorners(pBitmap)
                     clsidPng := Buffer(16)
                     DllCall("ole32\CLSIDFromString", "Str", "{557CF406-1A04-11D3-9A73-0000F81EF32E}", "Ptr", clsidPng.Ptr)
                     DllCall("gdiplus\GdipSaveImageToFile", "Ptr", pBitmap, "Str", outPng, "Ptr", clsidPng.Ptr, "Ptr", 0)
@@ -1003,6 +1005,83 @@ class ProfileAppScanner {
             return FileExist(outPng) ? true : false
         } catch {
             return false
+        }
+    }
+
+    static CleanWhiteCorners(pBitmap) {
+        try {
+            width := 0, height := 0
+            DllCall("gdiplus\GdipGetImageWidth", "Ptr", pBitmap, "UInt*", &width)
+            DllCall("gdiplus\GdipGetImageHeight", "Ptr", pBitmap, "UInt*", &height)
+            if (width < 4 || height < 4)
+                return
+
+            ; Check if top-left corner is solid white or near-white (common GDI+ artifact from masked icons)
+            argb0 := 0
+            DllCall("gdiplus\GdipBitmapGetPixel", "Ptr", pBitmap, "Int", 0, "Int", 0, "UInt*", &argb0)
+            a0 := (argb0 >> 24) & 0xFF
+            r0 := (argb0 >> 16) & 0xFF
+            g0 := (argb0 >> 8) & 0xFF
+            b0 := argb0 & 0xFF
+            if (a0 < 250 || r0 < 240 || g0 < 240 || b0 < 240)
+                return
+
+            ; Flood-fill from 4 outer corners to convert connected white background to alpha 0
+            queue := [[0, 0], [width - 1, 0], [0, height - 1], [width - 1, height - 1]]
+            visited := Map()
+            while (queue.Length > 0) {
+                pt := queue.Pop()
+                x := pt[1], y := pt[2]
+                if (x < 0 || x >= width || y < 0 || y >= height)
+                    continue
+                key := x . "," . y
+                if (visited.Has(key))
+                    continue
+                visited[key] := true
+
+                curArgb := 0
+                DllCall("gdiplus\GdipBitmapGetPixel", "Ptr", pBitmap, "Int", x, "Int", y, "UInt*", &curArgb)
+                a := (curArgb >> 24) & 0xFF
+                r := (curArgb >> 16) & 0xFF
+                g := (curArgb >> 8) & 0xFF
+                b := curArgb & 0xFF
+                if (a == 255 && r > 240 && g > 240 && b > 240) {
+                    DllCall("gdiplus\GdipBitmapSetPixel", "Ptr", pBitmap, "Int", x, "Int", y, "UInt", 0x00000000)
+                    queue.Push([x + 1, y])
+                    queue.Push([x - 1, y])
+                    queue.Push([x, y + 1])
+                    queue.Push([x, y - 1])
+                }
+            }
+        }
+    }
+
+    static CleanPngFile(pngPath) {
+        if (!FileExist(pngPath))
+            return
+        if (!ProfileGdipHelper.Init())
+            return
+        pBitmap := 0
+        DllCall("gdiplus\GdipCreateBitmapFromFile", "WStr", pngPath, "Ptr*", &pBitmap)
+        if (pBitmap) {
+            this.CleanWhiteCorners(pBitmap)
+            clsidPng := Buffer(16)
+            DllCall("ole32\CLSIDFromString", "Str", "{557CF406-1A04-11D3-9A73-0000F81EF32E}", "Ptr", clsidPng.Ptr)
+            tmpPng := pngPath . ".tmp.png"
+            DllCall("gdiplus\GdipSaveImageToFile", "Ptr", pBitmap, "Str", tmpPng, "Ptr", clsidPng.Ptr, "Ptr", 0)
+            DllCall("gdiplus\GdipDisposeImage", "Ptr", pBitmap)
+            if (FileExist(tmpPng)) {
+                try FileMove(tmpPng, pngPath, 1)
+            }
+        }
+    }
+
+    static CleanAllCachedIcons() {
+        outDir := A_ScriptDir . "\ui\icons"
+        if (!DirExist(outDir))
+            return
+        loop files, outDir . "\*.png" {
+            this.CleanPngFile(A_LoopFileFullPath)
         }
     }
 
@@ -1020,6 +1099,7 @@ class ProfileAppScanner {
                     pBitmap := 0
                     DllCall("gdiplus\GdipCreateBitmapFromHICON", "Ptr", hIcon, "Ptr*", &pBitmap)
                     if (pBitmap) {
+                        this.CleanWhiteCorners(pBitmap)
                         clsidPng := Buffer(16)
                         DllCall("ole32\CLSIDFromString", "Str", "{557CF406-1A04-11D3-9A73-0000F81EF32E}", "Ptr", clsidPng.Ptr)
                         DllCall("gdiplus\GdipSaveImageToFile", "Ptr", pBitmap, "Str", outPng, "Ptr", clsidPng.Ptr, "Ptr", 0)
