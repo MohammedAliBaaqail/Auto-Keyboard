@@ -1773,6 +1773,33 @@ html, body {
   min-height: 140px;
 }
 
+/* Two in One Line (2-Column Grid) for Text Expander and Key Remapper */
+#teShortcutsContainer,
+#krRemapsContainer {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 18px;
+  align-content: start;
+}
+
+#teShortcutsContainer .shortcut-card,
+#krRemapsContainer .shortcut-card {
+  margin: 0;
+  width: 100%;
+}
+
+#teShortcutsContainer .empty-state,
+#krRemapsContainer .empty-state {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 720px) {
+  #teShortcutsContainer,
+  #krRemapsContainer {
+    grid-template-columns: 1fr;
+  }
+}
+
 .shortcuts-list::-webkit-scrollbar {
   width: 6px;
 }
@@ -1791,11 +1818,12 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 20px;
+  padding: 12px 18px;
   margin: 14px 4px;
   transition: var(--transition-smooth);
   border: none;
   box-sizing: border-box;
+  min-width: 0;
 }
 
 .shortcut-card:hover {
@@ -1805,8 +1833,11 @@ html, body {
 .card-info {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  flex: 1 1 auto;
+  min-width: 0;
   overflow: hidden;
+  margin-right: 8px;
 }
 
 .trigger-badge {
@@ -1819,17 +1850,19 @@ html, body {
   box-shadow: var(--inset-sm);
   border: none;
   height: 34px;
-  padding: 0 16px;
+  padding: 0 14px;
   border-radius: var(--radius-btn);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .trigger-badge.trigger-badge-hotkey {
   color: var(--accent-primary);
   gap: 6px;
+  flex-shrink: 0;
 }
 
 .trigger-badge .badge-key-icon {
@@ -1842,6 +1875,9 @@ html, body {
 .arrow-divider {
   color: var(--text-muted);
   font-size: 14px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
 }
 
 .expansion-text {
@@ -1851,7 +1887,8 @@ html, body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 320px;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .multiline-badge {
@@ -1864,12 +1901,14 @@ html, body {
   padding: 2px 8px;
   border-radius: var(--radius-badge);
   margin-left: 6px;
+  flex-shrink: 0;
 }
 
 .card-actions {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .card-btn {

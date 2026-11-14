@@ -1276,7 +1276,6 @@
     filtered.forEach(item => {
       const isEnabled = item.enabled !== false && item.enabled !== 0;
       const card = document.createElement('div');
-      card.className = `shortcut-card ${state.editingTeId === item.id ? 'editing' : ''}`;
       card.className = `shortcut-card ${isEnabled ? '' : 'is-disabled'} ${state.editingTeId === item.id ? 'editing' : ''}`;
 
       const isMulti = item.multiline || item.output.includes('\n');
@@ -1464,13 +1463,13 @@ function renderKeyRemapper() {
   items.forEach(item => {
     const isEnabled = item.enabled !== false && item.enabled !== 0;
     const card = document.createElement('div');
-    card.className = 'shortcut-card';
     card.className = `shortcut-card ${isEnabled ? '' : 'is-disabled'}`;
+    const descText = `${item.target} — ${item.name || 'Remap'}`;
     card.innerHTML = `
         <div class="card-info">
           <span class="trigger-badge ${isEnabled ? '' : 'is-disabled'}">${escapeHtml(item.source)}</span>
           <span class="arrow-divider"><svg class="arrow-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></span>
-          <span class="expansion-text"><strong>${escapeHtml(item.target)}</strong> — ${escapeHtml(item.name || 'Remap')}</span>
+          <span class="expansion-text" title="${escapeHtml(descText)}"><strong>${escapeHtml(item.target)}</strong> — ${escapeHtml(item.name || 'Remap')}</span>
         </div>
         <div class="card-actions">
           <button class="card-btn btn-delete" title="Delete Remap" data-id="${item.id}">
