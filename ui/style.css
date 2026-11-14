@@ -437,30 +437,21 @@ html, body {
 
 .lgs-profile-card.active {
   box-shadow: var(--inset-sm);
-  border-color: var(--accent-primary);
+  border: 1px solid transparent;
+  background: var(--surface-color);
+  transform: none;
+  filter: none;
 }
 
-.lgs-profile-card.active::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 15%;
-  bottom: 15%;
-  width: 3.5px;
-  background: var(--accent-primary);
-  border-radius: 0 2px 2px 0;
+.lgs-profile-card.active:hover {
+  box-shadow: var(--inset-sm);
+  transform: none;
+  filter: none;
 }
 
-.profile-active-tag {
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-  color: #fff;
-  background: var(--accent-primary);
-  padding: 2px 6px;
-  border-radius: 4px;
-  margin-left: auto;
-  flex-shrink: 0;
+.lgs-profile-card.active .lgs-icon-box {
+  box-shadow: var(--raised-sm);
+  background: var(--surface-color);
 }
 
 .lgs-icon-box {

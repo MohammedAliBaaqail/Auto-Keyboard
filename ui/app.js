@@ -430,12 +430,41 @@
 
     const targetExe = (prof && prof.targetExe) ? prof.targetExe.trim() : '';
     const firstExe = targetExe ? targetExe.split(',')[0].trim().replace(/\.exe$/i, '') : '';
-    const iconSrc = firstExe ? `icons/${encodeURIComponent(firstExe)}.png` : '';
 
-    if (iconSrc) {
+    const candidates = [];
+    if (firstExe) {
+      candidates.push(`icons/${encodeURIComponent(firstExe)}.png`);
+      candidates.push(`icons/${encodeURIComponent(firstExe.toLowerCase())}.png`);
+    }
+    if (pName) {
+      candidates.push(`icons/${encodeURIComponent(pName)}.png`);
+      candidates.push(`icons/${encodeURIComponent(pName.toLowerCase())}.png`);
+    }
+
+    const uniqueCandidates = [];
+    candidates.forEach(c => {
+      if (!uniqueCandidates.includes(c)) uniqueCandidates.push(c);
+    });
+
+    if (uniqueCandidates.length > 0) {
+      const primary = uniqueCandidates[0];
+      const alts = uniqueCandidates.slice(1);
+      const altsJson = JSON.stringify(alts).replace(/"/g, '&quot;');
       return `
-        <img class="profile-card-img" src="${iconSrc}" alt="${escapeHtml(pName)}"
-             onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';" />
+        <img class="profile-card-img" src="${primary}" data-alts="${altsJson}" alt="${escapeHtml(pName)}"
+             onerror="
+               try {
+                 var a = JSON.parse(this.getAttribute('data-alts') || '[]');
+                 if (a && a.length > 0) {
+                   var next = a.shift();
+                   this.setAttribute('data-alts', JSON.stringify(a));
+                   this.src = next;
+                   return;
+                 }
+               } catch(e) {}
+               this.style.display='none';
+               if (this.nextElementSibling) this.nextElementSibling.style.display='flex';
+             " />
         <div class="profile-card-fallback-badge" style="display:none;">
           <span>${escapeHtml(pName.charAt(0).toUpperCase())}</span>
         </div>`;
@@ -507,13 +536,6 @@
 
       card.appendChild(iconBox);
       card.appendChild(infoCol);
-
-      if (isActive) {
-        const activeTag = document.createElement('span');
-        activeTag.className = 'profile-active-tag';
-        activeTag.textContent = 'ACTIVE';
-        card.appendChild(activeTag);
-      }
 
       card.addEventListener('click', () => {
         if (state.config.activeProfile !== pName) {

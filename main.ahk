@@ -199,6 +199,7 @@ InitConfig() {
     }
     
     ApplyAllModules()
+    ProfileAppScanner.EnsureAllProfileIcons()
 }
 
 GetDefaultConfig() {
@@ -1029,6 +1030,116 @@ class ProfileAppScanner {
             return FileExist(outPng) ? true : false
         } catch {
             return false
+        }
+    }
+
+    static ResolveExePath(exePathOrName) {
+        exePathOrName := Trim(exePathOrName)
+        if (exePathOrName == "")
+            return ""
+
+        if (InStr(exePathOrName, ",")) {
+            for part in StrSplit(exePathOrName, ",") {
+                p := this.ResolveExePath(Trim(part))
+                if (p != "")
+                    return p
+            }
+            return ""
+        }
+
+        exeClean := Trim(exePathOrName, ' "`t')
+        if (FileExist(exeClean))
+            return exeClean
+
+        cleanName := RegExReplace(exePathOrName, "i)\.exe$", "") . ".exe"
+        cleanBase := RegExReplace(cleanName, "i)\.exe$", "")
+
+        ; 1. Active running process path
+        try {
+            pid := ProcessExist(cleanName)
+            if (pid) {
+                p := ProcessGetPath(pid)
+                p := Trim(p, ' "`t')
+                if (FileExist(p))
+                    return p
+            }
+        }
+
+        ; 2. Windows App Paths registry keys
+        regKeys := [
+            "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\" . cleanName,
+            "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\" . cleanName,
+            "HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\App Paths\" . cleanName,
+            "HKEY_CURRENT_USER\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\App Paths\" . cleanName
+        ]
+        for rk in regKeys {
+            try {
+                p := RegRead(rk, "")
+                p := Trim(p, ' "`t')
+                if (p != "" && FileExist(p))
+                    return p
+            }
+        }
+
+        ; 3. Common installation paths
+        progFilesX86 := EnvGet("ProgramFiles(x86)")
+        if (progFilesX86 == "")
+            progFilesX86 := "C:\Program Files (x86)"
+
+        candidates := [
+            "C:\Program Files\" . cleanBase . "\" . cleanName,
+            progFilesX86 . "\" . cleanBase . "\" . cleanName,
+            A_AppData . "\..\Local\Programs\" . cleanBase . "\" . cleanName,
+            A_AppData . "\..\Local\Programs\" . cleanName,
+            A_AppData . "\..\Local\" . cleanBase . "\Application\" . cleanName,
+            A_AppData . "\..\Local\" . cleanBase . "\" . cleanName,
+            A_WinDir . "\System32\" . cleanName,
+            A_WinDir . "\" . cleanName
+        ]
+        for c in candidates {
+            c := Trim(c, ' "`t')
+            if (FileExist(c))
+                return c
+        }
+        return ""
+    }
+
+    static EnsureProfileIcon(profName, targetExe := "") {
+        if (profName = "Default" || profName = "")
+            return
+        outDir := A_ScriptDir . "\ui\icons"
+        if (!DirExist(outDir)) {
+            try DirCreate(outDir)
+        }
+        fullPath := ""
+        if (targetExe != "")
+            fullPath := this.ResolveExePath(targetExe)
+        if (fullPath == "" && profName != "")
+            fullPath := this.ResolveExePath(profName)
+
+        if (fullPath != "" && FileExist(fullPath)) {
+            outPng := outDir . "\" . profName . ".png"
+            if (!FileExist(outPng))
+                this.ExtractExeIcon(fullPath, outPng)
+            SplitPath(fullPath, &eFile, , , &eNameNoExt)
+            cleanPng := outDir . "\" . eNameNoExt . ".png"
+            if (!FileExist(cleanPng))
+                this.ExtractExeIcon(fullPath, cleanPng)
+            lowerPng := outDir . "\" . StrLower(eNameNoExt) . ".png"
+            if (!FileExist(lowerPng))
+                this.ExtractExeIcon(fullPath, lowerPng)
+        }
+    }
+
+    static EnsureAllProfileIcons() {
+        global g_Config
+        if (!g_Config.Has("profiles") || !IsObject(g_Config["profiles"]))
+            return
+        for pName, pData in g_Config["profiles"] {
+            if (pName != "Default" && IsObject(pData)) {
+                tExe := pData.Has("targetExe") ? pData["targetExe"] : ""
+                this.EnsureProfileIcon(pName, tExe)
+            }
         }
     }
 
@@ -2171,6 +2282,7 @@ OnWebMessageReceived(thisPtr, senderPtr, argsPtr) {
                     }
                     SaveConfigToFile()
                     ApplyAllModules()
+                    ProfileAppScanner.EnsureAllProfileIcons()
                 }
                 
             case "startDrag":
