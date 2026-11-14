@@ -174,67 +174,1678 @@
         </div>
       </div>
 
-      <!-- Application Profiles Ribbon Bar (OBM AHK Style) -->
-      <div class="lgs-profiles-bar" id="lgsProfilesBar">
-        <!-- Left Controls: Filter & Action Buttons -->
-        <div class="lgs-bar-controls">
-          <div class="lgs-search-row">
-            <div class="lgs-search-wrap">
-              <svg class="search-mini-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+  </div>
+  </div>
+
+  <!-- Application Profiles Ribbon Bar (OBM AHK Style) -->
+  <div class="lgs-profiles-bar" id="lgsProfilesBar">
+    <!-- Left Controls: Filter & Action Buttons -->
+    <div class="lgs-bar-controls">
+      <div class="lgs-search-row">
+        <div class="lgs-search-wrap">
+          <svg class="search-mini-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="profileSearchInput" placeholder="Search" autocomplete="off" spellcheck="false" />
+        </div>
+        <div class="lgs-action-btns">
+          <button class="squircle-btn lgs-mini-btn" id="btnAddProfile" title="Add New Profile">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </button>
+          <button class="squircle-btn lgs-mini-btn" id="btnEditProfile"
+            title="Configure Profile Settings & Auto-Switching">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path
+                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+              </path>
+            </svg>
+          </button>
+          <button class="squircle-btn lgs-mini-btn btn-danger-profile" id="btnDeleteProfile" title="Delete Profile">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fixed Default Profile Slot -->
+    <div class="lgs-default-profile-slot" id="lgsDefaultProfileSlot"></div>
+
+    <!-- Vertical Divider Separator -->
+    <div class="lgs-profile-separator" id="lgsProfileSeparator" aria-hidden="true"></div>
+
+    <!-- Center/Right: App Profiles Carousel / Strip -->
+    <div class="lgs-carousel-wrap">
+      <button class="lgs-scroll-btn left" id="btnScrollProfilesLeft" title="Scroll Left">‹</button>
+      <div class="lgs-profiles-track" id="lgsProfilesTrack">
+        <div class="lgs-profiles-glider" id="lgsProfilesGlider"></div>
+        <!-- Dynamic profile cards injected here -->
+      </div>
+      <button class="lgs-scroll-btn right" id="btnScrollProfilesRight" title="Scroll Right">›</button>
+    </div>
+
+    <!-- Hidden select for backward compatibility -->
+    <select id="profileSelect" style="display:none;"></select>
+  </div>
+
+  <div class="header-right">
+    <button class="squircle-btn" id="btnTheme" title="Customize Theme (Background & Accent)">
+      <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle>
+        <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle>
+        <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle>
+        <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle>
+        <path
+          d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.992 6.012 17.461 2 12 2z">
+        </path>
+      </svg>
+    </button>
+    <button class="squircle-btn" id="btnRefresh" title="Reload / Re-sync Config">
+      <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"></path>
+      </svg>
+    </button>
+    <button class="squircle-btn" id="btnMinimize" title="Minimize Window">
+      <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+    </button>
+    <button class="squircle-btn btn-close" id="btnClose" title="Close Window">
+      <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+  </div>
+  </header>
+
+  <!-- Script Type / Feature Tabs Bar (Segmented Control from image) -->
+  <div class="segmented-control-wrapper">
+    <div class="segmented-control" id="segmentedBar">
+      <div class="segmented-glider" id="segmentedGlider"></div>
+      <button class="segment-btn active" data-tab="textExpander">
+        <svg class="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 5H3"></path>
+          <path d="M21 12H8"></path>
+          <path d="M21 19H8"></path>
+          <path d="M3 12v7"></path>
+        </svg>
+        <span class="tab-label">Text Expander</span>
+      </button>
+      <button class="segment-btn" data-tab="keyRemapper">
+        <svg class="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+          <path d="M10 8h.01"></path>
+          <path d="M12 12h.01"></path>
+          <path d="M14 8h.01"></path>
+          <path d="M16 12h.01"></path>
+          <path d="M18 8h.01"></path>
+          <path d="M6 8h.01"></path>
+          <path d="M7 16h10"></path>
+          <path d="M8 12h.01"></path>
+        </svg>
+        <span class="tab-label">Key Remapper</span>
+      </button>
+      <button class="segment-btn" data-tab="windowManager">
+        <svg class="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+          <path d="M10 4v4"></path>
+          <path d="M2 8h20"></path>
+          <path d="M6 4v4"></path>
+        </svg>
+        <span class="tab-label">System Tools</span>
+      </button>
+      <button class="segment-btn" data-tab="mouseGestures">
+        <svg class="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <rect x="5" y="2" width="14" height="20" rx="7"></rect>
+          <line x1="12" y1="6" x2="12" y2="10"></line>
+          <path d="M12 2v4"></path>
+        </svg>
+        <span class="tab-label">Gestures & Corners</span>
+      </button>
+      <button class="segment-btn" data-tab="radialMenu">
+        <svg class="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="m4.93 4.93 4.24 4.24"></path>
+          <path d="m14.83 9.17 4.24-4.24"></path>
+          <path d="m14.83 14.83 4.24 4.24"></path>
+          <path d="m9.17 14.83-4.24 4.24"></path>
+          <circle cx="12" cy="12" r="3"></circle>
+        </svg>
+        <span class="tab-label">Radial Menu</span>
+      </button>
+      <button class="segment-btn" data-tab="appLauncher">
+        <svg class="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path>
+          <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09"></path>
+          <path d="M9 12a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.4 22.4 0 0 1-4 2z"></path>
+          <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 .05 5 .05"></path>
+        </svg>
+        <span class="tab-label">App Launcher</span>
+      </button>
+      <button class="segment-btn" data-tab="autoClicker">
+        <svg class="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 4.1 12 6"></path>
+          <path d="m5.1 8-2.9-.8"></path>
+          <path d="m6 12-1.9 2"></path>
+          <path d="M7.2 2.2 8 5.1"></path>
+          <path
+            d="M9.037 9.69a.498.498 0 0 1 .653-.653l11 4.5a.5.5 0 0 1-.074.949l-4.349 1.041a1 1 0 0 0-.74.739l-1.04 4.35a.5.5 0 0 1-.95.074z">
+          </path>
+        </svg>
+        <span class="tab-label">Auto Clicker</span>
+      </button>
+      <button class="segment-btn" data-tab="macroRecorder">
+        <svg class="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <circle cx="12" cy="12" r="3.5" fill="currentColor"></circle>
+        </svg>
+        <span class="tab-label">Macro Recorder</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Module Panels Container with Smooth Overflow -->
+  <main class="modules-container">
+
+    <!-- ====================================================================
+           1. TEXT EXPANDER PANEL (with Multiline Expansion)
+           ==================================================================== -->
+    <section class="module-panel active" id="panel-textExpander">
+      <div class="inputs-section">
+        <div class="inputs-row">
+          <div class="inset-input-box trigger-box">
+            <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+            <input type="text" id="teInputTrigger" placeholder="Trigger (e.g. @@1, @@sig)" autocomplete="off"
+              spellcheck="false" />
+          </div>
+
+          <!-- Single or Multiline Output Field -->
+          <div class="inset-input-box output-box" id="teOutputContainer">
+            <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+            <input type="text" id="teInputOutput" placeholder="Replacement text or snippet..." autocomplete="off"
+              spellcheck="false" />
+            <textarea id="teTextareaOutput" class="hidden-field"
+              placeholder="Type multiline snippet / signature..."></textarea>
+          </div>
+
+          <!-- Multiline Toggle Pill -->
+          <button class="neumorphic-toggle-pill" id="teToggleMultiline" title="Toggle Single-line / Multiline">
+            <svg class="toggle-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="21" y1="6" x2="3" y2="6"></line>
+              <line x1="15" y1="12" x2="3" y2="12"></line>
+              <line x1="17" y1="18" x2="3" y2="18"></line>
+            </svg>
+            <span>Multiline</span>
+          </button>
+
+          <!-- Neumorphic GO Button -->
+          <button class="neumorphic-btn btn-go" id="teBtnSubmit">
+            <span id="teBtnSubmitText">GO</span>
+          </button>
+        </div>
+        <div class="input-hints">
+          <span class="hint-tag">Typing trigger replaces immediately anywhere in Windows</span>
+        </div>
+      </div>
+
+      <div class="list-section">
+        <div class="list-header">
+          <span class="section-label">Configured Expansions</span>
+          <div class="search-filter-box">
+            <input type="text" id="teSearchFilter" placeholder="Filter snippets..." autocomplete="off" />
+          </div>
+        </div>
+        <div class="shortcuts-list" id="teShortcutsContainer"></div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+           2. KEY REMAPPER PANEL
+           ==================================================================== -->
+    <section class="module-panel" id="panel-keyRemapper">
+      <div class="inputs-section">
+        <div class="inputs-row">
+          <!-- Source Key Combination Box -->
+          <div class="inset-input-box key-combo-box" id="krSourceBox" title="Click to record source key combination">
+            <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+              <path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M7 16h10"></path>
+            </svg>
+            <input type="text" id="krInputSource" class="key-combo-input" placeholder="Click to record source key..."
+              readonly autocomplete="off" spellcheck="false" />
+            <button type="button" class="btn-combo-clear hidden-field" id="krBtnClearSource"
+              title="Clear">&times;</button>
+          </div>
+
+          <!-- Arrow Divider -->
+          <div class="remap-arrow-indicator" title="Remaps to">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </div>
+
+          <!-- Target Key Combination Box -->
+          <div class="inset-input-box key-combo-box" id="krTargetBox" title="Click to record target key or combination">
+            <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="13 17 18 12 13 7"></polyline>
+              <polyline points="6 17 11 12 6 7"></polyline>
+            </svg>
+            <input type="text" id="krInputTarget" class="key-combo-input" placeholder="Click to record target key..."
+              readonly autocomplete="off" spellcheck="false" />
+            <button type="button" class="btn-combo-clear hidden-field" id="krBtnClearTarget"
+              title="Clear">&times;</button>
+          </div>
+
+          <button class="neumorphic-btn btn-go" id="krBtnSubmit" title="Add Key Remap">
+            <span>ADD</span>
+          </button>
+        </div>
+        <div class="input-hints">
+          <span class="hint-tag">Click a box & press any key or combination (e.g. Ctrl+Shift+A, CapsLock, F1-F12,
+            Esc)</span>
+        </div>
+      </div>
+
+      <div class="list-section">
+        <div class="list-header">
+          <span class="section-label">Active Key Remaps</span>
+        </div>
+        <div class="shortcuts-list" id="krRemapsContainer"></div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+           3. WINDOW MANAGEMENT PANEL
+           ==================================================================== -->
+    <section class="module-panel" id="panel-windowManager">
+      <div class="wm-grid">
+        <!-- Card 1: Always on Top -->
+        <div class="wm-card">
+          <div class="wm-card-left">
+            <div class="wm-icon-badge">
+              <svg class="wm-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="17" x2="12" y2="22"></line>
+                <path
+                  d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1v3.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z">
+                </path>
               </svg>
-              <input type="text" id="profileSearchInput" placeholder="Search" autocomplete="off" spellcheck="false" />
             </div>
-            <div class="lgs-action-btns">
-              <button class="squircle-btn lgs-mini-btn" id="btnAddProfile" title="Add New Profile">
-                <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                  <line x1="12" y1="5" x2="12" y2="19"></line>
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
+            <div class="wm-info">
+              <div class="wm-title-row">
+                <h3>Pin Always-on-Top</h3>
+                <div class="wm-hotkey-badge" id="wmBadgeAlwaysOnTop">Ctrl + Space</div>
+              </div>
+              <p>Pins the current active window on top of all others</p>
+            </div>
+          </div>
+          <div class="wm-card-actions">
+            <div class="toggle-wrapper" title="Enable / Disable Pin Always-on-Top">
+              <input class="toggle-checkbox" type="checkbox" id="wmSwitchAlwaysOnTop" checked>
+              <div class="toggle-container">
+                <div class="toggle-button"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Center Window -->
+        <div class="wm-card">
+          <div class="wm-card-left">
+            <div class="wm-icon-badge">
+              <svg class="wm-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="22" y1="12" x2="18" y2="12"></line>
+                <line x1="6" y1="12" x2="2" y2="12"></line>
+                <line x1="12" y1="2" x2="12" y2="6"></line>
+                <line x1="12" y1="18" x2="12" y2="22"></line>
+              </svg>
+            </div>
+            <div class="wm-info">
+              <div class="wm-title-row">
+                <h3>Center Active Window</h3>
+                <div class="wm-hotkey-badge" id="wmBadgeCenterWindow">Ctrl + Alt + C</div>
+              </div>
+              <p>Instantly centers the window on your monitor</p>
+            </div>
+          </div>
+          <div class="wm-card-actions">
+            <div class="toggle-wrapper" title="Enable / Disable Center Active Window">
+              <input class="toggle-checkbox" type="checkbox" id="wmSwitchCenterWindow" checked>
+              <div class="toggle-container">
+                <div class="toggle-button"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: Boss Key / Quick Hide -->
+        <div class="wm-card">
+          <div class="wm-card-left">
+            <div class="wm-icon-badge">
+              <svg class="wm-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
+                <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"></path>
+                <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"></path>
+                <line x1="2" y1="2" x2="22" y2="22"></line>
+              </svg>
+            </div>
+            <div class="wm-info">
+              <div class="wm-title-row">
+                <h3>Boss Key / Minimize Active</h3>
+                <div class="wm-hotkey-badge" id="wmBadgeHideWindow">Ctrl + Alt + H</div>
+              </div>
+              <p>Instantly minimizes the foreground window</p>
+            </div>
+          </div>
+          <div class="wm-card-actions">
+            <div class="toggle-wrapper" title="Enable / Disable Boss Key">
+              <input class="toggle-checkbox" type="checkbox" id="wmSwitchHideWindow" checked>
+              <div class="toggle-container">
+                <div class="toggle-button"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 4: Transparency Wheel & Click-Through Ghost Mode -->
+        <div class="wm-card wm-card-column">
+          <div class="wm-card-main-row">
+            <div class="wm-card-left">
+              <div class="wm-icon-badge">
+                <svg class="wm-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                  <polyline points="2 17 12 22 22 17"></polyline>
+                  <polyline points="2 12 12 17 22 12"></polyline>
                 </svg>
-              </button>
-              <button class="squircle-btn lgs-mini-btn" id="btnEditProfile"
-                title="Configure Profile Settings & Auto-Switching">
-                <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              </div>
+              <div class="wm-info">
+                <div class="wm-title-row">
+                  <h3>Scrollwheel Transparency</h3>
+                  <div class="wm-hotkey-badge" id="wmBadgeTransparencyWheel">Win + WheelUp/Down</div>
+                </div>
+                <p>Hold Win key and scroll mouse wheel over any window</p>
+              </div>
+            </div>
+            <div class="wm-card-actions">
+              <div class="toggle-wrapper" title="Enable / Disable Scrollwheel Transparency">
+                <input class="toggle-checkbox" type="checkbox" id="wmSwitchTransparencyWheel" checked>
+                <div class="toggle-container">
+                  <div class="toggle-button"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sub-Option: Click-Through / Ghost Mode (Uiverse bright-rat-5 by shreyasm-dev) -->
+          <div class="wm-sub-option">
+            <label class="uiverse-checkbox-wrap" title="Enable Click-Through Ghost Mode">
+              <input type="checkbox" class="uiverse-checkbox-input" id="wmCheckboxGhostMode">
+              <div class="uiverse-checkmark"></div>
+            </label>
+            <div class="wm-sub-info">
+              <label for="wmCheckboxGhostMode" class="wm-sub-label"
+                title="Clicks pass through transparent windows">Click-Through "Ghost" (pass clicks)</label>
+              <div class="wm-sub-hotkey-tag" id="wmBadgeGhostMode" title="Direct toggle hotkey">Ctrl + Alt + G</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 5: Focused App Volume Control -->
+        <div class="wm-card">
+          <div class="wm-card-left">
+            <div class="wm-icon-badge">
+              <svg class="wm-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+              </svg>
+            </div>
+            <div class="wm-info">
+              <div class="wm-title-row">
+                <h3>Active App Volume Control</h3>
+                <div class="wm-hotkey-badge" id="wmBadgeAppVolumeWheel">Alt + WheelUp/Down</div>
+              </div>
+              <p>Hold Alt & scroll mouse wheel (or Ctrl+Alt+PgUp/Dn)</p>
+            </div>
+          </div>
+          <div class="wm-card-actions">
+            <div class="toggle-wrapper" title="Enable / Disable Active App Volume Control">
+              <input class="toggle-checkbox" type="checkbox" id="wmSwitchAppVolumeWheel" checked>
+              <div class="toggle-container">
+                <div class="toggle-button"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 6: Mute Active Application -->
+        <div class="wm-card">
+          <div class="wm-card-left">
+            <div class="wm-icon-badge">
+              <svg class="wm-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <line x1="23" y1="9" x2="17" y2="15"></line>
+                <line x1="17" y1="9" x2="23" y2="15"></line>
+              </svg>
+            </div>
+            <div class="wm-info">
+              <div class="wm-title-row">
+                <h3>Mute Active Application</h3>
+                <div class="wm-hotkey-badge" id="wmBadgeAppVolumeMute">Alt + M</div>
+              </div>
+              <p>Instantly mute or unmute foreground application audio</p>
+            </div>
+          </div>
+          <div class="wm-card-actions">
+            <div class="toggle-wrapper" title="Enable / Disable Mute Active Application">
+              <input class="toggle-checkbox" type="checkbox" id="wmSwitchAppVolumeMute" checked>
+              <div class="toggle-container">
+                <div class="toggle-button"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 6b: Mute Master Audio -->
+        <div class="wm-card">
+          <div class="wm-card-left">
+            <div class="wm-icon-badge">
+              <svg class="wm-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <line x1="22" y1="9" x2="16" y2="15"></line>
+                <line x1="16" y1="9" x2="22" y2="15"></line>
+                <path d="M19 5a8 8 0 0 1 0 14" opacity="0.4"></path>
+              </svg>
+            </div>
+            <div class="wm-info">
+              <div class="wm-title-row">
+                <h3>Mute Master Audio</h3>
+                <div class="wm-hotkey-badge" id="wmBadgeMasterAudioMute">Ctrl + Alt + M</div>
+              </div>
+              <p>Instantly mute or unmute Windows master system audio</p>
+            </div>
+          </div>
+          <div class="wm-card-actions">
+            <div class="toggle-wrapper" title="Enable / Disable Mute Master Audio">
+              <input class="toggle-checkbox" type="checkbox" id="wmSwitchMasterAudioMute" checked>
+              <div class="toggle-container">
+                <div class="toggle-button"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 7: Window Shade / Roll Up -->
+        <div class="wm-card">
+          <div class="wm-card-left">
+            <div class="wm-icon-badge">
+              <svg class="wm-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                <line x1="3" y1="9" x2="21" y2="9"></line>
+                <polyline points="9 16 12 13 15 16"></polyline>
+              </svg>
+            </div>
+            <div class="wm-info">
+              <div class="wm-title-row">
+                <h3>Window Shade / Roll Up</h3>
+                <div class="wm-hotkey-badge" id="wmBadgeWindowShade">Ctrl + Alt + R</div>
+              </div>
+              <p>Rolls window into title bar & unrolls when pressed again</p>
+            </div>
+          </div>
+          <div class="wm-card-actions">
+            <div class="toggle-wrapper" title="Enable / Disable Window Shade">
+              <input class="toggle-checkbox" type="checkbox" id="wmSwitchWindowShade" checked>
+              <div class="toggle-container">
+                <div class="toggle-button"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 8: Force Borderless Fullscreen -->
+        <div class="wm-card">
+          <div class="wm-card-left">
+            <div class="wm-icon-badge">
+              <svg class="wm-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <polyline points="9 21 3 21 3 15"></polyline>
+                <line x1="21" y1="3" x2="14" y2="10"></line>
+                <line x1="3" y1="21" x2="10" y2="14"></line>
+              </svg>
+            </div>
+            <div class="wm-info">
+              <div class="wm-title-row">
+                <h3>Force Borderless Fullscreen</h3>
+                <div class="wm-hotkey-badge" id="wmBadgeBorderless">Ctrl + Alt + Enter</div>
+              </div>
+              <p>Removes borders & title bar for seamless full display</p>
+            </div>
+          </div>
+          <div class="wm-card-actions">
+            <div class="toggle-wrapper" title="Enable / Disable Force Borderless Fullscreen">
+              <input class="toggle-checkbox" type="checkbox" id="wmSwitchBorderless" checked>
+              <div class="toggle-container">
+                <div class="toggle-button"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 9: Text Transformer (Case Converter) -->
+        <div class="wm-card">
+          <div class="wm-card-left">
+            <div class="wm-icon-badge">
+              <svg class="wm-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="4 7 4 4 20 4 20 7"></polyline>
+                <line x1="9" y1="20" x2="15" y2="20"></line>
+                <line x1="12" y1="4" x2="12" y2="20"></line>
+              </svg>
+            </div>
+            <div class="wm-info">
+              <div class="wm-title-row">
+                <h3>Text Transformer (Case Converter)</h3>
+              </div>
+              <p>Highlight text in any app & press hotkey to convert in place</p>
+            </div>
+          </div>
+          <div class="wm-card-actions">
+            <div class="toggle-wrapper" title="Enable / Disable Text Case Transformer">
+              <input class="toggle-checkbox" type="checkbox" id="wmSwitchTextTransform" checked>
+              <div class="toggle-container">
+                <div class="toggle-button"></div>
+              </div>
+            </div>
+          </div>
+          <div class="wm-text-transform-chips">
+            <div class="tt-chip-row">
+              <span class="tt-label">UPPERCASE:</span>
+              <div class="wm-hotkey-badge tt-badge" id="wmBadgeUpper">Ctrl + Alt + U</div>
+            </div>
+            <div class="tt-chip-row">
+              <span class="tt-label">lowercase:</span>
+              <div class="wm-hotkey-badge tt-badge" id="wmBadgeLower">Ctrl + Alt + L</div>
+            </div>
+            <div class="tt-chip-row">
+              <span class="tt-label">Title Case:</span>
+              <div class="wm-hotkey-badge tt-badge" id="wmBadgeTitle">Ctrl + Alt + T</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 10: Clean Plain Text & Strip Formatting -->
+        <div class="wm-card">
+          <div class="wm-card-left">
+            <div class="wm-icon-badge">
+              <svg class="wm-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 20h9"></path>
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+              </svg>
+            </div>
+            <div class="wm-info">
+              <div class="wm-title-row">
+                <h3>Clean Plain Text & Strip Format</h3>
+                <div class="wm-hotkey-badge" id="wmBadgeCleanText">Ctrl + Alt + K</div>
+              </div>
+              <p>Strips excess whitespace, tabs & styling from highlighted text</p>
+            </div>
+          </div>
+          <div class="wm-card-actions">
+            <div class="toggle-wrapper" title="Enable / Disable Clean Plain Text Shortcut">
+              <input class="toggle-checkbox" type="checkbox" id="wmSwitchCleanText" checked>
+              <div class="toggle-container">
+                <div class="toggle-button"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 11: Instant Screen OCR (Text Grabber) -->
+        <div class="wm-card">
+          <div class="wm-card-left">
+            <div class="wm-icon-badge">
+              <svg class="wm-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 7V4h3"></path>
+                <path d="M20 7V4h-3"></path>
+                <path d="M4 17v3h3"></path>
+                <path d="M20 17v3h-3"></path>
+                <line x1="9" y1="12" x2="15" y2="12"></line>
+                <line x1="12" y1="9" x2="12" y2="15"></line>
+              </svg>
+            </div>
+            <div class="wm-info">
+              <div class="wm-title-row">
+                <h3>Instant Screen OCR (Text Grabber)</h3>
+                <div class="wm-hotkey-badge" id="wmBadgeOcr">Ctrl + Alt + O</div>
+              </div>
+              <p>Snip any screen region to extract text directly onto clipboard</p>
+            </div>
+          </div>
+          <div class="wm-card-actions">
+            <div class="toggle-wrapper" title="Enable / Disable Instant Screen OCR">
+              <input class="toggle-checkbox" type="checkbox" id="wmSwitchScreenOcr" checked>
+              <div class="toggle-container">
+                <div class="toggle-button"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 12: Precision Screen Color Picker -->
+        <div class="wm-card">
+          <div class="wm-card-left">
+            <div class="wm-icon-badge">
+              <svg class="wm-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="m14 7 3 3"></path>
+                <path d="m5 19 6-6"></path>
+                <path d="M19.5 4.5a2.121 2.121 0 0 1 0 3L16 11l-3-3 3.5-3.5a2.121 2.121 0 0 1 3 0z"></path>
+                <path d="M5 19l-3 3 1.5 1.5L7 21l-2-2z"></path>
+              </svg>
+            </div>
+            <div class="wm-info">
+              <div class="wm-title-row">
+                <h3>Precision Screen Color Picker</h3>
+                <div class="wm-hotkey-badge" id="wmBadgeColorPicker">Ctrl + Alt + P</div>
+              </div>
+              <p>Samples pixel color under cursor into HEX (#RRGGBB) & RGB</p>
+            </div>
+          </div>
+          <div class="wm-card-actions">
+            <div class="toggle-wrapper" title="Enable / Disable Color Picker Shortcut">
+              <input class="toggle-checkbox" type="checkbox" id="wmSwitchColorPicker" checked>
+              <div class="toggle-container">
+                <div class="toggle-button"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 13: Fast Virtual Desktop Navigation -->
+        <div class="wm-card">
+          <div class="wm-card-left">
+            <div class="wm-icon-badge">
+              <svg class="wm-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+                <line x1="7" y1="10" x2="9" y2="10"></line>
+                <line x1="15" y1="10" x2="17" y2="10"></line>
+              </svg>
+            </div>
+            <div class="wm-info">
+              <div class="wm-title-row">
+                <h3>Fast Virtual Desktop Navigation</h3>
+                <div class="wm-hotkey-badge" id="wmBadgeVDesktops">Ctrl + Alt + ← / →</div>
+              </div>
+              <p>Instant workspace hopping skipping sluggish Windows animations</p>
+              <div class="wm-sub-option">
+                <label class="uiverse-checkbox-wrap" title="Scroll mouse wheel over taskbar to switch desktops">
+                  <input type="checkbox" id="wmCheckboxTaskbarScroll" checked>
+                  <span class="uiverse-custom-checkbox"></span>
+                  <span class="uiverse-check-label">Taskbar Mouse Wheel Hopping</span>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="wm-card-actions">
+            <div class="toggle-wrapper" title="Enable / Disable Fast Virtual Desktop Navigation">
+              <input class="toggle-checkbox" type="checkbox" id="wmSwitchVirtualDesktops" checked>
+              <div class="toggle-container">
+                <div class="toggle-button"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+           MOUSE GESTURES & SCREEN HOT CORNERS PANEL
+           ==================================================================== -->
+    <section class="module-panel" id="panel-mouseGestures">
+      <div class="mg-container">
+        <!-- Left Column: Screen Hot Corners -->
+        <div class="mg-column">
+          <div class="mg-column-header">
+            <div class="mg-header-meta">
+              <div class="mg-icon-circle">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+                  <line x1="8" y1="21" x2="16" y2="21"></line>
+                  <line x1="12" y1="17" x2="12" y2="21"></line>
+                  <polyline points="7 3 2 3 2 8"></polyline>
+                  <polyline points="17 3 22 3 22 8"></polyline>
+                  <polyline points="7 17 2 17 2 12"></polyline>
+                  <polyline points="17 17 22 17 22 12"></polyline>
+                </svg>
+              </div>
+              <div class="mg-title-group">
+                <h3 class="mg-col-title">Screen Hot Corners</h3>
+                <span class="mg-col-subtitle">Trigger actions when holding mouse in screen corners</span>
+              </div>
+            </div>
+            <div class="toggle-wrapper" title="Enable / Disable Screen Hot Corners">
+              <input class="toggle-checkbox" type="checkbox" id="hcMasterSwitch" checked>
+              <div class="toggle-container">
+                <div class="toggle-button"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Duration Customization Slider (Dwell Time) -->
+          <div class="mg-slider-card">
+            <div class="mg-slider-header">
+              <span class="mg-slider-label">Corner Dwell Duration:</span>
+              <span class="mg-slider-val" id="hcDwellVal">250 ms</span>
+            </div>
+            <div class="mg-slider-row">
+              <span class="slider-min-lbl">Fast (50ms)</span>
+              <div class="neumorphic-slider-container" style="flex: 1;">
+                <input type="range" class="neumorphic-slider mg-slider" id="hcDwellSlider" min="50" max="1000" step="25"
+                  value="250">
+              </div>
+              <span class="slider-max-lbl">Deliberate (1s)</span>
+            </div>
+          </div>
+
+          <!-- Interactive Screen Corners Mockup -->
+          <div class="hc-screen-mockup">
+            <div class="hc-corner-slot hc-top-left">
+              <div class="hc-slot-tag">TOP LEFT</div>
+              <select class="hc-select" id="hcSelectTopLeft">
+                <option value="TaskView">Task View (Win+Tab)</option>
+                <option value="ShowDesktop">Show Desktop (Win+D)</option>
+                <option value="ScreenOcr">Instant Screen OCR</option>
+                <option value="ColorPicker">Color Picker</option>
+                <option value="ActionCenter">Action Center (Win+A)</option>
+                <option value="LockWorkstation">Lock Workstation</option>
+                <option value="MuteVolume">Toggle Mute Audio</option>
+                <option value="StartMenu">Start Menu</option>
+                <option value="none">Disabled</option>
+              </select>
+            </div>
+
+            <div class="hc-corner-slot hc-top-right">
+              <div class="hc-slot-tag">TOP RIGHT</div>
+              <select class="hc-select" id="hcSelectTopRight">
+                <option value="ActionCenter">Action Center (Win+A)</option>
+                <option value="TaskView">Task View (Win+Tab)</option>
+                <option value="ShowDesktop">Show Desktop (Win+D)</option>
+                <option value="ScreenOcr">Instant Screen OCR</option>
+                <option value="ColorPicker">Color Picker</option>
+                <option value="LockWorkstation">Lock Workstation</option>
+                <option value="MuteVolume">Toggle Mute Audio</option>
+                <option value="StartMenu">Start Menu</option>
+                <option value="none">Disabled</option>
+              </select>
+            </div>
+
+            <div class="hc-screen-center">
+              <svg class="hc-monitor-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+              </svg>
+              <span>Hold mouse in any corner for dwell duration</span>
+            </div>
+
+            <div class="hc-corner-slot hc-bottom-left">
+              <div class="hc-slot-tag">BOTTOM LEFT</div>
+              <select class="hc-select" id="hcSelectBottomLeft">
+                <option value="StartMenu">Start Menu (Ctrl+Esc)</option>
+                <option value="TaskView">Task View (Win+Tab)</option>
+                <option value="ShowDesktop">Show Desktop (Win+D)</option>
+                <option value="ScreenOcr">Instant Screen OCR</option>
+                <option value="ColorPicker">Color Picker</option>
+                <option value="ActionCenter">Action Center (Win+A)</option>
+                <option value="LockWorkstation">Lock Workstation</option>
+                <option value="MuteVolume">Toggle Mute Audio</option>
+                <option value="none">Disabled</option>
+              </select>
+            </div>
+
+            <div class="hc-corner-slot hc-bottom-right">
+              <div class="hc-slot-tag">BOTTOM RIGHT</div>
+              <select class="hc-select" id="hcSelectBottomRight">
+                <option value="ShowDesktop">Show Desktop (Win+D)</option>
+                <option value="TaskView">Task View (Win+Tab)</option>
+                <option value="ActionCenter">Action Center (Win+A)</option>
+                <option value="ScreenOcr">Instant Screen OCR</option>
+                <option value="ColorPicker">Color Picker</option>
+                <option value="LockWorkstation">Lock Workstation</option>
+                <option value="MuteVolume">Toggle Mute Audio</option>
+                <option value="StartMenu">Start Menu</option>
+                <option value="none">Disabled</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Mouse Gestures -->
+        <div class="mg-column">
+          <div class="mg-column-header">
+            <div class="mg-header-meta">
+              <div class="mg-icon-circle">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="5" y="2" width="14" height="20" rx="7"></rect>
+                  <line x1="12" y1="6" x2="12" y2="10"></line>
+                  <path d="M12 2v4"></path>
+                </svg>
+              </div>
+              <div class="mg-title-group">
+                <h3 class="mg-col-title">Mouse Stroke Gestures</h3>
+                <span class="mg-col-subtitle">Hold trigger button and swipe mouse to execute actions</span>
+              </div>
+            </div>
+            <div class="toggle-wrapper" title="Enable / Disable Mouse Gestures">
+              <input class="toggle-checkbox" type="checkbox" id="mgMasterSwitch" checked>
+              <div class="toggle-container">
+                <div class="toggle-button"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Gesture Trigger & Timeout Settings Subcard -->
+          <div class="mg-config-subcard">
+            <div class="mg-field-row">
+              <span class="mg-field-lbl">Gesture Trigger Button:</span>
+              <select class="hc-select mg-trigger-select" id="mgTriggerSelect">
+                <option value="RButton">Right Mouse Button (Hold & Swipe)</option>
+                <option value="MButton">Middle Mouse Button</option>
+                <option value="XButton1">Mouse Side Button 4 (Back)</option>
+                <option value="XButton2">Mouse Side Button 5 (Forward)</option>
+              </select>
+            </div>
+
+            <!-- Duration Customization Slider (Gesture Timeout) -->
+            <div class="mg-slider-card inline">
+              <div class="mg-slider-header">
+                <span class="mg-slider-label">Gesture Duration Limit:</span>
+                <span class="mg-slider-val" id="mgTimeoutVal">700 ms</span>
+              </div>
+              <div class="mg-slider-row">
+                <span class="slider-min-lbl">Quick (200ms)</span>
+                <div class="neumorphic-slider-container" style="flex: 1;">
+                  <input type="range" class="neumorphic-slider mg-slider" id="mgTimeoutSlider" min="200" max="1500"
+                    step="50" value="700">
+                </div>
+                <span class="slider-max-lbl">Extended (1.5s)</span>
+              </div>
+            </div>
+
+            <!-- Distance Threshold Slider -->
+            <div class="mg-slider-card inline">
+              <div class="mg-slider-header">
+                <span class="mg-slider-label">Min Stroke Distance:</span>
+                <span class="mg-slider-val" id="mgThresholdVal">45 px</span>
+              </div>
+              <div class="mg-slider-row">
+                <span class="slider-min-lbl">Short (20px)</span>
+                <div class="neumorphic-slider-container" style="flex: 1;">
+                  <input type="range" class="neumorphic-slider mg-slider" id="mgThresholdSlider" min="20" max="120"
+                    step="5" value="45">
+                </div>
+                <span class="slider-max-lbl">Long (120px)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Gesture Direction Action Cards -->
+          <div class="mg-gestures-grid">
+            <!-- Swipe Left -->
+            <div class="mg-gesture-card">
+              <div class="mg-gesture-dir">
+                <span class="mg-arrow-icon">←</span>
+                <div class="mg-gesture-name">Swipe Left</div>
+              </div>
+              <select class="hc-select mg-action-select" id="mgActionLeft">
+                <option value="Back">Browser Back (Alt+Left)</option>
+                <option value="Forward">Browser Forward (Alt+Right)</option>
+                <option value="CloseTab">Close Tab (Ctrl+W)</option>
+                <option value="NewTab">New Tab (Ctrl+T)</option>
+                <option value="MinimizeWindow">Minimize Window</option>
+                <option value="MaximizeWindow">Maximize Window</option>
+                <option value="CloseWindow">Close Window (Alt+F4)</option>
+                <option value="ShowDesktop">Show Desktop</option>
+                <option value="none">Disabled</option>
+              </select>
+            </div>
+
+            <!-- Swipe Right -->
+            <div class="mg-gesture-card">
+              <div class="mg-gesture-dir">
+                <span class="mg-arrow-icon">→</span>
+                <div class="mg-gesture-name">Swipe Right</div>
+              </div>
+              <select class="hc-select mg-action-select" id="mgActionRight">
+                <option value="Forward">Browser Forward (Alt+Right)</option>
+                <option value="Back">Browser Back (Alt+Left)</option>
+                <option value="CloseTab">Close Tab (Ctrl+W)</option>
+                <option value="NewTab">New Tab (Ctrl+T)</option>
+                <option value="MinimizeWindow">Minimize Window</option>
+                <option value="MaximizeWindow">Maximize Window</option>
+                <option value="CloseWindow">Close Window (Alt+F4)</option>
+                <option value="ShowDesktop">Show Desktop</option>
+                <option value="none">Disabled</option>
+              </select>
+            </div>
+
+            <!-- Swipe Up -->
+            <div class="mg-gesture-card">
+              <div class="mg-gesture-dir">
+                <span class="mg-arrow-icon">↑</span>
+                <div class="mg-gesture-name">Swipe Up</div>
+              </div>
+              <select class="hc-select mg-action-select" id="mgActionUp">
+                <option value="MaximizeWindow">Maximize Window</option>
+                <option value="ScrollTop">Scroll to Top</option>
+                <option value="NewTab">New Tab (Ctrl+T)</option>
+                <option value="Back">Browser Back</option>
+                <option value="Forward">Browser Forward</option>
+                <option value="CloseTab">Close Tab (Ctrl+W)</option>
+                <option value="MinimizeWindow">Minimize Window</option>
+                <option value="CloseWindow">Close Window</option>
+                <option value="ShowDesktop">Show Desktop</option>
+                <option value="none">Disabled</option>
+              </select>
+            </div>
+
+            <!-- Swipe Down -->
+            <div class="mg-gesture-card">
+              <div class="mg-gesture-dir">
+                <span class="mg-arrow-icon">↓</span>
+                <div class="mg-gesture-name">Swipe Down</div>
+              </div>
+              <select class="hc-select mg-action-select" id="mgActionDown">
+                <option value="MinimizeWindow">Minimize Window</option>
+                <option value="ScrollBottom">Scroll to Bottom</option>
+                <option value="CloseTab">Close Tab (Ctrl+W)</option>
+                <option value="MaximizeWindow">Maximize Window</option>
+                <option value="NewTab">New Tab</option>
+                <option value="Back">Browser Back</option>
+                <option value="Forward">Browser Forward</option>
+                <option value="CloseWindow">Close Window</option>
+                <option value="ShowDesktop">Show Desktop</option>
+                <option value="none">Disabled</option>
+              </select>
+            </div>
+
+            <!-- Swipe Down-Right -->
+            <div class="mg-gesture-card">
+              <div class="mg-gesture-dir">
+                <span class="mg-arrow-icon">↳</span>
+                <div class="mg-gesture-name">Swipe Down-Right</div>
+              </div>
+              <select class="hc-select mg-action-select" id="mgActionDownRight">
+                <option value="CloseWindow">Close Window (Alt+F4)</option>
+                <option value="CloseTab">Close Tab (Ctrl+W)</option>
+                <option value="ShowDesktop">Show Desktop (Win+D)</option>
+                <option value="MinimizeWindow">Minimize Window</option>
+                <option value="MaximizeWindow">Maximize Window</option>
+                <option value="none">Disabled</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+           RADIAL MENU / COMMAND PALETTE (PIE WHEEL) PANEL
+           ==================================================================== -->
+    <section class="module-panel" id="panel-radialMenu">
+      <div class="mg-container">
+        <!-- Left Column: Interactive Neumorphic Pie Wheel Mockup -->
+        <div class="mg-column">
+          <div class="mg-column-header">
+            <div class="mg-header-meta">
+              <div class="mg-icon-circle">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <path d="m4.93 4.93 4.24 4.24"></path>
+                  <path d="m14.83 9.17 4.24-4.24"></path>
+                  <path d="m14.83 14.83 4.24 4.24"></path>
+                  <path d="m9.17 14.83-4.24 4.24"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </div>
+              <div class="mg-title-group">
+                <h3 class="mg-col-title">Radial Menu (Pie Wheel)</h3>
+                <span class="mg-col-subtitle">Circular popup wheel centered on mouse cursor</span>
+              </div>
+            </div>
+            <div class="toggle-wrapper" title="Enable / Disable Radial Menu">
+              <input class="toggle-checkbox" type="checkbox" id="rmMasterSwitch" checked>
+              <div class="toggle-container">
+                <div class="toggle-button"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tactile Neumorphic Pie Wheel Preview Canvas -->
+          <div class="rm-canvas-card">
+            <div class="rm-wheel-container" id="rmWheelPreview">
+              <!-- Center Hub -->
+              <div class="rm-center-hub" id="rmCenterHub">
+                <svg class="rm-hub-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="9"></circle>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                <span class="rm-hub-title" id="rmHubTitle">HOVER SLICE</span>
+              </div>
+
+              <!-- 8 Radial Slices around the perimeter -->
+              <div class="rm-slice-node rm-pos-n" data-slice="0" title="Slice 1: North">
+                <span class="rm-slice-tag">N</span>
+                <span class="rm-slice-lbl" id="rmSliceLbl0">OCR</span>
+              </div>
+              <div class="rm-slice-node rm-pos-ne" data-slice="1" title="Slice 2: North-East">
+                <span class="rm-slice-tag">NE</span>
+                <span class="rm-slice-lbl" id="rmSliceLbl1">Next Desk</span>
+              </div>
+              <div class="rm-slice-node rm-pos-e" data-slice="2" title="Slice 3: East">
+                <span class="rm-slice-tag">E</span>
+                <span class="rm-slice-lbl" id="rmSliceLbl2">Color Pick</span>
+              </div>
+              <div class="rm-slice-node rm-pos-se" data-slice="3" title="Slice 4: South-East">
+                <span class="rm-slice-tag">SE</span>
+                <span class="rm-slice-lbl" id="rmSliceLbl3">Always On</span>
+              </div>
+              <div class="rm-slice-node rm-pos-s" data-slice="4" title="Slice 5: South">
+                <span class="rm-slice-tag">S</span>
+                <span class="rm-slice-lbl" id="rmSliceLbl4">Mute Audio</span>
+              </div>
+              <div class="rm-slice-node rm-pos-sw" data-slice="5" title="Slice 6: South-West">
+                <span class="rm-slice-tag">SW</span>
+                <span class="rm-slice-lbl" id="rmSliceLbl5">Clean Text</span>
+              </div>
+              <div class="rm-slice-node rm-pos-w" data-slice="6" title="Slice 7: West">
+                <span class="rm-slice-tag">W</span>
+                <span class="rm-slice-lbl" id="rmSliceLbl6">Prev Desk</span>
+              </div>
+              <div class="rm-slice-node rm-pos-nw" data-slice="7" title="Slice 8: North-West">
+                <span class="rm-slice-tag">NW</span>
+                <span class="rm-slice-lbl" id="rmSliceLbl7">Task View</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Controls & 8 Slice Configurations -->
+        <div class="mg-column">
+          <div class="mg-column-header">
+            <div class="mg-header-meta">
+              <div class="mg-icon-circle">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <circle cx="12" cy="12" r="3"></circle>
                   <path
                     d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
                   </path>
                 </svg>
-              </button>
-              <button class="squircle-btn lgs-mini-btn btn-danger-profile" id="btnDeleteProfile" title="Delete Profile">
-                <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="3 6 5 6 21 6"></polyline>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                </svg>
-              </button>
+              </div>
+              <div class="mg-title-group">
+                <h3 class="mg-col-title">Trigger & Slice Setup</h3>
+                <span class="mg-col-subtitle">Customize wheel size and assigned slice actions</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Activation Config Subcard -->
+          <div class="mg-config-subcard">
+            <div class="mg-field-row">
+              <span class="mg-field-lbl">Activation Trigger:</span>
+              <select class="hc-select mg-trigger-select" id="rmTriggerSelect">
+                <option value="MButton">Middle Mouse Button (Hold & Release)</option>
+                <option value="XButton1">Mouse Side Button 4 (Back)</option>
+                <option value="XButton2">Mouse Side Button 5 (Forward)</option>
+                <option value="CapsLock">Caps Lock Key</option>
+                <option value="^SPACE">Ctrl + Space</option>
+                <option value="#z">Win + Z</option>
+              </select>
+            </div>
+
+            <!-- Wheel Radius Slider -->
+            <div class="mg-slider-card inline">
+              <div class="mg-slider-header">
+                <span class="mg-slider-label">Wheel Diameter:</span>
+                <span class="mg-slider-val" id="rmRadiusVal">190 px</span>
+              </div>
+              <div class="mg-slider-row">
+                <span class="slider-min-lbl">Compact (140px)</span>
+                <div class="neumorphic-slider-container" style="flex: 1;">
+                  <input type="range" class="neumorphic-slider mg-slider" id="rmRadiusSlider" min="140" max="260"
+                    step="10" value="190">
+                </div>
+                <span class="slider-max-lbl">Spacious (260px)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 8 Slices Configurations Grid -->
+          <div class="mg-gestures-grid">
+            <!-- Slice 0: North -->
+            <div class="mg-gesture-card">
+              <div class="mg-gesture-dir">
+                <span class="mg-arrow-icon">↑</span>
+                <div class="mg-gesture-name">Slice 1 (North)</div>
+              </div>
+              <select class="hc-select mg-action-select rm-slice-select" id="rmAction0" data-slice="0">
+                <option value="ScreenOcr">Instant Screen OCR (Text Grabber)</option>
+                <option value="ColorPicker">Precision Color Picker</option>
+                <option value="NextDesktop">Next Virtual Desktop</option>
+                <option value="PrevDesktop">Previous Virtual Desktop</option>
+                <option value="TaskView">Task View (Win+Tab)</option>
+                <option value="ShowDesktop">Show Desktop (Win+D)</option>
+                <option value="AlwaysOnTop">Toggle Always-on-Top</option>
+                <option value="GhostMode">Toggle Ghost Click-Through</option>
+                <option value="MuteVolume">Toggle Audio Mute</option>
+                <option value="Calculator">Launch Calculator</option>
+                <option value="CleanText">Clean Plain Text</option>
+                <option value="Screenshot">Screen Snip</option>
+                <option value="none">Disabled</option>
+              </select>
+            </div>
+
+            <!-- Slice 1: North-East -->
+            <div class="mg-gesture-card">
+              <div class="mg-gesture-dir">
+                <span class="mg-arrow-icon">↗</span>
+                <div class="mg-gesture-name">Slice 2 (North-East)</div>
+              </div>
+              <select class="hc-select mg-action-select rm-slice-select" id="rmAction1" data-slice="1">
+                <option value="NextDesktop">Next Virtual Desktop</option>
+                <option value="ScreenOcr">Instant Screen OCR</option>
+                <option value="ColorPicker">Precision Color Picker</option>
+                <option value="PrevDesktop">Previous Virtual Desktop</option>
+                <option value="TaskView">Task View</option>
+                <option value="ShowDesktop">Show Desktop</option>
+                <option value="AlwaysOnTop">Toggle Always-on-Top</option>
+                <option value="GhostMode">Toggle Ghost Click-Through</option>
+                <option value="MuteVolume">Toggle Audio Mute</option>
+                <option value="Calculator">Launch Calculator</option>
+                <option value="CleanText">Clean Plain Text</option>
+                <option value="Screenshot">Screen Snip</option>
+                <option value="none">Disabled</option>
+              </select>
+            </div>
+
+            <!-- Slice 2: East -->
+            <div class="mg-gesture-card">
+              <div class="mg-gesture-dir">
+                <span class="mg-arrow-icon">→</span>
+                <div class="mg-gesture-name">Slice 3 (East)</div>
+              </div>
+              <select class="hc-select mg-action-select rm-slice-select" id="rmAction2" data-slice="2">
+                <option value="ColorPicker">Precision Color Picker</option>
+                <option value="ScreenOcr">Instant Screen OCR</option>
+                <option value="NextDesktop">Next Virtual Desktop</option>
+                <option value="PrevDesktop">Previous Virtual Desktop</option>
+                <option value="TaskView">Task View</option>
+                <option value="ShowDesktop">Show Desktop</option>
+                <option value="AlwaysOnTop">Toggle Always-on-Top</option>
+                <option value="GhostMode">Toggle Ghost Click-Through</option>
+                <option value="MuteVolume">Toggle Audio Mute</option>
+                <option value="Calculator">Launch Calculator</option>
+                <option value="CleanText">Clean Plain Text</option>
+                <option value="Screenshot">Screen Snip</option>
+                <option value="none">Disabled</option>
+              </select>
+            </div>
+
+            <!-- Slice 3: South-East -->
+            <div class="mg-gesture-card">
+              <div class="mg-gesture-dir">
+                <span class="mg-arrow-icon">↘</span>
+                <div class="mg-gesture-name">Slice 4 (South-East)</div>
+              </div>
+              <select class="hc-select mg-action-select rm-slice-select" id="rmAction3" data-slice="3">
+                <option value="AlwaysOnTop">Toggle Always-on-Top</option>
+                <option value="ScreenOcr">Instant Screen OCR</option>
+                <option value="ColorPicker">Precision Color Picker</option>
+                <option value="NextDesktop">Next Virtual Desktop</option>
+                <option value="PrevDesktop">Previous Virtual Desktop</option>
+                <option value="TaskView">Task View</option>
+                <option value="ShowDesktop">Show Desktop</option>
+                <option value="GhostMode">Toggle Ghost Click-Through</option>
+                <option value="MuteVolume">Toggle Audio Mute</option>
+                <option value="Calculator">Launch Calculator</option>
+                <option value="CleanText">Clean Plain Text</option>
+                <option value="Screenshot">Screen Snip</option>
+                <option value="none">Disabled</option>
+              </select>
+            </div>
+
+            <!-- Slice 4: South -->
+            <div class="mg-gesture-card">
+              <div class="mg-gesture-dir">
+                <span class="mg-arrow-icon">↓</span>
+                <div class="mg-gesture-name">Slice 5 (South)</div>
+              </div>
+              <select class="hc-select mg-action-select rm-slice-select" id="rmAction4" data-slice="4">
+                <option value="MuteVolume">Toggle Audio Mute</option>
+                <option value="ScreenOcr">Instant Screen OCR</option>
+                <option value="ColorPicker">Precision Color Picker</option>
+                <option value="NextDesktop">Next Virtual Desktop</option>
+                <option value="PrevDesktop">Previous Virtual Desktop</option>
+                <option value="TaskView">Task View</option>
+                <option value="ShowDesktop">Show Desktop</option>
+                <option value="AlwaysOnTop">Toggle Always-on-Top</option>
+                <option value="GhostMode">Toggle Ghost Click-Through</option>
+                <option value="Calculator">Launch Calculator</option>
+                <option value="CleanText">Clean Plain Text</option>
+                <option value="Screenshot">Screen Snip</option>
+                <option value="none">Disabled</option>
+              </select>
+            </div>
+
+            <!-- Slice 5: South-West -->
+            <div class="mg-gesture-card">
+              <div class="mg-gesture-dir">
+                <span class="mg-arrow-icon">↙</span>
+                <div class="mg-gesture-name">Slice 6 (South-West)</div>
+              </div>
+              <select class="hc-select mg-action-select rm-slice-select" id="rmAction5" data-slice="5">
+                <option value="CleanText">Clean Plain Text</option>
+                <option value="ScreenOcr">Instant Screen OCR</option>
+                <option value="ColorPicker">Precision Color Picker</option>
+                <option value="NextDesktop">Next Virtual Desktop</option>
+                <option value="PrevDesktop">Previous Virtual Desktop</option>
+                <option value="TaskView">Task View</option>
+                <option value="ShowDesktop">Show Desktop</option>
+                <option value="AlwaysOnTop">Toggle Always-on-Top</option>
+                <option value="GhostMode">Toggle Ghost Click-Through</option>
+                <option value="MuteVolume">Toggle Audio Mute</option>
+                <option value="Calculator">Launch Calculator</option>
+                <option value="Screenshot">Screen Snip</option>
+                <option value="none">Disabled</option>
+              </select>
+            </div>
+
+            <!-- Slice 6: West -->
+            <div class="mg-gesture-card">
+              <div class="mg-gesture-dir">
+                <span class="mg-arrow-icon">←</span>
+                <div class="mg-gesture-name">Slice 7 (West)</div>
+              </div>
+              <select class="hc-select mg-action-select rm-slice-select" id="rmAction6" data-slice="6">
+                <option value="PrevDesktop">Previous Virtual Desktop</option>
+                <option value="NextDesktop">Next Virtual Desktop</option>
+                <option value="ScreenOcr">Instant Screen OCR</option>
+                <option value="ColorPicker">Precision Color Picker</option>
+                <option value="TaskView">Task View</option>
+                <option value="ShowDesktop">Show Desktop</option>
+                <option value="AlwaysOnTop">Toggle Always-on-Top</option>
+                <option value="GhostMode">Toggle Ghost Click-Through</option>
+                <option value="MuteVolume">Toggle Audio Mute</option>
+                <option value="Calculator">Launch Calculator</option>
+                <option value="CleanText">Clean Plain Text</option>
+                <option value="Screenshot">Screen Snip</option>
+                <option value="none">Disabled</option>
+              </select>
+            </div>
+
+            <!-- Slice 7: North-West -->
+            <div class="mg-gesture-card">
+              <div class="mg-gesture-dir">
+                <span class="mg-arrow-icon">↖</span>
+                <div class="mg-gesture-name">Slice 8 (North-West)</div>
+              </div>
+              <select class="hc-select mg-action-select rm-slice-select" id="rmAction7" data-slice="7">
+                <option value="TaskView">Task View (Win+Tab)</option>
+                <option value="ShowDesktop">Show Desktop (Win+D)</option>
+                <option value="ScreenOcr">Instant Screen OCR</option>
+                <option value="ColorPicker">Precision Color Picker</option>
+                <option value="NextDesktop">Next Virtual Desktop</option>
+                <option value="PrevDesktop">Previous Virtual Desktop</option>
+                <option value="AlwaysOnTop">Toggle Always-on-Top</option>
+                <option value="GhostMode">Toggle Ghost Click-Through</option>
+                <option value="MuteVolume">Toggle Audio Mute</option>
+                <option value="Calculator">Launch Calculator</option>
+                <option value="CleanText">Clean Plain Text</option>
+                <option value="Screenshot">Screen Snip</option>
+                <option value="none">Disabled</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+           4. APP LAUNCHER PANEL
+           ==================================================================== -->
+    <section class="module-panel" id="panel-appLauncher">
+      <div class="inputs-section">
+        <!-- Row 1: Trigger Mode & Trigger Key/String Definition -->
+        <div class="inputs-row al-row-trigger">
+          <!-- Trigger Type Selector: Text String vs Button Combination -->
+          <div class="al-type-segmented" id="alTriggerTypeSelector">
+            <button type="button" class="al-type-btn active" id="alTypeString" data-type="string"
+              title="Trigger by typing text (e.g. @calc, @yt)">
+              <svg class="al-type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="4 17 10 11 4 5"></polyline>
+                <line x1="12" y1="19" x2="20" y2="19"></line>
+              </svg>
+              <span>Text</span>
+            </button>
+            <button type="button" class="al-type-btn" id="alTypeHotkey" data-type="hotkey"
+              title="Trigger by pressing a button combination (e.g. Ctrl+Alt+C)">
+              <svg class="al-type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                <path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M7 16h10"></path>
+              </svg>
+              <span>Shortcut</span>
+            </button>
+          </div>
+
+          <div class="inset-input-box trigger-box al-trigger-box" id="alTriggerBox">
+            <svg class="input-icon-svg" id="alTriggerIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2">
+              <polyline points="4 17 10 11 4 5"></polyline>
+              <line x1="12" y1="19" x2="20" y2="19"></line>
+            </svg>
+            <input type="text" id="alInputTrigger" placeholder="Trigger (e.g. @calc, @yt, @work)" autocomplete="off"
+              spellcheck="false" />
+          </div>
+        </div>
+
+        <!-- Row 2: Target App Path/URL + Browse, Friendly Name, and ADD/SAVE Action -->
+        <div class="inputs-row al-row-target">
+          <div class="inset-input-box output-box al-output-box" id="alOutputBox">
+            <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+            <input type="text" id="alInputTarget" placeholder="Target app path, URL, or command..." autocomplete="off"
+              spellcheck="false" />
+            <button type="button" class="btn-input-browse" id="alBtnBrowse"
+              title="Browse for application or file (.exe, .lnk, etc.)">
+              <svg class="browse-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+              </svg>
+              <span>Browse</span>
+            </button>
+          </div>
+
+          <div class="inset-input-box label-box al-label-box">
+            <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+              <line x1="7" y1="7" x2="7.01" y2="7"></line>
+            </svg>
+            <input type="text" id="alInputName" placeholder="Name (optional)..." autocomplete="off"
+              spellcheck="false" />
+          </div>
+
+          <button class="neumorphic-btn btn-go al-btn-submit" id="alBtnSubmit">
+            <span id="alBtnSubmitText">ADD</span>
+          </button>
+        </div>
+
+        <div class="input-hints">
+          <span class="hint-tag" id="alHintTag">Typing trigger anywhere opens apps, websites, or commands
+            instantly</span>
+        </div>
+      </div>
+
+      <div class="list-section">
+        <div class="list-header">
+          <span class="section-label">Configured Launchers</span>
+        </div>
+        <div class="shortcuts-list" id="alLaunchersContainer"></div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+           5. AUTO CLICKER PANEL
+           ==================================================================== -->
+    <section class="module-panel" id="panel-autoClicker">
+      <div class="ac-container">
+        <div class="ac-settings-grid">
+          <!-- Mouse Button -->
+          <div class="ac-setting-card">
+            <span class="setting-title">Mouse Button</span>
+            <div class="ac-pill-selector" id="acButtonSelector">
+              <button class="ac-pill-btn active" data-val="Left">Left</button>
+              <button class="ac-pill-btn" data-val="Right">Right</button>
+              <button class="ac-pill-btn" data-val="Middle">Middle</button>
+            </div>
+          </div>
+
+          <!-- Click Type -->
+          <div class="ac-setting-card">
+            <span class="setting-title">Click Type</span>
+            <div class="ac-pill-selector" id="acTypeSelector">
+              <button class="ac-pill-btn active" data-val="Single">Single</button>
+              <button class="ac-pill-btn" data-val="Double">Double</button>
+            </div>
+          </div>
+
+          <!-- Toggle Hotkey -->
+          <div class="ac-setting-card">
+            <span class="setting-title">Global Hotkey</span>
+            <div class="ac-hotkey-display" title="Press this key anywhere to toggle auto-clicking">
+              <svg class="hotkey-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+              </svg>
+              <span id="acHotkeyLabel">F8</span>
             </div>
           </div>
         </div>
 
-        <!-- Fixed Default Profile Slot -->
-        <div class="lgs-default-profile-slot" id="lgsDefaultProfileSlot"></div>
-
-        <!-- Vertical Divider Separator -->
-        <div class="lgs-profile-separator" id="lgsProfileSeparator" aria-hidden="true"></div>
-
-        <!-- Center/Right: App Profiles Carousel / Strip -->
-        <div class="lgs-carousel-wrap">
-          <button class="lgs-scroll-btn left" id="btnScrollProfilesLeft" title="Scroll Left">‹</button>
-          <div class="lgs-profiles-track" id="lgsProfilesTrack">
-            <div class="lgs-profiles-glider" id="lgsProfilesGlider"></div>
-            <!-- Dynamic profile cards injected here -->
+        <!-- CPS Speed Slider (from reference image) -->
+        <div class="slider-module-card">
+          <div class="slider-header">
+            <span class="section-label">Click Speed (Clicks Per Second)</span>
+            <span class="slider-value-badge" id="acCpsValue">20 CPS</span>
           </div>
-          <button class="lgs-scroll-btn right" id="btnScrollProfilesRight" title="Scroll Right">›</button>
+          <div class="neumorphic-slider-container">
+            <input type="range" id="acCpsSlider" min="1" max="60" value="20" class="neumorphic-slider" />
+          </div>
+          <div class="cps-quick-row">
+            <span class="hint-tag">1 CPS (Slow)</span>
+            <span class="hint-tag">20 CPS</span>
+            <span class="hint-tag">60 CPS (Max Speed)</span>
+          </div>
         </div>
 
-        <!-- Hidden select for backward compatibility -->
-        <select id="profileSelect" style="display:none;"></select>
+        <!-- Live Arm & Status Button -->
+        <div class="ac-action-row">
+          <button class="neumorphic-btn ac-toggle-btn" id="acToggleBtn">
+            <span id="acToggleBtnText">START (F8)</span>
+          </button>
+          <span class="hint-tag" id="acStatusHint">Ready - Press F8 anywhere in Windows to start or stop
+            clicking</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+           6. MACRO RECORDER PANEL (Sequencer, Live Keystroke & Click Recording)
+           ==================================================================== -->
+    <section class="module-panel" id="panel-macroRecorder">
+      <div class="inputs-section">
+        <!-- Top Row: Configuration -->
+        <div class="inputs-row macro-config-row">
+          <!-- Macro Name -->
+          <div class="inset-input-box macro-name-box">
+            <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+              <line x1="7" y1="7" x2="7.01" y2="7"></line>
+            </svg>
+            <input type="text" id="macroInputName" placeholder="Macro Name (e.g. Fast Combo)" autocomplete="off"
+              spellcheck="false" />
+          </div>
+
+          <!-- Trigger Hotkey Box -->
+          <div class="inset-input-box key-combo-box macro-trigger-box" id="macroTriggerBox"
+            title="Click to record trigger hotkey">
+            <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+              <path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M7 16h10"></path>
+            </svg>
+            <input type="text" id="macroInputTrigger" class="key-combo-input" placeholder="Trigger (e.g. F9)..."
+              readonly autocomplete="off" spellcheck="false" />
+            <button type="button" class="btn-combo-clear hidden-field" id="macroBtnClearTrigger"
+              title="Clear">&times;</button>
+          </div>
+
+          <!-- Playback Mode Segmented Pill -->
+          <div class="macro-mode-segmented" id="macroModeSelector" title="Macro Playback Mode">
+            <button type="button" class="macro-mode-btn active" data-mode="NoRepeat"
+              title="Play sequence once on press">Once</button>
+            <button type="button" class="macro-mode-btn" data-mode="RepeatWhileHolding"
+              title="Loop sequence while hotkey is held">Hold</button>
+            <button type="button" class="macro-mode-btn" data-mode="Toggle"
+              title="Press to start loop, press again to stop">Toggle</button>
+          </div>
+
+          <!-- Repeat Interval (for Hold / Toggle) -->
+          <div class="inset-input-box macro-interval-box is-hidden" id="macroIntervalBox"
+            title="Repeat delay between loops (ms)">
+            <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <input type="number" id="macroInputInterval" value="50" min="5" max="5000" placeholder="50" />
+            <span class="input-unit">ms</span>
+          </div>
+
+          <!-- Save / Add Macro Button -->
+          <button class="neumorphic-btn btn-go" id="macroBtnSubmit" title="Save Macro">
+            <span id="macroBtnSubmitText">ADD</span>
+          </button>
+        </div>
+
+        <!-- Macro Sequencer & Live Capture Deck -->
+        <div class="macro-sequencer-deck">
+          <div class="macro-deck-header">
+            <div class="macro-deck-left">
+              <!-- Tactile Record Button (Fixed Width, No Layout Shift) -->
+              <button type="button" class="btn-record-macro young-frog-record-btn" id="macroBtnRecordToggle"
+                title="Start / Stop Hardware Keystroke Recording">
+                <span class="young-frog-bezel">
+                  <span class="rec-pulse-dot" id="macroRecDot"></span>
+                  <span class="young-frog-text" id="macroBtnRecordText">RECORD</span>
+                </span>
+              </button>
+
+              <!-- Quick Mouse & Delay Injections -->
+              <div class="macro-inject-group">
+                <button type="button" class="macro-inject-btn" id="macroBtnAddLClick" title="Inject Left Mouse Click">
+                  <span>+ Left Click</span>
+                </button>
+                <button type="button" class="macro-inject-btn" id="macroBtnAddRClick" title="Inject Right Mouse Click">
+                  <span>+ Right Click</span>
+                </button>
+                <button type="button" class="macro-inject-btn" id="macroBtnAddMClick" title="Inject Middle Mouse Click">
+                  <span>+ Mid Click</span>
+                </button>
+                <button type="button" class="macro-inject-btn" id="macroBtnAddDelay"
+                  title="Inject Custom Delay (+50ms)">
+                  <span>+ 50ms Delay</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="macro-deck-right">
+              <!-- Standard Delays Toggle -->
+              <label class="macro-delay-toggle"
+                title="Use fixed 50ms delay between steps or record exact real-time timing">
+                <input type="checkbox" id="macroChkStandardDelays" checked />
+                <span class="macro-delay-checkbox"></span>
+                <span class="macro-delay-label">Fixed Delay (50ms)</span>
+              </label>
+
+              <!-- Test Playback Button -->
+              <button type="button" class="neumorphic-btn-pill btn-test-macro" id="macroBtnTestPlay"
+                title="Test Play Current Sequence">
+                <svg class="macro-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+                <span>Test Play</span>
+              </button>
+
+              <!-- Clear Steps Button -->
+              <button type="button" class="neumorphic-btn-pill btn-clear-macro" id="macroBtnClearSteps"
+                title="Clear all recorded steps">
+                <svg class="macro-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+                <span>Clear</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Sequence Flow Timeline Track -->
+          <div class="macro-timeline-track" id="macroTimelineTrack">
+            <div class="macro-timeline-empty" id="macroTimelineEmpty">
+              <span>No sequence steps recorded yet. Click <strong>RECORD</strong> and press any keys, or click the
+                <strong>+ Mouse / Delay</strong> buttons above.</span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="header-right">
-        <button class="squircle-btn" id="btnTheme" title="Customize Theme (Background & Accent)">
-          <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <!-- Saved Macros List -->
+      <div class="list-section">
+        <div class="list-header">
+          <div class="list-header-left">
+            <span class="section-label">Active Recorded Macros</span>
+            <span class="section-count" id="macroCountBadge">0</span>
+          </div>
+          <span class="hint-tag">Press trigger hotkeys anywhere in Windows to execute macros</span>
+        </div>
+        <div class="shortcuts-list" id="macroListContainer"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Window Resize Handles (Full perimeter: 4 edges + 4 corners) -->
+  <div class="resize-handle handle-n" data-direction="n" title="Resize Height"></div>
+  <div class="resize-handle handle-s" data-direction="s" title="Resize Height"></div>
+  <div class="resize-handle handle-e" data-direction="e" title="Resize Width"></div>
+  <div class="resize-handle handle-w" data-direction="w" title="Resize Width"></div>
+  <div class="resize-handle handle-nw" data-direction="nw" title="Resize Window"></div>
+  <div class="resize-handle handle-ne" data-direction="ne" title="Resize Window"></div>
+  <div class="resize-handle handle-sw" data-direction="sw" title="Resize Window"></div>
+  <div class="resize-handle handle-se" data-direction="se" title="Resize Window">
+    <span class="resize-grip-line"></span>
+    <span class="resize-grip-line"></span>
+  </div>
+
+  <!-- Neumorphic Theme Customizer Modal -->
+  <div class="modal-overlay hidden-field" id="themeModal">
+    <div class="modal-card theme-modal-card">
+      <div class="modal-header">
+        <div class="modal-title-row">
+          <svg class="icon-svg" style="color:var(--accent-primary);" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2">
             <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle>
             <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle>
             <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle>
@@ -243,1268 +1854,555 @@
               d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.992 6.012 17.461 2 12 2z">
             </path>
           </svg>
-        </button>
-        <button class="squircle-btn" id="btnRefresh" title="Reload / Re-sync Config">
-          <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"></path>
-          </svg>
-        </button>
-        <button class="squircle-btn" id="btnMinimize" title="Minimize Window">
-          <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
-        </button>
-        <button class="squircle-btn btn-close" id="btnClose" title="Close Window">
+          <h3 class="modal-title">Theme & Appearance</h3>
+        </div>
+        <button class="squircle-btn btn-mini" id="btnCloseThemeModal" title="Close Theme Settings">
           <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
         </button>
       </div>
-    </header>
 
-    <!-- Script Type / Feature Tabs Bar (Segmented Control from image) -->
-    <div class="segmented-control-wrapper">
-      <div class="segmented-control" id="segmentedBar">
-        <div class="segmented-glider" id="segmentedGlider"></div>
-        <button class="segment-btn active" data-tab="textExpander">
-          <svg class="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M17 5H3"></path>
-            <path d="M21 12H8"></path>
-            <path d="M21 19H8"></path>
-            <path d="M3 12v7"></path>
-          </svg>
-          <span class="tab-label">Text Expander</span>
-        </button>
-        <button class="segment-btn" data-tab="keyRemapper">
-          <svg class="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="4" width="20" height="16" rx="2"></rect>
-            <path d="M10 8h.01"></path>
-            <path d="M12 12h.01"></path>
-            <path d="M14 8h.01"></path>
-            <path d="M16 12h.01"></path>
-            <path d="M18 8h.01"></path>
-            <path d="M6 8h.01"></path>
-            <path d="M7 16h10"></path>
-            <path d="M8 12h.01"></path>
-          </svg>
-          <span class="tab-label">Key Remapper</span>
-        </button>
-        <button class="segment-btn" data-tab="windowManager">
-          <svg class="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="4" width="20" height="16" rx="2"></rect>
-            <path d="M10 4v4"></path>
-            <path d="M2 8h20"></path>
-            <path d="M6 4v4"></path>
-          </svg>
-          <span class="tab-label">Window Manager</span>
-        </button>
-        <button class="segment-btn" data-tab="appLauncher">
-          <svg class="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path>
-            <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09"></path>
-            <path d="M9 12a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.4 22.4 0 0 1-4 2z"></path>
-            <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 .05 5 .05"></path>
-          </svg>
-          <span class="tab-label">App Launcher</span>
-        </button>
-        <button class="segment-btn" data-tab="autoClicker">
-          <svg class="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 4.1 12 6"></path>
-            <path d="m5.1 8-2.9-.8"></path>
-            <path d="m6 12-1.9 2"></path>
-            <path d="M7.2 2.2 8 5.1"></path>
-            <path
-              d="M9.037 9.69a.498.498 0 0 1 .653-.653l11 4.5a.5.5 0 0 1-.074.949l-4.349 1.041a1 1 0 0 0-.74.739l-1.04 4.35a.5.5 0 0 1-.95.074z">
-            </path>
-          </svg>
-          <span class="tab-label">Auto Clicker</span>
-        </button>
-        <button class="segment-btn" data-tab="macroRecorder">
-          <svg class="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <circle cx="12" cy="12" r="3.5" fill="currentColor"></circle>
-          </svg>
-          <span class="tab-label">Macro Recorder</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- Main Module Panels Container with Smooth Overflow -->
-    <main class="modules-container">
-
-      <!-- ====================================================================
-           1. TEXT EXPANDER PANEL (with Multiline Expansion)
-           ==================================================================== -->
-      <section class="module-panel active" id="panel-textExpander">
-        <div class="inputs-section">
-          <div class="inputs-row">
-            <div class="inset-input-box trigger-box">
-              <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+      <div class="theme-modal-body">
+        <!-- Theme Presets Section -->
+        <div class="theme-section">
+          <div class="theme-swatches-grid" id="bgSwatchesGrid">
+            <button class="theme-swatch-chip theme-card-chip active" data-preset="custom-default" data-color="#e8dfd5"
+              title="Warm Clay (Default) (Balanced warm clay with warm amber accent)" aria-label="Warm Clay (Default)"
+              style="background-color: #e8dfd5; border-color: #d97706; color: #d97706; border-radius: 5px; box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.08), -2px -2px 6px rgba(255, 255, 255, 0.8);">
+              <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
               </svg>
-              <input type="text" id="teInputTrigger" placeholder="Trigger (e.g. @@1, @@sig)" autocomplete="off"
-                spellcheck="false" />
-            </div>
-
-            <!-- Single or Multiline Output Field -->
-            <div class="inset-input-box output-box" id="teOutputContainer">
-              <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-                <line x1="16" y1="13" x2="8" y2="13"></line>
-                <line x1="16" y1="17" x2="8" y2="17"></line>
-              </svg>
-              <input type="text" id="teInputOutput" placeholder="Replacement text or snippet..." autocomplete="off"
-                spellcheck="false" />
-              <textarea id="teTextareaOutput" class="hidden-field"
-                placeholder="Type multiline snippet / signature..."></textarea>
-            </div>
-
-            <!-- Multiline Toggle Pill -->
-            <button class="neumorphic-toggle-pill" id="teToggleMultiline" title="Toggle Single-line / Multiline">
-              <svg class="toggle-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="21" y1="6" x2="3" y2="6"></line>
-                <line x1="15" y1="12" x2="3" y2="12"></line>
-                <line x1="17" y1="18" x2="3" y2="18"></line>
-              </svg>
-              <span>Multiline</span>
             </button>
-
-            <!-- Neumorphic GO Button -->
-            <button class="neumorphic-btn btn-go" id="teBtnSubmit">
-              <span id="teBtnSubmitText">GO</span>
+            <button class="theme-swatch-chip theme-card-chip" data-preset="brutalist-amber" data-color="#f59e0b"
+              title="Brutalist Amber (Vivid amber pop with zero blur hard-edge comic shadows and chiseled edges)"
+              aria-label="Brutalist Amber"
+              style="background-color: #f59e0b; border-color: #1e1b4b; color: #1e1b4b; border-radius: 2px; box-shadow: 5px 5px 0px rgba(0, 0, 0, 0.55), -5px -5px 0px rgba(255, 255, 255, 0.65);">
+              <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </button>
+            <button class="theme-swatch-chip theme-card-chip" data-preset="marshmallow-indigo" data-color="#4f46e5"
+              title="Marshmallow Indigo (Electric indigo with soft lemon cream in an ultra-pill marshmallow 3D cloud)"
+              aria-label="Marshmallow Indigo"
+              style="background-color: #4f46e5; border-color: #fde047; color: #fde047; border-radius: 42px; box-shadow: 6px 6px 18px rgba(0, 0, 0, 0.53), -6px -6px 18px rgba(255, 255, 255, 0.44);">
+              <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </button>
+            <button class="theme-swatch-chip theme-card-chip" data-preset="porcelain-ceramic" data-color="#f1f5f9"
+              title="Porcelain Ceramic (High-key sculpted slate white ceramic with royal sapphire blue and specular glow)"
+              aria-label="Porcelain Ceramic"
+              style="background-color: #f1f5f9; border-color: #2563eb; color: #2563eb; border-radius: 28px; box-shadow: 5px 5px 16px rgba(0, 0, 0, 0.22), -5px -5px 16px rgba(255, 255, 255, 0.65);">
+              <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </button>
+            <button class="theme-swatch-chip theme-card-chip" data-preset="solar-tangerine" data-color="#ea580c"
+              title="Solar Tangerine (Punchy fire tangerine orange clay with radiant sunbeam cream highlights)"
+              aria-label="Solar Tangerine"
+              style="background-color: #ea580c; border-color: #fef08a; color: #fef08a; border-radius: 34px; box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.46), -4px -4px 12px rgba(255, 255, 255, 0.42);">
+              <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </button>
+            <button class="theme-swatch-chip theme-card-chip" data-preset="matrix-terminal" data-color="#052e16"
+              title="Matrix CRT (Deep phosphor CRT green terminal with crisp sunken bevel and phosphor laser text)"
+              aria-label="Matrix CRT"
+              style="background-color: #052e16; border-color: #22c55e; color: #22c55e; border-radius: 4px; box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.55), -2px -2px 2px rgba(255, 255, 255, 0.44);">
+              <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </button>
+            <button class="theme-swatch-chip theme-card-chip" data-preset="cyber-cyan" data-color="#0891b2"
+              title="Cyber Cyan (Vivid Mediterranean electric cyan clay with high-saturation lemon triggers)"
+              aria-label="Cyber Cyan"
+              style="background-color: #0891b2; border-color: #fef08a; color: #fef08a; border-radius: 18px; box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.35), -3px -3px 6px rgba(255, 255, 255, 0.39);">
+              <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </button>
+            <button class="theme-swatch-chip theme-card-chip" data-preset="brutalist-concrete" data-color="#78716c"
+              title="Brutalist Concrete (Raw architectural concrete stone with safety orange and 1px hard-relief shadow)"
+              aria-label="Brutalist Concrete"
+              style="background-color: #78716c; border-color: #f97316; color: #f97316; border-radius: 3px; box-shadow: 4px 4px 1px rgba(0, 0, 0, 0.55), -4px -4px 1px rgba(255, 255, 255, 0.55);">
+              <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </button>
+            <button class="theme-swatch-chip theme-card-chip" data-preset="midnight-violet" data-color="#3b0764"
+              title="Midnight Violet (Deep royal ultraviolet plum with fluorescent neon fuchsia pop)"
+              aria-label="Midnight Violet"
+              style="background-color: #3b0764; border-color: #f43f5e; color: #f43f5e; border-radius: 24px; box-shadow: 5px 5px 14px rgba(0, 0, 0, 0.55), -5px -5px 14px rgba(255, 255, 255, 0.35);">
+              <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </button>
+            <button class="theme-swatch-chip theme-card-chip" data-preset="spearmint-gelato" data-color="#6ee7b7"
+              title="Spearmint Gelato (Fresh spearmint gelato clay with deep blackberry wine contrast and high-radius curve)"
+              aria-label="Spearmint Gelato"
+              style="background-color: #6ee7b7; border-color: #831843; color: #831843; border-radius: 38px; box-shadow: 5px 5px 14px rgba(0, 0, 0, 0.31), -5px -5px 14px rgba(255, 255, 255, 0.53);">
+              <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </button>
+            <button class="theme-swatch-chip theme-card-chip" data-preset="garnet-obsidian" data-color="#450a0a"
+              title="Garnet Obsidian (Deep chiseled crimson mahogany gemstone with coral rose illumination)"
+              aria-label="Garnet Obsidian"
+              style="background-color: #450a0a; border-color: #fb7185; color: #fb7185; border-radius: 8px; box-shadow: 3px 3px 9px rgba(0, 0, 0, 0.55), -3px -3px 9px rgba(255, 255, 255, 0.26);">
+              <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </button>
+            <button class="theme-swatch-chip theme-card-chip" data-preset="abyssal-ocean" data-color="#0e2a47"
+              title="Abyssal Ocean (Deep navy sapphire oceanic abyss with electric cyan telemetry glow)"
+              aria-label="Abyssal Ocean"
+              style="background-color: #0e2a47; border-color: #38bdf8; color: #38bdf8; border-radius: 16px; box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.55), -4px -4px 10px rgba(255, 255, 255, 0.29);">
+              <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </button>
+            <button class="theme-swatch-chip theme-card-chip" data-preset="roasted-cocoa" data-color="#351c14"
+              title="Roasted Cocoa (Dark artisanal roasted coffee and cocoa bean with molten amber gold accents)"
+              aria-label="Roasted Cocoa"
+              style="background-color: #351c14; border-color: #fbbf24; color: #fbbf24; border-radius: 10px; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.55), -2px -2px 5px rgba(255, 255, 255, 0.24);">
+              <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </button>
+            <button class="theme-swatch-chip theme-card-chip" data-preset="bubblegum-magenta" data-color="#db2777"
+              title="Bubblegum Magenta (Bold electric hot magenta clay with sunburst yellow highlights)"
+              aria-label="Bubblegum Magenta"
+              style="background-color: #db2777; border-color: #fef08a; color: #fef08a; border-radius: 30px; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.42), -5px -5px 15px rgba(255, 255, 255, 0.46);">
+              <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </button>
+            <button class="theme-swatch-chip theme-card-chip" data-preset="lilac-cloud" data-color="#c4b5fd"
+              title="Lilac Cloud (Soft dream lavender lilac clay with regal royal violet depth)"
+              aria-label="Lilac Cloud"
+              style="background-color: #c4b5fd; border-color: #4c1d95; color: #4c1d95; border-radius: 22px; box-shadow: 3px 3px 11px rgba(0, 0, 0, 0.24), -3px -3px 11px rgba(255, 255, 255, 0.40);">
+              <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </button>
+            <button class="theme-swatch-chip theme-card-chip" data-preset="matte-titanium" data-color="#1e293b"
+              title="Matte Titanium (Tactical gunmetal stealth titanium with hyper cyan aerospace accents)"
+              aria-label="Matte Titanium"
+              style="background-color: #1e293b; border-color: #06b6d4; color: #06b6d4; border-radius: 12px; box-shadow: 2px 2px 7px rgba(0, 0, 0, 0.50), -2px -2px 7px rgba(255, 255, 255, 0.24);">
+              <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </button>
+            <button class="theme-swatch-chip theme-card-chip" data-preset="dribbble-soft-gray" data-color="#e0e5ec"
+              title="Dribbble Soft Canvas (The iconic Dribbble benchmark Neumorphic soft clay canvas with electric royal blue accent)"
+              aria-label="Dribbble Soft Canvas"
+              style="background-color: #e0e5ec; border-color: #3b82f6; color: #3b82f6; border-radius: 16px; box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.20), -4px -4px 10px rgba(255, 255, 255, 0.65);">
+              <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </button>
+            <button class="theme-swatch-chip theme-card-chip" data-preset="polar-glacier" data-color="#dbe4ee"
+              title="Polar Glacier (Subtle frosty arctic ice-tinted clay with vibrant marine cyan accents)"
+              aria-label="Polar Glacier"
+              style="background-color: #dbe4ee; border-color: #0284c7; color: #0284c7; border-radius: 14px; box-shadow: 3px 3px 9px rgba(0, 0, 0, 0.24), -3px -3px 9px rgba(255, 255, 255, 0.65);">
+              <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </button>
+            <button class="theme-swatch-chip theme-card-chip" data-preset="graphite-carbon" data-color="#24272c"
+              title="Graphite Studio (Hi-Fi studio dark graphite with glowing neon cyan indicators)"
+              aria-label="Graphite Studio"
+              style="background-color: #24272c; border-color: #00f2fe; color: #00f2fe; border-radius: 12px; box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.46), -3px -3px 8px rgba(255, 255, 255, 0.20);">
+              <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </button>
+            <button class="theme-swatch-chip theme-card-chip" data-preset="nordic-linen" data-color="#dfd9ce"
+              title="Nordic Linen (Minimalist Scandinavian warm linen clay with rich cognac amber accents)"
+              aria-label="Nordic Linen"
+              style="background-color: #dfd9ce; border-color: #92400e; color: #92400e; border-radius: 10px; box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.22), -3px -3px 8px rgba(255, 255, 255, 0.65);">
+              <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </button>
+            <button class="theme-swatch-chip theme-card-chip" data-preset="eucalyptus-mist" data-color="#d4ded6"
+              title="Eucalyptus Mist (Organic calming herbal eucalyptus clay with deep emerald accents)"
+              aria-label="Eucalyptus Mist"
+              style="background-color: #d4ded6; border-color: #065f46; color: #065f46; border-radius: 16px; box-shadow: 3px 3px 9px rgba(0, 0, 0, 0.24), -3px -3px 9px rgba(255, 255, 255, 0.65);">
+              <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </button>
+            <button class="theme-swatch-chip theme-card-chip" data-preset="obsidian-gold" data-color="#1e1e24"
+              title="Obsidian Gold (Luxury executive dark obsidian clay with polished gold accents)"
+              aria-label="Obsidian Gold"
+              style="background-color: #1e1e24; border-color: #f59e0b; color: #f59e0b; border-radius: 10px; box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.53), -3px -3px 8px rgba(255, 255, 255, 0.18);">
+              <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </button>
+            <button class="theme-swatch-chip theme-card-chip" data-preset="dusty-blush" data-color="#ebdcd9"
+              title="Dusty Blush (Soft rose quartz cosmetic clay with rich deep crimson accents)"
+              aria-label="Dusty Blush"
+              style="background-color: #ebdcd9; border-color: #9f1239; color: #9f1239; border-radius: 18px; box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.22), -4px -4px 10px rgba(255, 255, 255, 0.65);">
+              <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </button>
+            <button class="theme-swatch-chip theme-card-chip" data-preset="synth-slate" data-color="#2b2d42"
+              title="Synthwave Slate (Deep twilight slate console with vibrant electric neon magenta accents)"
+              aria-label="Synthwave Slate"
+              style="background-color: #2b2d42; border-color: #ff007f; color: #ff007f; border-radius: 12px; box-shadow: 4px 4px 9px rgba(0, 0, 0, 0.42), -4px -4px 9px rgba(255, 255, 255, 0.24);">
+              <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
             </button>
           </div>
-          <div class="input-hints">
-            <span class="hint-tag">Typing trigger replaces immediately anywhere in Windows</span>
-          </div>
         </div>
 
-        <div class="list-section">
-          <div class="list-header">
-            <span class="section-label">Configured Expansions</span>
-            <div class="search-filter-box">
-              <input type="text" id="teSearchFilter" placeholder="Filter snippets..." autocomplete="off" />
-            </div>
+        <!-- Custom Theme Presets Section (Right Below Theme Presets) -->
+        <div class="theme-section">
+          <div class="theme-section-header">
+            <span class="theme-section-title">Custom Theme Presets</span>
           </div>
-          <div class="shortcuts-list" id="teShortcutsContainer"></div>
-        </div>
-      </section>
 
-      <!-- ====================================================================
-           2. KEY REMAPPER PANEL
-           ==================================================================== -->
-      <section class="module-panel" id="panel-keyRemapper">
-        <div class="inputs-section">
-          <div class="inputs-row">
-            <!-- Source Key Combination Box -->
-            <div class="inset-input-box key-combo-box" id="krSourceBox" title="Click to record source key combination">
+          <div class="custom-preset-save-row">
+            <div class="inset-input-box custom-preset-input-box">
               <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="2" y="4" width="20" height="16" rx="2"></rect>
-                <path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M7 16h10"></path>
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                <polyline points="7 3 7 8 15 8"></polyline>
               </svg>
-              <input type="text" id="krInputSource" class="key-combo-input" placeholder="Click to record source key..."
-                readonly autocomplete="off" spellcheck="false" />
-              <button type="button" class="btn-combo-clear hidden-field" id="krBtnClearSource"
-                title="Clear">&times;</button>
+              <input type="text" id="inputCustomPresetName" placeholder="Preset name (e.g. My Dark Clay)..."
+                autocomplete="off" spellcheck="false" class="custom-preset-name-input" />
             </div>
-
-            <!-- Arrow Divider -->
-            <div class="remap-arrow-indicator" title="Remaps to">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-                <polyline points="12 5 19 12 12 19"></polyline>
-              </svg>
-            </div>
-
-            <!-- Target Key Combination Box -->
-            <div class="inset-input-box key-combo-box" id="krTargetBox"
-              title="Click to record target key or combination">
-              <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="13 17 18 12 13 7"></polyline>
-                <polyline points="6 17 11 12 6 7"></polyline>
-              </svg>
-              <input type="text" id="krInputTarget" class="key-combo-input" placeholder="Click to record target key..."
-                readonly autocomplete="off" spellcheck="false" />
-              <button type="button" class="btn-combo-clear hidden-field" id="krBtnClearTarget"
-                title="Clear">&times;</button>
-            </div>
-
-            <button class="neumorphic-btn btn-go" id="krBtnSubmit" title="Add Key Remap">
-              <span>ADD</span>
+            <button type="button" class="neumorphic-btn btn-go btn-save-preset" id="btnSaveCustomPreset"
+              title="Save current theme as a custom preset">
+              <span>SAVE PRESET</span>
             </button>
           </div>
-          <div class="input-hints">
-            <span class="hint-tag">Click a box & press any key or combination (e.g. Ctrl+Shift+A, CapsLock, F1-F12,
-              Esc)</span>
-          </div>
+
+          <div class="theme-swatches-grid custom-presets-grid" id="customPresetsGrid"></div>
         </div>
 
-        <div class="list-section">
-          <div class="list-header">
-            <span class="section-label">Active Key Remaps</span>
+        <!-- Background Color Section -->
+        <div class="theme-section">
+          <div class="theme-section-header">
+            <span class="theme-section-title">Background Color</span>
           </div>
-          <div class="shortcuts-list" id="krRemapsContainer"></div>
-        </div>
-      </section>
-
-      <!-- ====================================================================
-           3. WINDOW MANAGEMENT PANEL
-           ==================================================================== -->
-      <section class="module-panel" id="panel-windowManager">
-        <div class="wm-grid">
-          <!-- Card 1: Always on Top -->
-          <div class="wm-card">
-            <div class="wm-card-left">
-              <div class="wm-icon-badge">
-                <svg class="wm-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="12" y1="17" x2="12" y2="22"></line>
+          <!-- Custom Background Color Picker Row -->
+          <div class="custom-color-row">
+            <span class="custom-label">Custom Background Color:</span>
+            <div class="color-picker-input-wrap">
+              <div class="color-picker-chip" title="Click to open color palette">
+                <input type="color" id="themeBgColorPicker" value="#e8dfd5" class="neumorphic-color-picker" />
+                <svg class="color-picker-badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2.2">
+                  <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle>
+                  <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle>
+                  <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle>
+                  <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle>
                   <path
-                    d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1v3.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z">
+                    d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.992 6.012 17.461 2 12 2z">
                   </path>
                 </svg>
               </div>
-              <div class="wm-info">
-                <div class="wm-title-row">
-                  <h3>Pin Always-on-Top</h3>
-                  <div class="wm-hotkey-badge" id="wmBadgeAlwaysOnTop">Ctrl + Space</div>
-                </div>
-                <p>Pins the current active window on top of all others</p>
-              </div>
-            </div>
-            <div class="wm-card-actions">
-              <div class="toggle-wrapper" title="Enable / Disable Pin Always-on-Top">
-                <input class="toggle-checkbox" type="checkbox" id="wmSwitchAlwaysOnTop" checked>
-                <div class="toggle-container">
-                  <div class="toggle-button"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Card 2: Center Window -->
-          <div class="wm-card">
-            <div class="wm-card-left">
-              <div class="wm-icon-badge">
-                <svg class="wm-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <line x1="22" y1="12" x2="18" y2="12"></line>
-                  <line x1="6" y1="12" x2="2" y2="12"></line>
-                  <line x1="12" y1="2" x2="12" y2="6"></line>
-                  <line x1="12" y1="18" x2="12" y2="22"></line>
-                </svg>
-              </div>
-              <div class="wm-info">
-                <div class="wm-title-row">
-                  <h3>Center Active Window</h3>
-                  <div class="wm-hotkey-badge" id="wmBadgeCenterWindow">Ctrl + Alt + C</div>
-                </div>
-                <p>Instantly centers the window on your monitor</p>
-              </div>
-            </div>
-            <div class="wm-card-actions">
-              <div class="toggle-wrapper" title="Enable / Disable Center Active Window">
-                <input class="toggle-checkbox" type="checkbox" id="wmSwitchCenterWindow" checked>
-                <div class="toggle-container">
-                  <div class="toggle-button"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Card 3: Boss Key / Quick Hide -->
-          <div class="wm-card">
-            <div class="wm-card-left">
-              <div class="wm-icon-badge">
-                <svg class="wm-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
-                  <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"></path>
-                  <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"></path>
-                  <line x1="2" y1="2" x2="22" y2="22"></line>
-                </svg>
-              </div>
-              <div class="wm-info">
-                <div class="wm-title-row">
-                  <h3>Boss Key / Minimize Active</h3>
-                  <div class="wm-hotkey-badge" id="wmBadgeHideWindow">Ctrl + Alt + H</div>
-                </div>
-                <p>Instantly minimizes the foreground window</p>
-              </div>
-            </div>
-            <div class="wm-card-actions">
-              <div class="toggle-wrapper" title="Enable / Disable Boss Key">
-                <input class="toggle-checkbox" type="checkbox" id="wmSwitchHideWindow" checked>
-                <div class="toggle-container">
-                  <div class="toggle-button"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Card 4: Transparency Wheel & Click-Through Ghost Mode -->
-          <div class="wm-card wm-card-column">
-            <div class="wm-card-main-row">
-              <div class="wm-card-left">
-                <div class="wm-icon-badge">
-                  <svg class="wm-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
-                    <polyline points="2 17 12 22 22 17"></polyline>
-                    <polyline points="2 12 12 17 22 12"></polyline>
-                  </svg>
-                </div>
-                <div class="wm-info">
-                  <div class="wm-title-row">
-                    <h3>Scrollwheel Transparency</h3>
-                    <div class="wm-hotkey-badge" id="wmBadgeTransparencyWheel">Win + WheelUp/Down</div>
-                  </div>
-                  <p>Hold Win key and scroll mouse wheel over any window</p>
-                </div>
-              </div>
-              <div class="wm-card-actions">
-                <div class="toggle-wrapper" title="Enable / Disable Scrollwheel Transparency">
-                  <input class="toggle-checkbox" type="checkbox" id="wmSwitchTransparencyWheel" checked>
-                  <div class="toggle-container">
-                    <div class="toggle-button"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Sub-Option: Click-Through / Ghost Mode (Uiverse bright-rat-5 by shreyasm-dev) -->
-            <div class="wm-sub-option">
-              <label class="uiverse-checkbox-wrap" title="Enable Click-Through Ghost Mode">
-                <input type="checkbox" class="uiverse-checkbox-input" id="wmCheckboxGhostMode">
-                <div class="uiverse-checkmark"></div>
-              </label>
-              <div class="wm-sub-info">
-                <label for="wmCheckboxGhostMode" class="wm-sub-label"
-                  title="Clicks pass through transparent windows">Click-Through "Ghost" (pass clicks)</label>
-                <div class="wm-sub-hotkey-tag" id="wmBadgeGhostMode" title="Direct toggle hotkey">Ctrl + Alt + G</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Card 5: Focused App Volume Control -->
-          <div class="wm-card">
-            <div class="wm-card-left">
-              <div class="wm-icon-badge">
-                <svg class="wm-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-                </svg>
-              </div>
-              <div class="wm-info">
-                <div class="wm-title-row">
-                  <h3>Active App Volume Control</h3>
-                  <div class="wm-hotkey-badge" id="wmBadgeAppVolumeWheel">Alt + WheelUp/Down</div>
-                </div>
-                <p>Hold Alt & scroll mouse wheel (or Ctrl+Alt+PgUp/Dn)</p>
-              </div>
-            </div>
-            <div class="wm-card-actions">
-              <div class="toggle-wrapper" title="Enable / Disable Active App Volume Control">
-                <input class="toggle-checkbox" type="checkbox" id="wmSwitchAppVolumeWheel" checked>
-                <div class="toggle-container">
-                  <div class="toggle-button"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Card 6: Mute Active Application -->
-          <div class="wm-card">
-            <div class="wm-card-left">
-              <div class="wm-icon-badge">
-                <svg class="wm-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                  <line x1="23" y1="9" x2="17" y2="15"></line>
-                  <line x1="17" y1="9" x2="23" y2="15"></line>
-                </svg>
-              </div>
-              <div class="wm-info">
-                <div class="wm-title-row">
-                  <h3>Mute Active Application</h3>
-                  <div class="wm-hotkey-badge" id="wmBadgeAppVolumeMute">Alt + M</div>
-                </div>
-                <p>Instantly mute or unmute foreground application audio</p>
-              </div>
-            </div>
-            <div class="wm-card-actions">
-              <div class="toggle-wrapper" title="Enable / Disable Mute Active Application">
-                <input class="toggle-checkbox" type="checkbox" id="wmSwitchAppVolumeMute" checked>
-                <div class="toggle-container">
-                  <div class="toggle-button"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Card 7: Window Shade / Roll Up -->
-          <div class="wm-card">
-            <div class="wm-card-left">
-              <div class="wm-icon-badge">
-                <svg class="wm-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="3" y="3" width="18" height="18" rx="2"></rect>
-                  <line x1="3" y1="9" x2="21" y2="9"></line>
-                  <polyline points="9 16 12 13 15 16"></polyline>
-                </svg>
-              </div>
-              <div class="wm-info">
-                <div class="wm-title-row">
-                  <h3>Window Shade / Roll Up</h3>
-                  <div class="wm-hotkey-badge" id="wmBadgeWindowShade">Ctrl + Alt + R</div>
-                </div>
-                <p>Rolls window into title bar & unrolls when pressed again</p>
-              </div>
-            </div>
-            <div class="wm-card-actions">
-              <div class="toggle-wrapper" title="Enable / Disable Window Shade">
-                <input class="toggle-checkbox" type="checkbox" id="wmSwitchWindowShade" checked>
-                <div class="toggle-container">
-                  <div class="toggle-button"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Card 8: Force Borderless Fullscreen -->
-          <div class="wm-card">
-            <div class="wm-card-left">
-              <div class="wm-icon-badge">
-                <svg class="wm-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="15 3 21 3 21 9"></polyline>
-                  <polyline points="9 21 3 21 3 15"></polyline>
-                  <line x1="21" y1="3" x2="14" y2="10"></line>
-                  <line x1="3" y1="21" x2="10" y2="14"></line>
-                </svg>
-              </div>
-              <div class="wm-info">
-                <div class="wm-title-row">
-                  <h3>Force Borderless Fullscreen</h3>
-                  <div class="wm-hotkey-badge" id="wmBadgeBorderless">Ctrl + Alt + Enter</div>
-                </div>
-                <p>Removes borders & title bar for seamless full display</p>
-              </div>
-            </div>
-            <div class="wm-card-actions">
-              <div class="toggle-wrapper" title="Enable / Disable Force Borderless Fullscreen">
-                <input class="toggle-checkbox" type="checkbox" id="wmSwitchBorderless" checked>
-                <div class="toggle-container">
-                  <div class="toggle-button"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ====================================================================
-           4. APP LAUNCHER PANEL
-           ==================================================================== -->
-      <section class="module-panel" id="panel-appLauncher">
-        <div class="inputs-section">
-          <!-- Row 1: Trigger Mode & Trigger Key/String Definition -->
-          <div class="inputs-row al-row-trigger">
-            <!-- Trigger Type Selector: Text String vs Button Combination -->
-            <div class="al-type-segmented" id="alTriggerTypeSelector">
-              <button type="button" class="al-type-btn active" id="alTypeString" data-type="string"
-                title="Trigger by typing text (e.g. @calc, @yt)">
-                <svg class="al-type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="4 17 10 11 4 5"></polyline>
-                  <line x1="12" y1="19" x2="20" y2="19"></line>
-                </svg>
-                <span>Text</span>
-              </button>
-              <button type="button" class="al-type-btn" id="alTypeHotkey" data-type="hotkey"
-                title="Trigger by pressing a button combination (e.g. Ctrl+Alt+C)">
-                <svg class="al-type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="2" y="4" width="20" height="16" rx="2"></rect>
-                  <path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M7 16h10"></path>
-                </svg>
-                <span>Shortcut</span>
-              </button>
-            </div>
-
-            <div class="inset-input-box trigger-box al-trigger-box" id="alTriggerBox">
-              <svg class="input-icon-svg" id="alTriggerIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="2">
-                <polyline points="4 17 10 11 4 5"></polyline>
-                <line x1="12" y1="19" x2="20" y2="19"></line>
-              </svg>
-              <input type="text" id="alInputTrigger" placeholder="Trigger (e.g. @calc, @yt, @work)" autocomplete="off"
-                spellcheck="false" />
-            </div>
-          </div>
-
-          <!-- Row 2: Target App Path/URL + Browse, Friendly Name, and ADD/SAVE Action -->
-          <div class="inputs-row al-row-target">
-            <div class="inset-input-box output-box al-output-box" id="alOutputBox">
-              <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                <polyline points="15 3 21 3 21 9"></polyline>
-                <line x1="10" y1="14" x2="21" y2="3"></line>
-              </svg>
-              <input type="text" id="alInputTarget" placeholder="Target app path, URL, or command..." autocomplete="off"
-                spellcheck="false" />
-              <button type="button" class="btn-input-browse" id="alBtnBrowse"
-                title="Browse for application or file (.exe, .lnk, etc.)">
-                <svg class="browse-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-                </svg>
-                <span>Browse</span>
-              </button>
-            </div>
-
-            <div class="inset-input-box label-box al-label-box">
-              <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
-                <line x1="7" y1="7" x2="7.01" y2="7"></line>
-              </svg>
-              <input type="text" id="alInputName" placeholder="Name (optional)..." autocomplete="off"
-                spellcheck="false" />
-            </div>
-
-            <button class="neumorphic-btn btn-go al-btn-submit" id="alBtnSubmit">
-              <span id="alBtnSubmitText">ADD</span>
-            </button>
-          </div>
-
-          <div class="input-hints">
-            <span class="hint-tag" id="alHintTag">Typing trigger anywhere opens apps, websites, or commands
-              instantly</span>
-          </div>
-        </div>
-
-        <div class="list-section">
-          <div class="list-header">
-            <span class="section-label">Configured Launchers</span>
-          </div>
-          <div class="shortcuts-list" id="alLaunchersContainer"></div>
-        </div>
-      </section>
-
-      <!-- ====================================================================
-           5. AUTO CLICKER PANEL
-           ==================================================================== -->
-      <section class="module-panel" id="panel-autoClicker">
-        <div class="ac-container">
-          <div class="ac-settings-grid">
-            <!-- Mouse Button -->
-            <div class="ac-setting-card">
-              <span class="setting-title">Mouse Button</span>
-              <div class="ac-pill-selector" id="acButtonSelector">
-                <button class="ac-pill-btn active" data-val="Left">Left</button>
-                <button class="ac-pill-btn" data-val="Right">Right</button>
-                <button class="ac-pill-btn" data-val="Middle">Middle</button>
-              </div>
-            </div>
-
-            <!-- Click Type -->
-            <div class="ac-setting-card">
-              <span class="setting-title">Click Type</span>
-              <div class="ac-pill-selector" id="acTypeSelector">
-                <button class="ac-pill-btn active" data-val="Single">Single</button>
-                <button class="ac-pill-btn" data-val="Double">Double</button>
-              </div>
-            </div>
-
-            <!-- Toggle Hotkey -->
-            <div class="ac-setting-card">
-              <span class="setting-title">Global Hotkey</span>
-              <div class="ac-hotkey-display" title="Press this key anywhere to toggle auto-clicking">
-                <svg class="hotkey-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-                </svg>
-                <span id="acHotkeyLabel">F8</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- CPS Speed Slider (from reference image) -->
-          <div class="slider-module-card">
-            <div class="slider-header">
-              <span class="section-label">Click Speed (Clicks Per Second)</span>
-              <span class="slider-value-badge" id="acCpsValue">20 CPS</span>
-            </div>
-            <div class="neumorphic-slider-container">
-              <input type="range" id="acCpsSlider" min="1" max="60" value="20" class="neumorphic-slider" />
-            </div>
-            <div class="cps-quick-row">
-              <span class="hint-tag">1 CPS (Slow)</span>
-              <span class="hint-tag">20 CPS</span>
-              <span class="hint-tag">60 CPS (Max Speed)</span>
-            </div>
-          </div>
-
-          <!-- Live Arm & Status Button -->
-          <div class="ac-action-row">
-            <button class="neumorphic-btn ac-toggle-btn" id="acToggleBtn">
-              <span id="acToggleBtnText">START (F8)</span>
-            </button>
-            <span class="hint-tag" id="acStatusHint">Ready - Press F8 anywhere in Windows to start or stop
-              clicking</span>
-          </div>
-        </div>
-      </section>
-
-      <!-- ====================================================================
-           6. MACRO RECORDER PANEL (Sequencer, Live Keystroke & Click Recording)
-           ==================================================================== -->
-      <section class="module-panel" id="panel-macroRecorder">
-        <div class="inputs-section">
-          <!-- Top Row: Configuration -->
-          <div class="inputs-row macro-config-row">
-            <!-- Macro Name -->
-            <div class="inset-input-box macro-name-box">
-              <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
-                <line x1="7" y1="7" x2="7.01" y2="7"></line>
-              </svg>
-              <input type="text" id="macroInputName" placeholder="Macro Name (e.g. Fast Combo)" autocomplete="off"
-                spellcheck="false" />
-            </div>
-
-            <!-- Trigger Hotkey Box -->
-            <div class="inset-input-box key-combo-box macro-trigger-box" id="macroTriggerBox"
-              title="Click to record trigger hotkey">
-              <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="2" y="4" width="20" height="16" rx="2"></rect>
-                <path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M7 16h10"></path>
-              </svg>
-              <input type="text" id="macroInputTrigger" class="key-combo-input" placeholder="Trigger (e.g. F9)..."
-                readonly autocomplete="off" spellcheck="false" />
-              <button type="button" class="btn-combo-clear hidden-field" id="macroBtnClearTrigger"
-                title="Clear">&times;</button>
-            </div>
-
-            <!-- Playback Mode Segmented Pill -->
-            <div class="macro-mode-segmented" id="macroModeSelector" title="Macro Playback Mode">
-              <button type="button" class="macro-mode-btn active" data-mode="NoRepeat"
-                title="Play sequence once on press">Once</button>
-              <button type="button" class="macro-mode-btn" data-mode="RepeatWhileHolding"
-                title="Loop sequence while hotkey is held">Hold</button>
-              <button type="button" class="macro-mode-btn" data-mode="Toggle"
-                title="Press to start loop, press again to stop">Toggle</button>
-            </div>
-
-            <!-- Repeat Interval (for Hold / Toggle) -->
-            <div class="inset-input-box macro-interval-box is-hidden" id="macroIntervalBox"
-              title="Repeat delay between loops (ms)">
-              <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"></circle>
-                <polyline points="12 6 12 12 16 14"></polyline>
-              </svg>
-              <input type="number" id="macroInputInterval" value="50" min="5" max="5000" placeholder="50" />
-              <span class="input-unit">ms</span>
-            </div>
-
-            <!-- Save / Add Macro Button -->
-            <button class="neumorphic-btn btn-go" id="macroBtnSubmit" title="Save Macro">
-              <span id="macroBtnSubmitText">ADD</span>
-            </button>
-          </div>
-
-          <!-- Macro Sequencer & Live Capture Deck -->
-          <div class="macro-sequencer-deck">
-            <div class="macro-deck-header">
-              <div class="macro-deck-left">
-                <!-- Tactile Record Button (Fixed Width, No Layout Shift) -->
-                <button type="button" class="btn-record-macro young-frog-record-btn" id="macroBtnRecordToggle"
-                  title="Start / Stop Hardware Keystroke Recording">
-                  <span class="young-frog-bezel">
-                    <span class="rec-pulse-dot" id="macroRecDot"></span>
-                    <span class="young-frog-text" id="macroBtnRecordText">RECORD</span>
-                  </span>
-                </button>
-
-                <!-- Quick Mouse & Delay Injections -->
-                <div class="macro-inject-group">
-                  <button type="button" class="macro-inject-btn" id="macroBtnAddLClick" title="Inject Left Mouse Click">
-                    <span>+ Left Click</span>
-                  </button>
-                  <button type="button" class="macro-inject-btn" id="macroBtnAddRClick"
-                    title="Inject Right Mouse Click">
-                    <span>+ Right Click</span>
-                  </button>
-                  <button type="button" class="macro-inject-btn" id="macroBtnAddMClick"
-                    title="Inject Middle Mouse Click">
-                    <span>+ Mid Click</span>
-                  </button>
-                  <button type="button" class="macro-inject-btn" id="macroBtnAddDelay"
-                    title="Inject Custom Delay (+50ms)">
-                    <span>+ 50ms Delay</span>
-                  </button>
-                </div>
-              </div>
-
-              <div class="macro-deck-right">
-                <!-- Standard Delays Toggle -->
-                <label class="macro-delay-toggle"
-                  title="Use fixed 50ms delay between steps or record exact real-time timing">
-                  <input type="checkbox" id="macroChkStandardDelays" checked />
-                  <span class="macro-delay-checkbox"></span>
-                  <span class="macro-delay-label">Fixed Delay (50ms)</span>
-                </label>
-
-                <!-- Test Playback Button -->
-                <button type="button" class="neumorphic-btn-pill btn-test-macro" id="macroBtnTestPlay"
-                  title="Test Play Current Sequence">
-                  <svg class="macro-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2.5">
-                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                  </svg>
-                  <span>Test Play</span>
-                </button>
-
-                <!-- Clear Steps Button -->
-                <button type="button" class="neumorphic-btn-pill btn-clear-macro" id="macroBtnClearSteps"
-                  title="Clear all recorded steps">
-                  <svg class="macro-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="3 6 5 6 21 6"></polyline>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                  </svg>
-                  <span>Clear</span>
-                </button>
-              </div>
-            </div>
-
-            <!-- Sequence Flow Timeline Track -->
-            <div class="macro-timeline-track" id="macroTimelineTrack">
-              <div class="macro-timeline-empty" id="macroTimelineEmpty">
-                <span>No sequence steps recorded yet. Click <strong>RECORD</strong> and press any keys, or click the
-                  <strong>+ Mouse / Delay</strong> buttons above.</span>
-              </div>
+              <input type="text" id="themeBgHex" value="#E8DFD5" maxlength="7" spellcheck="false"
+                class="color-hex-input" />
             </div>
           </div>
         </div>
 
-        <!-- Saved Macros List -->
-        <div class="list-section">
-          <div class="list-header">
-            <div class="list-header-left">
-              <span class="section-label">Active Recorded Macros</span>
-              <span class="section-count" id="macroCountBadge">0</span>
-            </div>
-            <span class="hint-tag">Press trigger hotkeys anywhere in Windows to execute macros</span>
+        <!-- Elements (Secondary / Accent) Color Section -->
+        <div class="theme-section">
+          <div class="theme-section-header">
+            <span class="theme-section-title">Elements Color (Secondary / Accent)</span>
           </div>
-          <div class="shortcuts-list" id="macroListContainer"></div>
-        </div>
-      </section>
-
-    </main>
-
-    <!-- Window Resize Handles (Full perimeter: 4 edges + 4 corners) -->
-    <div class="resize-handle handle-n" data-direction="n" title="Resize Height"></div>
-    <div class="resize-handle handle-s" data-direction="s" title="Resize Height"></div>
-    <div class="resize-handle handle-e" data-direction="e" title="Resize Width"></div>
-    <div class="resize-handle handle-w" data-direction="w" title="Resize Width"></div>
-    <div class="resize-handle handle-nw" data-direction="nw" title="Resize Window"></div>
-    <div class="resize-handle handle-ne" data-direction="ne" title="Resize Window"></div>
-    <div class="resize-handle handle-sw" data-direction="sw" title="Resize Window"></div>
-    <div class="resize-handle handle-se" data-direction="se" title="Resize Window">
-      <span class="resize-grip-line"></span>
-      <span class="resize-grip-line"></span>
-    </div>
-
-    <!-- Neumorphic Theme Customizer Modal -->
-    <div class="modal-overlay hidden-field" id="themeModal">
-      <div class="modal-card theme-modal-card">
-        <div class="modal-header">
-          <div class="modal-title-row">
-            <svg class="icon-svg" style="color:var(--accent-primary);" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2">
-              <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle>
-              <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle>
-              <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle>
-              <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle>
-              <path
-                d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.992 6.012 17.461 2 12 2z">
-              </path>
-            </svg>
-            <h3 class="modal-title">Theme & Appearance</h3>
-          </div>
-          <button class="squircle-btn btn-mini" id="btnCloseThemeModal" title="Close Theme Settings">
-            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
-        </div>
-
-        <div class="theme-modal-body">
-          <!-- Theme Presets Section -->
-          <div class="theme-section">
-            <div class="theme-swatches-grid" id="bgSwatchesGrid">
-              <button class="theme-swatch-chip theme-card-chip active" data-preset="custom-default" data-color="#e8dfd5"
-                title="Warm Clay (Default) (Balanced warm clay with warm amber accent)" aria-label="Warm Clay (Default)"
-                style="background-color: #e8dfd5; border-color: #d97706; color: #d97706; border-radius: 5px; box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.08), -2px -2px 6px rgba(255, 255, 255, 0.8);">
-                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12"></polyline>
+          <!-- Custom Accent Color Picker Row -->
+          <div class="custom-color-row">
+            <span class="custom-label">Custom Accent Color:</span>
+            <div class="color-picker-input-wrap">
+              <div class="color-picker-chip" title="Click to open color palette">
+                <input type="color" id="themeAccentColorPicker" value="#d97706" class="neumorphic-color-picker" />
+                <svg class="color-picker-badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2.2">
+                  <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle>
+                  <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle>
+                  <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle>
+                  <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle>
+                  <path
+                    d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.992 6.012 17.461 2 12 2z">
+                  </path>
                 </svg>
-              </button>
-              <button class="theme-swatch-chip theme-card-chip" data-preset="brutalist-amber" data-color="#f59e0b"
-                title="Brutalist Amber (Vivid amber pop with zero blur hard-edge comic shadows and chiseled edges)"
-                aria-label="Brutalist Amber"
-                style="background-color: #f59e0b; border-color: #1e1b4b; color: #1e1b4b; border-radius: 2px; box-shadow: 5px 5px 0px rgba(0, 0, 0, 0.55), -5px -5px 0px rgba(255, 255, 255, 0.65);">
-                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-              </button>
-              <button class="theme-swatch-chip theme-card-chip" data-preset="marshmallow-indigo" data-color="#4f46e5"
-                title="Marshmallow Indigo (Electric indigo with soft lemon cream in an ultra-pill marshmallow 3D cloud)"
-                aria-label="Marshmallow Indigo"
-                style="background-color: #4f46e5; border-color: #fde047; color: #fde047; border-radius: 42px; box-shadow: 6px 6px 18px rgba(0, 0, 0, 0.53), -6px -6px 18px rgba(255, 255, 255, 0.44);">
-                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-              </button>
-              <button class="theme-swatch-chip theme-card-chip" data-preset="porcelain-ceramic" data-color="#f1f5f9"
-                title="Porcelain Ceramic (High-key sculpted slate white ceramic with royal sapphire blue and specular glow)"
-                aria-label="Porcelain Ceramic"
-                style="background-color: #f1f5f9; border-color: #2563eb; color: #2563eb; border-radius: 28px; box-shadow: 5px 5px 16px rgba(0, 0, 0, 0.22), -5px -5px 16px rgba(255, 255, 255, 0.65);">
-                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-              </button>
-              <button class="theme-swatch-chip theme-card-chip" data-preset="solar-tangerine" data-color="#ea580c"
-                title="Solar Tangerine (Punchy fire tangerine orange clay with radiant sunbeam cream highlights)"
-                aria-label="Solar Tangerine"
-                style="background-color: #ea580c; border-color: #fef08a; color: #fef08a; border-radius: 34px; box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.46), -4px -4px 12px rgba(255, 255, 255, 0.42);">
-                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-              </button>
-              <button class="theme-swatch-chip theme-card-chip" data-preset="matrix-terminal" data-color="#052e16"
-                title="Matrix CRT (Deep phosphor CRT green terminal with crisp sunken bevel and phosphor laser text)"
-                aria-label="Matrix CRT"
-                style="background-color: #052e16; border-color: #22c55e; color: #22c55e; border-radius: 4px; box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.55), -2px -2px 2px rgba(255, 255, 255, 0.44);">
-                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-              </button>
-              <button class="theme-swatch-chip theme-card-chip" data-preset="cyber-cyan" data-color="#0891b2"
-                title="Cyber Cyan (Vivid Mediterranean electric cyan clay with high-saturation lemon triggers)"
-                aria-label="Cyber Cyan"
-                style="background-color: #0891b2; border-color: #fef08a; color: #fef08a; border-radius: 18px; box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.35), -3px -3px 6px rgba(255, 255, 255, 0.39);">
-                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-              </button>
-              <button class="theme-swatch-chip theme-card-chip" data-preset="brutalist-concrete" data-color="#78716c"
-                title="Brutalist Concrete (Raw architectural concrete stone with safety orange and 1px hard-relief shadow)"
-                aria-label="Brutalist Concrete"
-                style="background-color: #78716c; border-color: #f97316; color: #f97316; border-radius: 3px; box-shadow: 4px 4px 1px rgba(0, 0, 0, 0.55), -4px -4px 1px rgba(255, 255, 255, 0.55);">
-                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-              </button>
-              <button class="theme-swatch-chip theme-card-chip" data-preset="midnight-violet" data-color="#3b0764"
-                title="Midnight Violet (Deep royal ultraviolet plum with fluorescent neon fuchsia pop)"
-                aria-label="Midnight Violet"
-                style="background-color: #3b0764; border-color: #f43f5e; color: #f43f5e; border-radius: 24px; box-shadow: 5px 5px 14px rgba(0, 0, 0, 0.55), -5px -5px 14px rgba(255, 255, 255, 0.35);">
-                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-              </button>
-              <button class="theme-swatch-chip theme-card-chip" data-preset="spearmint-gelato" data-color="#6ee7b7"
-                title="Spearmint Gelato (Fresh spearmint gelato clay with deep blackberry wine contrast and high-radius curve)"
-                aria-label="Spearmint Gelato"
-                style="background-color: #6ee7b7; border-color: #831843; color: #831843; border-radius: 38px; box-shadow: 5px 5px 14px rgba(0, 0, 0, 0.31), -5px -5px 14px rgba(255, 255, 255, 0.53);">
-                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-              </button>
-              <button class="theme-swatch-chip theme-card-chip" data-preset="garnet-obsidian" data-color="#450a0a"
-                title="Garnet Obsidian (Deep chiseled crimson mahogany gemstone with coral rose illumination)"
-                aria-label="Garnet Obsidian"
-                style="background-color: #450a0a; border-color: #fb7185; color: #fb7185; border-radius: 8px; box-shadow: 3px 3px 9px rgba(0, 0, 0, 0.55), -3px -3px 9px rgba(255, 255, 255, 0.26);">
-                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-              </button>
-              <button class="theme-swatch-chip theme-card-chip" data-preset="abyssal-ocean" data-color="#0e2a47"
-                title="Abyssal Ocean (Deep navy sapphire oceanic abyss with electric cyan telemetry glow)"
-                aria-label="Abyssal Ocean"
-                style="background-color: #0e2a47; border-color: #38bdf8; color: #38bdf8; border-radius: 16px; box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.55), -4px -4px 10px rgba(255, 255, 255, 0.29);">
-                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-              </button>
-              <button class="theme-swatch-chip theme-card-chip" data-preset="roasted-cocoa" data-color="#351c14"
-                title="Roasted Cocoa (Dark artisanal roasted coffee and cocoa bean with molten amber gold accents)"
-                aria-label="Roasted Cocoa"
-                style="background-color: #351c14; border-color: #fbbf24; color: #fbbf24; border-radius: 10px; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.55), -2px -2px 5px rgba(255, 255, 255, 0.24);">
-                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-              </button>
-              <button class="theme-swatch-chip theme-card-chip" data-preset="bubblegum-magenta" data-color="#db2777"
-                title="Bubblegum Magenta (Bold electric hot magenta clay with sunburst yellow highlights)"
-                aria-label="Bubblegum Magenta"
-                style="background-color: #db2777; border-color: #fef08a; color: #fef08a; border-radius: 30px; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.42), -5px -5px 15px rgba(255, 255, 255, 0.46);">
-                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-              </button>
-              <button class="theme-swatch-chip theme-card-chip" data-preset="lilac-cloud" data-color="#c4b5fd"
-                title="Lilac Cloud (Soft dream lavender lilac clay with regal royal violet depth)"
-                aria-label="Lilac Cloud"
-                style="background-color: #c4b5fd; border-color: #4c1d95; color: #4c1d95; border-radius: 22px; box-shadow: 3px 3px 11px rgba(0, 0, 0, 0.24), -3px -3px 11px rgba(255, 255, 255, 0.40);">
-                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-              </button>
-              <button class="theme-swatch-chip theme-card-chip" data-preset="matte-titanium" data-color="#1e293b"
-                title="Matte Titanium (Tactical gunmetal stealth titanium with hyper cyan aerospace accents)"
-                aria-label="Matte Titanium"
-                style="background-color: #1e293b; border-color: #06b6d4; color: #06b6d4; border-radius: 12px; box-shadow: 2px 2px 7px rgba(0, 0, 0, 0.50), -2px -2px 7px rgba(255, 255, 255, 0.24);">
-                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                  stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          <!-- Custom Theme Presets Section (Right Below Theme Presets) -->
-          <div class="theme-section">
-            <div class="theme-section-header">
-              <span class="theme-section-title">Custom Theme Presets</span>
-            </div>
-
-            <div class="custom-preset-save-row">
-              <div class="inset-input-box custom-preset-input-box">
-                <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                  <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                  <polyline points="7 3 7 8 15 8"></polyline>
-                </svg>
-                <input type="text" id="inputCustomPresetName" placeholder="Preset name (e.g. My Dark Clay)..."
-                  autocomplete="off" spellcheck="false" class="custom-preset-name-input" />
               </div>
-              <button type="button" class="neumorphic-btn btn-go btn-save-preset" id="btnSaveCustomPreset"
-                title="Save current theme as a custom preset">
-                <span>SAVE PRESET</span>
-              </button>
-            </div>
-
-            <div class="theme-swatches-grid custom-presets-grid" id="customPresetsGrid"></div>
-          </div>
-
-          <!-- Background Color Section -->
-          <div class="theme-section">
-            <div class="theme-section-header">
-              <span class="theme-section-title">Background Color</span>
-            </div>
-            <!-- Custom Background Color Picker Row -->
-            <div class="custom-color-row">
-              <span class="custom-label">Custom Background Color:</span>
-              <div class="color-picker-input-wrap">
-                <div class="color-picker-chip" title="Click to open color palette">
-                  <input type="color" id="themeBgColorPicker" value="#e8dfd5" class="neumorphic-color-picker" />
-                  <svg class="color-picker-badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2.2">
-                    <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle>
-                    <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle>
-                    <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle>
-                    <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle>
-                    <path
-                      d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.992 6.012 17.461 2 12 2z">
-                    </path>
-                  </svg>
-                </div>
-                <input type="text" id="themeBgHex" value="#E8DFD5" maxlength="7" spellcheck="false"
-                  class="color-hex-input" />
-              </div>
-            </div>
-          </div>
-
-          <!-- Elements (Secondary / Accent) Color Section -->
-          <div class="theme-section">
-            <div class="theme-section-header">
-              <span class="theme-section-title">Elements Color (Secondary / Accent)</span>
-            </div>
-            <!-- Custom Accent Color Picker Row -->
-            <div class="custom-color-row">
-              <span class="custom-label">Custom Accent Color:</span>
-              <div class="color-picker-input-wrap">
-                <div class="color-picker-chip" title="Click to open color palette">
-                  <input type="color" id="themeAccentColorPicker" value="#d97706" class="neumorphic-color-picker" />
-                  <svg class="color-picker-badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2.2">
-                    <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle>
-                    <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle>
-                    <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle>
-                    <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle>
-                    <path
-                      d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.992 6.012 17.461 2 12 2z">
-                    </path>
-                  </svg>
-                </div>
-                <input type="text" id="themeAccentHex" value="#D97706" maxlength="7" spellcheck="false"
-                  class="color-hex-input" />
-              </div>
-            </div>
-          </div>
-
-          <!-- Neumorphism Controls Section (Radius, Distance, Intensity, Blur) -->
-          <div class="theme-section">
-            <div class="theme-section-header">
-              <span class="theme-section-title">Neumorphism Effect Controls</span>
-            </div>
-            <div class="neo-sliders-grid">
-              <!-- Radius Slider -->
-              <div class="neo-slider-row">
-                <div class="neo-slider-label-group">
-                  <span class="neo-slider-label">Radius</span>
-                  <span class="neo-slider-badge" id="badgeRadius">5px</span>
-                </div>
-                <div class="neo-slider-track-wrap">
-                  <input type="range" id="themeSliderRadius" min="0" max="60" step="1" value="5"
-                    class="neumorphic-slider" />
-                </div>
-              </div>
-
-              <!-- Distance Slider -->
-              <div class="neo-slider-row">
-                <div class="neo-slider-label-group">
-                  <span class="neo-slider-label">Distance</span>
-                  <span class="neo-slider-badge" id="badgeDistance">3px</span>
-                </div>
-                <div class="neo-slider-track-wrap">
-                  <input type="range" id="themeSliderDistance" min="1" max="15" step="1" value="3"
-                    class="neumorphic-slider" />
-                </div>
-              </div>
-
-              <!-- Top Light Shadow Intensity Slider -->
-              <div class="neo-slider-row">
-                <div class="neo-slider-label-group">
-                  <span class="neo-slider-label">Light Shadow</span>
-                  <span class="neo-slider-badge" id="badgeLightIntensity">22%</span>
-                </div>
-                <div class="neo-slider-track-wrap">
-                  <input type="range" id="themeSliderLightIntensity" min="1" max="100" step="1" value="22"
-                    class="neumorphic-slider" />
-                </div>
-              </div>
-
-              <!-- Bottom Dark Shadow Intensity Slider -->
-              <div class="neo-slider-row">
-                <div class="neo-slider-label-group">
-                  <span class="neo-slider-label">Dark Shadow</span>
-                  <span class="neo-slider-badge" id="badgeDarkIntensity">6%</span>
-                </div>
-                <div class="neo-slider-track-wrap">
-                  <input type="range" id="themeSliderDarkIntensity" min="1" max="100" step="1" value="6"
-                    class="neumorphic-slider" />
-                </div>
-              </div>
-
-              <!-- Blur Slider -->
-              <div class="neo-slider-row">
-                <div class="neo-slider-label-group">
-                  <span class="neo-slider-label">Blur</span>
-                  <span class="neo-slider-badge" id="badgeBlur">10px</span>
-                </div>
-                <div class="neo-slider-track-wrap">
-                  <input type="range" id="themeSliderBlur" min="0" max="25" step="1" value="10"
-                    class="neumorphic-slider" />
-                </div>
-              </div>
+              <input type="text" id="themeAccentHex" value="#D97706" maxlength="7" spellcheck="false"
+                class="color-hex-input" />
             </div>
           </div>
         </div>
 
-        <div class="theme-modal-footer">
-          <button class="neumorphic-btn btn-chip" id="btnResetTheme">
-            <span>Reset to Default</span>
-          </button>
-          <button class="neumorphic-btn btn-go" id="btnSaveTheme">
-            <span>APPLY</span>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Profile Setup & Auto-Switch Configuration Modal -->
-    <div class="modal-overlay hidden-field" id="profileModal">
-      <div class="profile-config-dialog" id="profileConfigCard">
-        <div class="modal-header">
-          <div class="modal-title-row">
-            <svg class="icon-svg" style="color:var(--accent-primary);" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-              <circle cx="12" cy="7" r="4"></circle>
-            </svg>
-            <h3 class="modal-title" id="profileModalTitle">CREATE APP PROFILE</h3>
+        <!-- Neumorphism Controls Section (Radius, Distance, Intensity, Blur) -->
+        <div class="theme-section">
+          <div class="theme-section-header">
+            <span class="theme-section-title">Neumorphism Effect Controls</span>
           </div>
-          <button class="squircle-btn btn-mini" id="btnCloseProfileModal" title="Close (Esc)">
-            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
-        </div>
-
-        <div class="profile-config-body" id="profileConfigBody">
-          <!-- Left Column: Form & Toggles -->
-          <div class="profile-form-column">
-            <!-- Delete Mode Confirmation Prompt -->
-            <div id="profileDeleteNotice" class="profile-delete-box hidden-field">
-              <p class="profile-modal-desc" id="profileModalDesc">Are you sure you want to delete this profile?</p>
-            </div>
-
-            <!-- Profile Name -->
-            <div class="form-group-field" id="profileNameGroup">
-              <label for="profileNameInput" class="form-field-lbl">Profile Name:</label>
-              <input type="text" class="profile-modal-input" id="profileNameInput"
-                placeholder="e.g. Chrome, Blender, Gaming, VS Code..." maxlength="28" autocomplete="off"
-                spellcheck="false" />
-            </div>
-
-            <!-- Default Profile Info (shown when editing Default) -->
-            <div class="default-profile-badge-notice hidden-field" id="defaultProfileBadgeNotice">
-              <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polygon
-                  points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
-                </polygon>
-              </svg>
-              <div class="notice-meta">
-                <strong>System Default Profile</strong>
-                <span>Fallback profile activated when no application-specific profile matches.</span>
+          <div class="neo-sliders-grid">
+            <!-- Radius Slider -->
+            <div class="neo-slider-row">
+              <div class="neo-slider-label-group">
+                <span class="neo-slider-label">Radius</span>
+                <span class="neo-slider-badge" id="badgeRadius">5px</span>
+              </div>
+              <div class="neo-slider-track-wrap">
+                <input type="range" id="themeSliderRadius" min="0" max="60" step="1" value="5"
+                  class="neumorphic-slider" />
               </div>
             </div>
 
-            <!-- Target Executables -->
-            <div class="form-group-field" id="profileExeGroup">
-              <div class="form-field-header-row">
-                <label for="profInputExe" class="form-field-lbl">Target Executable(s):</label>
-                <div class="form-field-actions">
-                  <button type="button" class="neumorphic-btn btn-chip btn-sm-chip" id="btnBrowseProfileExe"
-                    title="Browse your PC for an executable file">
-                    <svg class="icon-svg-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-                    </svg>
-                    <span>Browse .exe</span>
-                  </button>
-                  <button type="button" class="neumorphic-btn btn-chip btn-sm-chip" id="btnRescanRunningApps"
-                    title="Rescan currently open application windows">
-                    <svg class="icon-svg-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <polyline points="23 4 23 10 17 10"></polyline>
-                      <polyline points="1 20 1 14 7 14"></polyline>
-                      <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-                    </svg>
-                    <span>Rescan</span>
-                  </button>
-                </div>
+            <!-- Distance Slider -->
+            <div class="neo-slider-row">
+              <div class="neo-slider-label-group">
+                <span class="neo-slider-label">Distance</span>
+                <span class="neo-slider-badge" id="badgeDistance">3px</span>
               </div>
-              <input type="text" class="profile-modal-input" id="profInputExe"
-                placeholder="e.g. chrome.exe, code.exe (comma-separated)" autocomplete="off" spellcheck="false" />
-              <span class="form-field-hint">Multiple executables supported. Click any window card on the right to toggle
-                assignment.</span>
-            </div>
-
-            <!-- Option 1: Profile Switch Trigger (Window Focus vs Mouse Hover) -->
-            <div class="profile-option-row profile-trigger-row" id="profHoverRow">
-              <div class="toggle-wrapper" title="Switch trigger mode between Focus and Hover">
-                <input class="toggle-checkbox" type="checkbox" id="profSwitchOnHover">
-                <div class="toggle-container">
-                  <div class="toggle-button"></div>
-                </div>
-              </div>
-              <div class="option-meta">
-                <div class="trigger-mode-header">
-                  <span class="option-title" id="profHoverTitle">Switch Trigger: On Window Focus</span>
-                  <div class="trigger-mode-pills" role="radiogroup" aria-label="Trigger Mode">
-                    <button type="button" class="trigger-pill active" id="chipTriggerFocus">Window Focus</button>
-                    <button type="button" class="trigger-pill" id="chipTriggerHover">Mouse Hover</button>
-                  </div>
-                </div>
-                <span class="option-desc" id="profHoverDesc">Activate this profile when you click or switch focus to
-                  this application's window.</span>
+              <div class="neo-slider-track-wrap">
+                <input type="range" id="themeSliderDistance" min="1" max="15" step="1" value="3"
+                  class="neumorphic-slider" />
               </div>
             </div>
 
-            <!-- Option 2: Show App Icon on Switch (OSD HUD) -->
-            <div class="profile-option-row" id="profOsdRow">
-              <div class="toggle-wrapper" title="Show app icon popup on profile switch">
-                <input class="toggle-checkbox" type="checkbox" id="profSwitchOsdIcon" checked>
-                <div class="toggle-container">
-                  <div class="toggle-button"></div>
-                </div>
+            <!-- Top Light Shadow Intensity Slider -->
+            <div class="neo-slider-row">
+              <div class="neo-slider-label-group">
+                <span class="neo-slider-label">Light Shadow</span>
+                <span class="neo-slider-badge" id="badgeLightIntensity">22%</span>
               </div>
-              <div class="option-meta">
-                <span class="option-title">Show App Icon on Switch</span>
-                <span class="option-desc">Display a sleek floating on-screen HUD badge showing the target app icon
-                  whenever switched.</span>
+              <div class="neo-slider-track-wrap">
+                <input type="range" id="themeSliderLightIntensity" min="1" max="100" step="1" value="22"
+                  class="neumorphic-slider" />
               </div>
             </div>
 
-            <!-- Profile Info Tip -->
-            <div class="profile-info-tip" id="profileInfoTip">
-              <svg class="icon-svg-xs" style="color:var(--accent-primary);" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="16" x2="12" y2="12"></line>
-                <line x1="12" y1="8" x2="12.01" y2="8"></line>
-              </svg>
-              <span>Auto-Switching detects active windows automatically in real time across all your displays.</span>
+            <!-- Bottom Dark Shadow Intensity Slider -->
+            <div class="neo-slider-row">
+              <div class="neo-slider-label-group">
+                <span class="neo-slider-label">Dark Shadow</span>
+                <span class="neo-slider-badge" id="badgeDarkIntensity">6%</span>
+              </div>
+              <div class="neo-slider-track-wrap">
+                <input type="range" id="themeSliderDarkIntensity" min="1" max="100" step="1" value="6"
+                  class="neumorphic-slider" />
+              </div>
+            </div>
+
+            <!-- Blur Slider -->
+            <div class="neo-slider-row">
+              <div class="neo-slider-label-group">
+                <span class="neo-slider-label">Blur</span>
+                <span class="neo-slider-badge" id="badgeBlur">10px</span>
+              </div>
+              <div class="neo-slider-track-wrap">
+                <input type="range" id="themeSliderBlur" min="0" max="25" step="1" value="10"
+                  class="neumorphic-slider" />
+              </div>
             </div>
           </div>
-
-          <!-- Right Column: Pick From Open Windows & Running Applications Explorer -->
-          <div class="profile-apps-column" id="profileAppsColumn">
-            <div class="apps-column-header">
-              <div class="apps-header-titles">
-                <span class="apps-col-title">SHOWING CURRENT OPEN APP(S)</span>
-                <span class="apps-col-subtitle">Click any open application window card below to bind it to this
-                  profile</span>
-              </div>
-              <div class="apps-filter-box">
-                <svg class="icon-svg-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-                <input type="text" id="runningAppsFilterInput" placeholder="Filter open apps..." autocomplete="off"
-                  spellcheck="false" />
-              </div>
-            </div>
-
-            <div class="running-apps-scroll-area" id="runningAppsList">
-              <div class="apps-empty-state">Scanning active open windows...</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="modal-footer profile-modal-footer">
-          <button class="neumorphic-btn btn-chip" id="btnCancelProfileModal">Cancel</button>
-          <button class="neumorphic-btn btn-chip btn-primary-chip" id="btnConfirmProfileModal">Save Profile</button>
         </div>
       </div>
+
+      <div class="theme-modal-footer">
+        <button class="neumorphic-btn btn-chip" id="btnResetTheme">
+          <span>Reset to Default</span>
+        </button>
+        <button class="neumorphic-btn btn-go" id="btnSaveTheme">
+          <span>APPLY</span>
+        </button>
+      </div>
     </div>
+  </div>
+
+  <!-- Profile Setup & Auto-Switch Configuration Modal -->
+  <div class="modal-overlay hidden-field" id="profileModal">
+    <div class="profile-config-dialog" id="profileConfigCard">
+      <div class="modal-header">
+        <div class="modal-title-row">
+          <svg class="icon-svg" style="color:var(--accent-primary);" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <h3 class="modal-title" id="profileModalTitle">CREATE APP PROFILE</h3>
+        </div>
+        <button class="squircle-btn btn-mini" id="btnCloseProfileModal" title="Close (Esc)">
+          <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="profile-config-body" id="profileConfigBody">
+        <!-- Left Column: Form & Toggles -->
+        <div class="profile-form-column">
+          <!-- Delete Mode Confirmation Prompt -->
+          <div id="profileDeleteNotice" class="profile-delete-box hidden-field">
+            <p class="profile-modal-desc" id="profileModalDesc">Are you sure you want to delete this profile?</p>
+          </div>
+
+          <!-- Profile Name -->
+          <div class="form-group-field" id="profileNameGroup">
+            <label for="profileNameInput" class="form-field-lbl">Profile Name:</label>
+            <input type="text" class="profile-modal-input" id="profileNameInput"
+              placeholder="e.g. Chrome, Blender, Gaming, VS Code..." maxlength="28" autocomplete="off"
+              spellcheck="false" />
+          </div>
+
+          <!-- Default Profile Info (shown when editing Default) -->
+          <div class="default-profile-badge-notice hidden-field" id="defaultProfileBadgeNotice">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon
+                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+              </polygon>
+            </svg>
+            <div class="notice-meta">
+              <strong>System Default Profile</strong>
+              <span>Fallback profile activated when no application-specific profile matches.</span>
+            </div>
+          </div>
+
+          <!-- Target Executables -->
+          <div class="form-group-field" id="profileExeGroup">
+            <div class="form-field-header-row">
+              <label for="profInputExe" class="form-field-lbl">Target Executable(s):</label>
+              <div class="form-field-actions">
+                <button type="button" class="neumorphic-btn btn-chip btn-sm-chip" id="btnBrowseProfileExe"
+                  title="Browse your PC for an executable file">
+                  <svg class="icon-svg-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                  </svg>
+                  <span>Browse .exe</span>
+                </button>
+                <button type="button" class="neumorphic-btn btn-chip btn-sm-chip" id="btnRescanRunningApps"
+                  title="Rescan currently open application windows">
+                  <svg class="icon-svg-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="23 4 23 10 17 10"></polyline>
+                    <polyline points="1 20 1 14 7 14"></polyline>
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                  </svg>
+                  <span>Rescan</span>
+                </button>
+              </div>
+            </div>
+            <input type="text" class="profile-modal-input" id="profInputExe"
+              placeholder="e.g. chrome.exe, code.exe (comma-separated)" autocomplete="off" spellcheck="false" />
+            <span class="form-field-hint">Multiple executables supported. Click any window card on the right to toggle
+              assignment.</span>
+          </div>
+
+          <!-- Option 1: Profile Switch Trigger (Window Focus vs Mouse Hover) -->
+          <div class="profile-option-row profile-trigger-row" id="profHoverRow">
+            <div class="toggle-wrapper" title="Switch trigger mode between Focus and Hover">
+              <input class="toggle-checkbox" type="checkbox" id="profSwitchOnHover">
+              <div class="toggle-container">
+                <div class="toggle-button"></div>
+              </div>
+            </div>
+            <div class="option-meta">
+              <div class="trigger-mode-header">
+                <span class="option-title" id="profHoverTitle">Switch Trigger: On Window Focus</span>
+                <div class="trigger-mode-pills" role="radiogroup" aria-label="Trigger Mode">
+                  <button type="button" class="trigger-pill active" id="chipTriggerFocus">Window Focus</button>
+                  <button type="button" class="trigger-pill" id="chipTriggerHover">Mouse Hover</button>
+                </div>
+              </div>
+              <span class="option-desc" id="profHoverDesc">Activate this profile when you click or switch focus to
+                this application's window.</span>
+            </div>
+          </div>
+
+          <!-- Option 2: Show App Icon on Switch (OSD HUD) -->
+          <div class="profile-option-row" id="profOsdRow">
+            <div class="toggle-wrapper" title="Show app icon popup on profile switch">
+              <input class="toggle-checkbox" type="checkbox" id="profSwitchOsdIcon" checked>
+              <div class="toggle-container">
+                <div class="toggle-button"></div>
+              </div>
+            </div>
+            <div class="option-meta">
+              <span class="option-title">Show App Icon on Switch</span>
+              <span class="option-desc">Display a sleek floating on-screen HUD badge showing the target app icon
+                whenever switched.</span>
+            </div>
+          </div>
+
+          <!-- Profile Info Tip -->
+          <div class="profile-info-tip" id="profileInfoTip">
+            <svg class="icon-svg-xs" style="color:var(--accent-primary);" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            <span>Auto-Switching detects active windows automatically in real time across all your displays.</span>
+          </div>
+        </div>
+
+        <!-- Right Column: Pick From Open Windows & Running Applications Explorer -->
+        <div class="profile-apps-column" id="profileAppsColumn">
+          <div class="apps-column-header">
+            <div class="apps-header-titles">
+              <span class="apps-col-title">SHOWING CURRENT OPEN APP(S)</span>
+              <span class="apps-col-subtitle">Click any open application window card below to bind it to this
+                profile</span>
+            </div>
+            <div class="apps-filter-box">
+              <svg class="icon-svg-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="text" id="runningAppsFilterInput" placeholder="Filter open apps..." autocomplete="off"
+                spellcheck="false" />
+            </div>
+          </div>
+
+          <div class="running-apps-scroll-area" id="runningAppsList">
+            <div class="apps-empty-state">Scanning active open windows...</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer profile-modal-footer">
+        <button class="neumorphic-btn btn-chip" id="btnCancelProfileModal">Cancel</button>
+        <button class="neumorphic-btn btn-chip btn-primary-chip" id="btnConfirmProfileModal">Save Profile</button>
+      </div>
+    </div>
+  </div>
 
   </div>
 

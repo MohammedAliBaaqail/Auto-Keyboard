@@ -36,6 +36,7 @@ A_MenuMaskKey := "vkE8"
 #Include lib\JSON.ahk
 #Include lib\WebView2\WebView2.ahk
 #Include lib\AudioSession.ahk
+#Include lib\OCR.ahk
 
 ; Global constants and variables
 global APP_NAME := "AutoHotKeyboard"
@@ -217,8 +218,7 @@ GetDefaultConfig() {
         "keyRemapper", Map(
             "enabled", true,
             "items", [
-                Map("id", "kr-1", "source", "CapsLock", "target", "Control", "name", "CapsLock to Control"),
-                Map("id", "kr-2", "source", "^!m", "target", "MuteAudio", "name", "Mute Master Audio (Ctrl+Alt+M)")
+                Map("id", "kr-1", "source", "CapsLock", "target", "Control", "name", "CapsLock to Control")
             ]
         ),
         "windowManager", Map(
@@ -233,7 +233,9 @@ GetDefaultConfig() {
             "opacity", 210,
             "appVolumeWheel", true,
             "appVolumeMuteEnabled", true,
-            "appVolumeMuteHotkey", "!m"
+            "appVolumeMuteHotkey", "!m",
+            "masterAudioMuteEnabled", true,
+            "masterAudioMuteHotkey", "^!m"
         ),
         "appLauncher", Map(
             "enabled", true,
@@ -325,16 +327,60 @@ ApplyAllModules() {
     ApplyAppLauncher()
     ApplyAutoClicker()
     ApplyMacroRecorder()
+    ApplyMouseGestures()
+    ApplyRadialMenu()
+}
+
+IsNotAppWindowActive(*) {
+    global g_MainGui
+    try {
+        activeHwnd := WinActive("A")
+        if (g_MainGui && activeHwnd = g_MainGui.Hwnd)
+            return false
+        if (WinGetPID("ahk_id " . activeHwnd) = DllCall("GetCurrentProcessId"))
+            return false
+    }
+    return true
+}
+
+IsMouseOverTaskbar(*) {
+    global g_IsEngineActive
+    if (!g_IsEngineActive)
+        return false
+    try {
+        CoordMode("Mouse", "Screen")
+        MouseGetPos(,, &mHwnd)
+        if (!mHwnd)
+            return false
+        rootHwnd := DllCall("GetAncestor", "ptr", mHwnd, "uint", 2, "ptr") ; GA_ROOT = 2
+        topHwnd := rootHwnd ? rootHwnd : mHwnd
+        wClass := WinGetClass("ahk_id " . topHwnd)
+        return (wClass = "Shell_TrayWnd" || wClass = "Shell_SecondaryTrayWnd")
+    } catch {
+        return false
+    }
 }
 
 UnregisterAllHooks() {
     global g_ActiveHotstrings, g_ActiveHotkeys
+    
+    try SetTimer(CheckScreenHotCorners, 0)
     
     for trig in g_ActiveHotstrings {
         try Hotstring(":*:" . trig, "Off")
     }
     g_ActiveHotstrings := []
     
+    HotIf(IsNotAppWindowActive)
+    for hk in g_ActiveHotkeys {
+        try Hotkey(hk, "Off")
+    }
+    HotIf()
+    HotIf(IsMouseOverTaskbar)
+    for hk in g_ActiveHotkeys {
+        try Hotkey(hk, "Off")
+    }
+    HotIf()
     for hk in g_ActiveHotkeys {
         try Hotkey(hk, "Off")
     }
@@ -417,6 +463,7 @@ ApplyKeyRemapper() {
         return
     }
     
+    HotIf(IsNotAppWindowActive)
     for item in modConfig["items"] {
         if (IsObject(item) && item.Has("source") && item.Has("target")) {
             src := Trim(item["source"])
@@ -431,6 +478,7 @@ ApplyKeyRemapper() {
             }
         }
     }
+    HotIf()
 }
 
 FormatSendString(rawKey) {
@@ -570,6 +618,15 @@ ApplyWindowManager() {
         }
     }
 
+    ; Mute Master Audio Hotkey
+    if ((!wm.Has("masterAudioMuteEnabled") || wm["masterAudioMuteEnabled"]) && wm.Has("masterAudioMuteHotkey") && Trim(wm["masterAudioMuteHotkey"]) != "") {
+        try {
+            hk := Trim(wm["masterAudioMuteHotkey"])
+            Hotkey(hk, (*) => (SoundSetMute(-1), SoundBeep(650, 40)), "On")
+            g_ActiveHotkeys.Push(hk)
+        }
+    }
+
     ; Click-Through Ghost Mode Hotkey
     if (wm.Has("clickThroughGhostHotkey") && Trim(wm["clickThroughGhostHotkey"]) != "") {
         try {
@@ -594,6 +651,244 @@ ApplyWindowManager() {
             hk := Trim(wm["borderlessHotkey"])
             Hotkey(hk, (*) => ToggleBorderlessFullscreen(), "On")
             g_ActiveHotkeys.Push(hk)
+        }
+    }
+
+    ; Text Transformer (Case Converters: UPPER, lower, Title Case)
+    if (wm.Has("textTransformEnabled") && wm["textTransformEnabled"]) {
+        upperHk := (wm.Has("textTransformUpperHotkey") && Trim(wm["textTransformUpperHotkey"]) != "") ? Trim(wm["textTransformUpperHotkey"]) : "^!u"
+        lowerHk := (wm.Has("textTransformLowerHotkey") && Trim(wm["textTransformLowerHotkey"]) != "") ? Trim(wm["textTransformLowerHotkey"]) : "^!l"
+        titleHk := (wm.Has("textTransformTitleHotkey") && Trim(wm["textTransformTitleHotkey"]) != "") ? Trim(wm["textTransformTitleHotkey"]) : "^!t"
+        try {
+            Hotkey(upperHk, (*) => TransformSelectedText("upper"), "On")
+            g_ActiveHotkeys.Push(upperHk)
+        }
+        try {
+            Hotkey(lowerHk, (*) => TransformSelectedText("lower"), "On")
+            g_ActiveHotkeys.Push(lowerHk)
+        }
+        try {
+            Hotkey(titleHk, (*) => TransformSelectedText("title"), "On")
+            g_ActiveHotkeys.Push(titleHk)
+        }
+    }
+
+    ; Clean Plain Text & Strip Formatting Hotkey
+    if (wm.Has("textTransformCleanEnabled") && wm["textTransformCleanEnabled"]) {
+        cleanHk := (wm.Has("textTransformCleanHotkey") && Trim(wm["textTransformCleanHotkey"]) != "") ? Trim(wm["textTransformCleanHotkey"]) : "^!k"
+        try {
+            Hotkey(cleanHk, (*) => TransformSelectedText("clean"), "On")
+            g_ActiveHotkeys.Push(cleanHk)
+        }
+    }
+
+    ; Instant Screen OCR (Text Grabber) Hotkey
+    if (wm.Has("screenOcrEnabled") && wm["screenOcrEnabled"]) {
+        ocrHk := (wm.Has("screenOcrHotkey") && Trim(wm["screenOcrHotkey"]) != "") ? Trim(wm["screenOcrHotkey"]) : "^!o"
+        try {
+            Hotkey(ocrHk, (*) => StartScreenOCR(), "On")
+            g_ActiveHotkeys.Push(ocrHk)
+        }
+    }
+
+    ; Precision Screen Color Picker Hotkey
+    if (wm.Has("colorPickerEnabled") && wm["colorPickerEnabled"]) {
+        cpHk := (wm.Has("colorPickerHotkey") && Trim(wm["colorPickerHotkey"]) != "") ? Trim(wm["colorPickerHotkey"]) : "^!p"
+        try {
+            Hotkey(cpHk, (*) => StartColorPicker(), "On")
+            g_ActiveHotkeys.Push(cpHk)
+        }
+    }
+
+    ; Fast Virtual Desktop Navigation Hotkeys & Taskbar Mouse Wheel Hopping
+    if (wm.Has("virtualDesktopsEnabled") && (wm["virtualDesktopsEnabled"] = 1 || wm["virtualDesktopsEnabled"] = true)) {
+        try {
+            Hotkey("^!Left", (*) => SwitchVirtualDesktop(-1), "On")
+            Hotkey("^!Right", (*) => SwitchVirtualDesktop(1), "On")
+            g_ActiveHotkeys.Push("^!Left")
+            g_ActiveHotkeys.Push("^!Right")
+        }
+        
+        taskbarScrollOn := (!wm.Has("taskbarScrollEnabled") || wm["taskbarScrollEnabled"] = 1 || wm["taskbarScrollEnabled"] = true)
+        if (taskbarScrollOn) {
+            try {
+                HotIf(IsMouseOverTaskbar)
+                Hotkey("WheelUp", (*) => SwitchVirtualDesktop(-1), "On")
+                Hotkey("WheelDown", (*) => SwitchVirtualDesktop(1), "On")
+                HotIf()
+                g_ActiveHotkeys.Push("WheelUp")
+                g_ActiveHotkeys.Push("WheelDown")
+            }
+        }
+    }
+}
+
+TransformSelectedText(transType) {
+    global g_Wv
+    clipSaved := ClipboardAll()
+    A_Clipboard := ""
+    Send("^c")
+    if (!ClipWait(0.35, 0)) {
+        A_Clipboard := clipSaved
+        return
+    }
+    
+    txt := A_Clipboard
+    if (txt = "") {
+        A_Clipboard := clipSaved
+        return
+    }
+    
+    transformed := ""
+    eventMsg := ""
+    switch transType {
+        case "upper":
+            transformed := StrUpper(txt)
+            eventMsg := "Text: UPPERCASE"
+        case "lower":
+            transformed := StrLower(txt)
+            eventMsg := "Text: lowercase"
+        case "title":
+            transformed := StrTitle(txt)
+            eventMsg := "Text: Title Case"
+        case "clean":
+            cleaned := RegExReplace(txt, "\r\n", "`n")
+            cleaned := RegExReplace(cleaned, "[ \t]+$", "", , -1)
+            transformed := cleaned
+            eventMsg := "Text: Clean Plain Text"
+    }
+    
+    A_Clipboard := transformed
+    Sleep(25)
+    Send("^v")
+    Sleep(120)
+    
+    SoundBeep(900, 40)
+    if (g_Wv && eventMsg != "") {
+        try {
+            msg := JSON.stringify(Map(
+                "type", "moduleEvent",
+                "module", "windowManager",
+                "message", eventMsg
+            ))
+            g_Wv.PostWebMessageAsString(msg)
+        }
+    }
+}
+
+StartColorPicker() {
+    global g_Wv
+    CoordMode("Mouse", "Screen")
+    CoordMode("Pixel", "Screen")
+    MouseGetPos(&mx, &my)
+    try {
+        cVal := PixelGetColor(mx, my, "RGB")
+        hexStr := Format("#{:06X}", cVal)
+        r := (cVal >> 16) & 0xFF
+        g := (cVal >> 8) & 0xFF
+        b := cVal & 0xFF
+        rgbStr := "rgb(" . r . ", " . g . ", " . b . ")"
+        A_Clipboard := hexStr
+        SoundBeep(1100, 45)
+        if (g_Wv) {
+            msg := JSON.stringify(Map(
+                "type", "moduleEvent",
+                "module", "systemTools",
+                "message", "Color Copied: " . hexStr . " (" . rgbStr . ")"
+            ))
+            g_Wv.PostWebMessageAsString(msg)
+        }
+    }
+}
+
+StartScreenOCR() {
+    global g_Wv
+    CoordMode("Mouse", "Screen")
+    
+    vx := SysGet(76), vy := SysGet(77), vw := SysGet(78), vh := SysGet(79)
+    snipGui := Gui("+AlwaysOnTop -Caption +ToolWindow -DPIScale +LastFound +E0x00080000")
+    snipGui.BackColor := "000000"
+    WinSetTransparent(40, snipGui)
+    snipGui.Show("x" . vx . " y" . vy . " w" . vw . " h" . vh)
+    
+    KeyWait("LButton", "D T4")
+    if (A_PriorKey = "Escape" || !GetKeyState("LButton", "P")) {
+        snipGui.Destroy()
+        return
+    }
+    
+    MouseGetPos(&x1, &y1)
+    boxGui := Gui("+AlwaysOnTop -Caption +ToolWindow -DPIScale")
+    boxGui.BackColor := "d97706"
+    WinSetTransparent(80, boxGui)
+    
+    while GetKeyState("LButton", "P") {
+        Sleep(15)
+        MouseGetPos(&cx, &cy)
+        bx := Min(x1, cx), by := Min(y1, cy)
+        bw := Abs(cx - x1), bh := Abs(cy - y1)
+        if (bw > 2 && bh > 2) {
+            boxGui.Show("x" . bx . " y" . by . " w" . bw . " h" . bh . " NoActivate")
+        }
+    }
+    
+    MouseGetPos(&x2, &y2)
+    snipGui.Destroy()
+    boxGui.Destroy()
+    
+    snipX := Min(x1, x2), snipY := Min(y1, y2)
+    snipW := Abs(x2 - x1), snipH := Abs(y2 - y1)
+    
+    if (snipW < 8 || snipH < 8) {
+        return
+    }
+    
+    try {
+        result := OCR.FromRect(snipX, snipY, snipW, snipH)
+        if (result && Trim(result.Text) != "") {
+            txt := Trim(result.Text)
+            A_Clipboard := txt
+            SoundBeep(1250, 50)
+            wordsCount := StrSplit(txt, [" ", "`n", "`r", "`t"]).Length
+            if (g_Wv) {
+                msg := JSON.stringify(Map(
+                    "type", "moduleEvent",
+                    "module", "systemTools",
+                    "message", "OCR: Copied " . wordsCount . " words to Clipboard"
+                ))
+                g_Wv.PostWebMessageAsString(msg)
+            }
+        } else {
+            SoundBeep(450, 40)
+        }
+    } catch as err {
+        LogMessage("OCR Error: " . err.Message)
+    }
+}
+
+SwitchVirtualDesktop(dir) {
+    global g_Wv
+    static lastSwitchTick := 0
+    if (A_TickCount - lastSwitchTick < 120)
+        return
+    lastSwitchTick := A_TickCount
+
+    if (dir > 0) {
+        Send("^#{Right}")
+        msgText := "Virtual Desktop: Next (→)"
+    } else {
+        Send("^#{Left}")
+        msgText := "Virtual Desktop: Previous (←)"
+    }
+    SoundBeep(750, 35)
+    if (g_Wv) {
+        try {
+            msg := JSON.stringify(Map(
+                "type", "moduleEvent",
+                "module", "systemTools",
+                "message", msgText
+            ))
+            g_Wv.PostWebMessageAsString(msg)
         }
     }
 }
@@ -1522,6 +1817,10 @@ SwitchToProfileInternal(targetProfile, triggerExe := "") {
             g_Config["windowManager"] := prof["windowManager"]
         if (prof.Has("autoClicker"))
             g_Config["autoClicker"] := prof["autoClicker"]
+        if (prof.Has("mouseGestures"))
+            g_Config["mouseGestures"] := prof["mouseGestures"]
+        if (prof.Has("radialMenu"))
+            g_Config["radialMenu"] := prof["radialMenu"]
     }
 
     SaveConfigToFile()
@@ -2608,4 +2907,794 @@ ToggleEngineFromTray() {
             g_Wv.PostWebMessageAsString(msg)
         }
     }
+}
+
+; ==============================================================================
+; 7. Screen Hot Corners & Mouse Gestures Module
+; ==============================================================================
+
+; Hot Corner State Variables
+global g_CornerActive := ""
+global g_CornerTick := 0
+global g_CornerTriggered := false
+
+ApplyMouseGestures() {
+    global g_Config, g_ActiveHotkeys, g_IsEngineActive
+    
+    if (!g_Config.Has("mouseGestures")) {
+        return
+    }
+    
+    mg := g_Config["mouseGestures"]
+    
+    ; 1. Screen Hot Corners
+    cornersOn := (mg.Has("cornersEnabled") && (mg["cornersEnabled"] = 1 || mg["cornersEnabled"] = true))
+    if (cornersOn && g_IsEngineActive) {
+        SetTimer(CheckScreenHotCorners, 50)
+    } else {
+        SetTimer(CheckScreenHotCorners, 0)
+    }
+    
+    ; 2. Mouse Gestures
+    gesturesOn := (mg.Has("gesturesEnabled") && (mg["gesturesEnabled"] = 1 || mg["gesturesEnabled"] = true))
+    if (gesturesOn && g_IsEngineActive) {
+        trigBtn := mg.Has("triggerButton") && Trim(mg["triggerButton"]) != "" ? Trim(mg["triggerButton"]) : "RButton"
+        try {
+            hkStr := "*" . trigBtn
+            Hotkey(hkStr, (*) => HandleMouseGesture(trigBtn), "On")
+            g_ActiveHotkeys.Push(hkStr)
+        }
+    }
+}
+
+CheckScreenHotCorners() {
+    global g_Config, g_CornerActive, g_CornerTick, g_CornerTriggered, g_IsEngineActive
+    
+    if (!g_IsEngineActive || !g_Config.Has("mouseGestures")) {
+        return
+    }
+    
+    mg := g_Config["mouseGestures"]
+    if (!mg.Has("cornersEnabled") || (!mg["cornersEnabled"])) {
+        return
+    }
+    
+    dwellMs := mg.Has("dwellDuration") ? mg["dwellDuration"] : 250
+    
+    CoordMode("Mouse", "Screen")
+    MouseGetPos(&mx, &my)
+    
+    ; Virtual multi-monitor coordinates
+    vx := SysGet(76)
+    vy := SysGet(77)
+    vw := SysGet(78)
+    vh := SysGet(79)
+    
+    cornerName := ""
+    tol := 5 ; pixels tolerance for screen edge
+    
+    if (mx <= vx + tol && my <= vy + tol) {
+        cornerName := "cornerTopLeft"
+    } else if (mx >= vx + vw - tol && my <= vy + tol) {
+        cornerName := "cornerTopRight"
+    } else if (mx <= vx + tol && my >= vy + vh - tol) {
+        cornerName := "cornerBottomLeft"
+    } else if (mx >= vx + vw - tol && my >= vy + vh - tol) {
+        cornerName := "cornerBottomRight"
+    }
+    
+    if (cornerName != "") {
+        if (g_CornerActive != cornerName) {
+            g_CornerActive := cornerName
+            g_CornerTick := A_TickCount
+            g_CornerTriggered := false
+        } else if (!g_CornerTriggered && (A_TickCount - g_CornerTick >= dwellMs)) {
+            g_CornerTriggered := true
+            actionName := mg.Has(cornerName) ? mg[cornerName] : ""
+            if (actionName != "" && actionName != "None") {
+                ExecuteSystemAction(actionName, "Hot Corner: " . cornerName)
+            }
+        }
+    } else {
+        g_CornerActive := ""
+        g_CornerTriggered := false
+    }
+}
+
+HandleMouseGesture(triggerBtn) {
+    global g_Config, g_MainGui
+    if (!g_Config.Has("mouseGestures")) {
+        Click(triggerBtn)
+        return
+    }
+    
+    ; If right-clicking inside our own app window, let normal right-click through
+    try {
+        activeHwnd := WinActive("A")
+        if (g_MainGui && activeHwnd = g_MainGui.Hwnd) {
+            Click(triggerBtn)
+            return
+        }
+    }
+    
+    mg := g_Config["mouseGestures"]
+    timeoutMs := mg.Has("gestureTimeout") ? mg["gestureTimeout"] : 1200
+    threshPx := mg.Has("strokeThreshold") ? mg["strokeThreshold"] : 35
+    
+    CoordMode("Mouse", "Screen")
+    MouseGetPos(&startX, &startY)
+    startTick := A_TickCount
+    
+    ; Wait while trigger button is physically held down
+    while GetKeyState(triggerBtn, "P") {
+        Sleep(15)
+        if (A_TickCount - startTick > 3500) {
+            break
+        }
+    }
+    
+    elapsed := A_TickCount - startTick
+    MouseGetPos(&endX, &endY)
+    
+    dx := endX - startX
+    dy := endY - startY
+    dist := Sqrt((dx * dx) + (dy * dy))
+    
+    ; If the movement did not exceed threshold, perform standard click (e.g. right-click menu)
+    if (dist < threshPx) {
+        if (triggerBtn = "RButton") {
+            Click("Right")
+        } else if (triggerBtn = "MButton") {
+            Click("Middle")
+        } else if (triggerBtn = "XButton1") {
+            Click("X1")
+        } else if (triggerBtn = "XButton2") {
+            Click("X2")
+        }
+        return
+    }
+    
+    ; If held longer than 3.5s without completing, abort to prevent accidental stroke execution
+    if (elapsed > 3500) {
+        return
+    }
+    
+    ; Determine direction: Left, Right, Up, Down, DownRight
+    gesture := ""
+    absX := Abs(dx)
+    absY := Abs(dy)
+    
+    ; Check diagonal down-right
+    if (dx > 0 && dy > 0 && absX >= 20 && absY >= 20 && (absX / (absY + 0.001) >= 0.4 && absX / (absY + 0.001) <= 2.5)) {
+        gesture := "actionDownRight"
+    } else if (absX > absY) {
+        gesture := (dx > 0) ? "actionRight" : "actionLeft"
+    } else {
+        gesture := (dy > 0) ? "actionDown" : "actionUp"
+    }
+    
+    actionName := mg.Has(gesture) ? mg[gesture] : ""
+    if (actionName != "" && StrLower(actionName) != "none") {
+        ; Activate the window under the starting point so actions (e.g. Back, Close, Maximize) apply to it
+        try {
+            hwndUnder := DllCall("WindowFromPoint", "int64", (startY << 32) | (startX & 0xFFFFFFFF), "ptr")
+            rootHwnd := DllCall("GetAncestor", "ptr", hwndUnder, "uint", 2, "ptr")
+            if (rootHwnd && (!g_MainGui || rootHwnd != g_MainGui.Hwnd)) {
+                WinActivate("ahk_id " . rootHwnd)
+            }
+        }
+        ExecuteSystemAction(actionName, "Gesture: " . gesture)
+    }
+}
+
+ExecuteSystemAction(actionName, triggerSource := "") {
+    global g_Wv
+    
+    switch actionName {
+        case "TaskView":
+            Send("#{Tab}")
+        case "ActionCenter":
+            Send("#a")
+        case "StartMenu":
+            Send("^{Esc}")
+        case "ShowDesktop":
+            Send("#d")
+        case "LockWorkstation":
+            DllCall("LockWorkStation")
+        case "MuteVolume":
+            Send("{Volume_Mute}")
+        case "PrevTrack":
+            Send("{Media_Prev}")
+        case "NextTrack":
+            Send("{Media_Next}")
+        case "PlayPause":
+            Send("{Media_Play_Pause}")
+        case "Back":
+            Send("!{Left}")
+        case "Forward":
+            Send("!{Right}")
+        case "ScrollTop":
+            Send("^{Home}")
+        case "ScrollBottom":
+            Send("^{End}")
+        case "CloseWindow":
+            Send("!{F4}")
+        case "MinimizeWindow":
+            try WinMinimize("A")
+        case "MaximizeWindow":
+            try {
+                hwnd := WinGetID("A")
+                isMax := WinGetMinMax("ahk_id " . hwnd)
+                if (isMax = 1) {
+                    WinRestore("ahk_id " . hwnd)
+                } else {
+                    WinMaximize("ahk_id " . hwnd)
+                }
+            }
+        case "NewTab":
+            Send("^t")
+        case "CloseTab":
+            Send("^w")
+        case "ReloadPage":
+            Send("^{F5}")
+        case "Screenshot":
+            Send("#+s")
+        case "ScreenOcr":
+            StartScreenOCR()
+        case "ColorPicker":
+            StartColorPicker()
+        case "NextDesktop":
+            SwitchVirtualDesktop(1)
+        case "PrevDesktop":
+            SwitchVirtualDesktop(-1)
+        case "AlwaysOnTop":
+            ToggleAlwaysOnTop()
+        case "GhostMode":
+            ToggleGhostMode()
+        case "CleanText":
+            TransformSelectedText("clean")
+        case "Calculator":
+            try Run("calc.exe")
+    }
+    
+    SoundBeep(1100, 45)
+    
+    if (g_Wv) {
+        try {
+            msg := JSON.stringify(Map(
+                "type", "moduleEvent",
+                "module", "systemTools",
+                "message", triggerSource . " -> " . actionName
+            ))
+            g_Wv.PostWebMessageAsString(msg)
+        }
+    }
+}
+
+; ==============================================================================
+; 8. Radial Menu / Command Palette (Pie Wheel) Module
+; ==============================================================================
+
+ApplyRadialMenu() {
+    global g_Config, g_ActiveHotkeys, g_IsEngineActive
+    
+    if (!g_Config.Has("radialMenu")) {
+        return
+    }
+    
+    rm := g_Config["radialMenu"]
+    isEnabled := (rm.Has("enabled") && (rm["enabled"] = 1 || rm["enabled"] = true))
+    if (!isEnabled || !g_IsEngineActive) {
+        return
+    }
+    
+    trig := (rm.Has("triggerButton") && Trim(rm["triggerButton"]) != "") ? Trim(rm["triggerButton"]) : "MButton"
+    
+    try {
+        hkStr := "*" . trig
+        Hotkey(hkStr, (*) => HandleRadialMenuTrigger(trig), "On")
+        g_ActiveHotkeys.Push(hkStr)
+    }
+}
+
+HandleRadialMenuTrigger(trigBtn) {
+    global g_Config
+    if (!g_Config.Has("radialMenu")) {
+        Click(trigBtn)
+        return
+    }
+    
+    rm := g_Config["radialMenu"]
+    slices := rm.Has("slices") ? rm["slices"] : []
+    radSize := rm.Has("wheelRadius") ? rm["wheelRadius"] : 180
+    
+    CoordMode("Mouse", "Screen")
+    MouseGetPos(&originX, &originY)
+    
+    RadialMenuHUD.ShowMenu(originX, originY, radSize, slices, trigBtn)
+}
+
+class RadialMenuHUD {
+    static guiObj := 0
+    static isShowing := false
+
+    static GetActionFriendlyName(actionName) {
+        static nameMap := Map(
+            "ScreenOcr", "OCR",
+            "ColorPicker", "Color Pick",
+            "NextDesktop", "Next Desk",
+            "PrevDesktop", "Prev Desk",
+            "AlwaysOnTop", "Pin Top",
+            "MuteVolume", "Mute Audio",
+            "CleanText", "Clean Text",
+            "TaskView", "Task View",
+            "ShowDesktop", "Desktop",
+            "LockWorkstation", "Lock PC",
+            "Calculator", "Calculator",
+            "Screenshot", "Screenshot",
+            "MaximizeWindow", "Maximize",
+            "MinimizeWindow", "Minimize",
+            "CloseWindow", "Close Win",
+            "PlayPause", "Play/Pause",
+            "NextTrack", "Next Track",
+            "PrevTrack", "Prev Track",
+            "ActionCenter", "Action Ctr",
+            "StartMenu", "Start Menu",
+            "NewTab", "New Tab",
+            "CloseTab", "Close Tab",
+            "ReloadPage", "Reload"
+        )
+        if (nameMap.Has(actionName))
+            return nameMap[actionName]
+        return (actionName = "" || actionName = "none") ? "Empty" : actionName
+    }
+
+    static ParseHexColor(hexStr, defaultAlpha := 255) {
+        clean := StrReplace(StrReplace(hexStr, "#", ""), " ", "")
+        if (StrLen(clean) = 6) {
+            r := Integer("0x" . SubStr(clean, 1, 2))
+            g := Integer("0x" . SubStr(clean, 3, 2))
+            b := Integer("0x" . SubStr(clean, 5, 2))
+            return ((defaultAlpha & 0xFF) << 24) | ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | (b & 0xFF)
+        } else if (StrLen(clean) = 8) {
+            return Integer("0x" . clean)
+        }
+        return 0xFF2563EB
+    }
+
+    static AdjustBrightness(argb, delta) {
+        a := (argb >> 24) & 0xFF
+        r := Max(0, Min(255, ((argb >> 16) & 0xFF) + delta))
+        g := Max(0, Min(255, ((argb >> 8) & 0xFF) + delta))
+        b := Max(0, Min(255, (argb & 0xFF) + delta))
+        return (a << 24) | (r << 16) | (g << 8) | b
+    }
+
+    static GetLuminance(argb) {
+        r := (argb >> 16) & 0xFF
+        g := (argb >> 8) & 0xFF
+        b := argb & 0xFF
+        return 0.299 * r + 0.587 * g + 0.114 * b
+    }
+
+    static AddShapeToPath(pPath, x, y, w, h, r) {
+        if (r <= 0.5) {
+            DllCall("gdiplus\GdipAddPathRectangle", "ptr", pPath, "float", x, "float", y, "float", w, "float", h)
+        } else if (r >= (w / 2.0 - 0.5) && r >= (h / 2.0 - 0.5)) {
+            DllCall("gdiplus\GdipAddPathEllipse", "ptr", pPath, "float", x, "float", y, "float", w, "float", h)
+        } else {
+            d := r * 2.0
+            DllCall("gdiplus\GdipAddPathArc", "ptr", pPath, "float", x, "float", y, "float", d, "float", d, "float", 180.0, "float", 90.0)
+            DllCall("gdiplus\GdipAddPathArc", "ptr", pPath, "float", x + w - d, "float", y, "float", d, "float", d, "float", 270.0, "float", 90.0)
+            DllCall("gdiplus\GdipAddPathArc", "ptr", pPath, "float", x + w - d, "float", y + h - d, "float", d, "float", d, "float", 0.0, "float", 90.0)
+            DllCall("gdiplus\GdipAddPathArc", "ptr", pPath, "float", x, "float", y + h - d, "float", d, "float", d, "float", 90.0, "float", 90.0)
+            DllCall("gdiplus\GdipClosePathFigure", "ptr", pPath)
+        }
+    }
+
+    static ShowMenu(originX, originY, radSize, slices, trigBtn) {
+        global g_Config
+        if (this.isShowing)
+            return
+        this.isShowing := true
+
+        ProfileGdipHelper.Init()
+
+        dpiScale := A_ScreenDPI / 96.0
+        radSize := Max(140, Min(260, Integer(radSize)))
+        guiDiameter := Round((radSize + 70) * 2 * dpiScale)
+        guiRadius := guiDiameter // 2
+        cx := Float(guiRadius)
+        cy := Float(guiRadius)
+        R_outer := Float(radSize * dpiScale)
+        R_inner := Float(43.0 * dpiScale)
+        R_nodes := Float((R_outer + R_inner) * 0.52)
+        nodeDiam := 52.0 * dpiScale
+        nodeHoverDiam := 58.0 * dpiScale
+
+        ; Read active theme dynamically
+        themeBg := (g_Config.Has("theme") && g_Config["theme"].Has("bgColor")) ? g_Config["theme"]["bgColor"] : "#f1f5f9"
+        themeAccent := (g_Config.Has("theme") && g_Config["theme"].Has("accentColor")) ? g_Config["theme"]["accentColor"] : "#2563eb"
+        themeRadius := (g_Config.Has("theme") && g_Config["theme"].Has("radius")) ? Integer(g_Config["theme"]["radius"]) : 10
+
+        bgArgb := RadialMenuHUD.ParseHexColor(themeBg, 255)
+        accentArgb := RadialMenuHUD.ParseHexColor(themeAccent, 255)
+        isLight := RadialMenuHUD.GetLuminance(bgArgb) > 135
+
+        ; Calculate corner radii based on theme.radius (if radius == 0, sharp squares!)
+        if (themeRadius <= 0) {
+            outerCornerR := 0.0
+            hubCornerR := 0.0
+            nodeCornerR := 0.0
+        } else {
+            outerCornerR := Min(R_outer, Float(themeRadius * 7.0 * dpiScale))
+            hubCornerR := Min(R_inner, Float(themeRadius * 2.5 * dpiScale))
+            nodeCornerR := Min(nodeDiam / 2.0, Float(themeRadius * 2.0 * dpiScale))
+        }
+
+        this.guiObj := Gui("+AlwaysOnTop -Caption +ToolWindow -DPIScale +E0x08000000 +E0x00080000")
+
+        hDC := DllCall("GetDC", "ptr", 0, "ptr")
+        hMemDC := DllCall("CreateCompatibleDC", "ptr", hDC, "ptr")
+
+        bi := Buffer(40, 0)
+        NumPut("uint", 40, bi, 0)
+        NumPut("int", guiDiameter, bi, 4)
+        NumPut("int", -guiDiameter, bi, 8)
+        NumPut("ushort", 1, bi, 12)
+        NumPut("ushort", 32, bi, 14)
+
+        pBits := 0
+        hBmp := DllCall("CreateDIBSection", "ptr", hMemDC, "ptr", bi, "uint", 0, "ptr*", &pBits, "ptr", 0, "uint", 0, "ptr")
+        hOldBmp := DllCall("SelectObject", "ptr", hMemDC, "ptr", hBmp, "ptr")
+
+        pGraphics := 0
+        DllCall("gdiplus\GdipCreateFromHDC", "ptr", hMemDC, "ptr*", &pGraphics)
+        DllCall("gdiplus\GdipSetSmoothingMode", "ptr", pGraphics, "int", 4)
+        DllCall("gdiplus\GdipSetTextRenderingHint", "ptr", pGraphics, "int", 4)
+
+        ; GDI+ Fonts matching JetBrains Mono / Segoe UI
+        pFamily := 0
+        if (DllCall("gdiplus\GdipCreateFontFamilyFromName", "wstr", "JetBrains Mono", "ptr", 0, "ptr*", &pFamily) != 0 || !pFamily) {
+            DllCall("gdiplus\GdipCreateFontFamilyFromName", "wstr", "Segoe UI", "ptr", 0, "ptr*", &pFamily)
+        }
+        pFontDir := 0
+        DllCall("gdiplus\GdipCreateFont", "ptr", pFamily, "float", 8.0 * dpiScale, "int", 1, "int", 2, "ptr*", &pFontDir)
+        pFontLabel := 0
+        DllCall("gdiplus\GdipCreateFont", "ptr", pFamily, "float", 7.8 * dpiScale, "int", 1, "int", 2, "ptr*", &pFontLabel)
+        pFontCenter := 0
+        DllCall("gdiplus\GdipCreateFont", "ptr", pFamily, "float", 8.0 * dpiScale, "int", 1, "int", 2, "ptr*", &pFontCenter)
+        pFontCenterAction := 0
+        DllCall("gdiplus\GdipCreateFont", "ptr", pFamily, "float", 9.0 * dpiScale, "int", 1, "int", 2, "ptr*", &pFontCenterAction)
+
+        ; String formats (centered)
+        pFormat := 0
+        DllCall("gdiplus\GdipCreateStringFormat", "int", 0, "int", 0, "ptr*", &pFormat)
+        DllCall("gdiplus\GdipSetStringFormatAlign", "ptr", pFormat, "int", 1)
+        DllCall("gdiplus\GdipSetStringFormatLineAlign", "ptr", pFormat, "int", 1)
+
+        ; Brushes & Pens dynamically mapped to the current theme
+        cBackdrop := (0xFC << 24) | (bgArgb & 0x00FFFFFF)
+        cBorder := isLight ? ((0x80 << 24) | (RadialMenuHUD.AdjustBrightness(bgArgb, -45) & 0x00FFFFFF)) : ((0x60 << 24) | (RadialMenuHUD.AdjustBrightness(bgArgb, 40) & 0x00FFFFFF))
+        cShadow := isLight ? ((0x30 << 24) | (RadialMenuHUD.AdjustBrightness(bgArgb, -60) & 0x00FFFFFF)) : 0x50000000
+        cSpoke := isLight ? ((0x35 << 24) | (RadialMenuHUD.AdjustBrightness(bgArgb, -50) & 0x00FFFFFF)) : ((0x30 << 24) | (RadialMenuHUD.AdjustBrightness(bgArgb, 50) & 0x00FFFFFF))
+        cHoverWedge := (0x35 << 24) | (accentArgb & 0x00FFFFFF)
+
+        cNodeNormalBg := (0xFF << 24) | (RadialMenuHUD.AdjustBrightness(bgArgb, isLight ? 10 : 15) & 0x00FFFFFF)
+        cNodeNormalBorder := cBorder
+        cNodeHoverBg := (0xFF << 24) | (accentArgb & 0x00FFFFFF)
+        cNodeHoverBorder := isLight ? 0xFFFFFFFF : 0xFFFFFFFF
+
+        cCenterHubBg := (0xFF << 24) | (RadialMenuHUD.AdjustBrightness(bgArgb, isLight ? -6 : -10) & 0x00FFFFFF)
+        cCenterHubBorder := (0xFF << 24) | (accentArgb & 0x00FFFFFF)
+        cTargetIcon := (0xFF << 24) | (accentArgb & 0x00FFFFFF)
+
+        cTextTagNormal := (0xFF << 24) | (accentArgb & 0x00FFFFFF)
+        cTextLblNormal := isLight ? 0xFF1E293B : 0xFFF1F5F9
+        cTextTagHover := 0xFFFFFFFF
+        cTextLblHover := 0xFFFFFFFF
+        cTextCenterNormal := isLight ? 0xFF64748B : 0xFF94A3B8
+        cTextCenterHover := (0xFF << 24) | (accentArgb & 0x00FFFFFF)
+
+        pWheelBackdropBrush := 0
+        DllCall("gdiplus\GdipCreateSolidFill", "uint", cBackdrop, "ptr*", &pWheelBackdropBrush)
+
+        pWheelShadowPen := 0
+        DllCall("gdiplus\GdipCreatePen1", "uint", cShadow, "float", 3.0 * dpiScale, "int", 2, "ptr*", &pWheelShadowPen)
+
+        pWheelBorderPen := 0
+        DllCall("gdiplus\GdipCreatePen1", "uint", cBorder, "float", 1.8 * dpiScale, "int", 2, "ptr*", &pWheelBorderPen)
+
+        pSpokePen := 0
+        DllCall("gdiplus\GdipCreatePen1", "uint", cSpoke, "float", 1.0 * dpiScale, "int", 2, "ptr*", &pSpokePen)
+
+        pHoverWedgeBrush := 0
+        DllCall("gdiplus\GdipCreateSolidFill", "uint", cHoverWedge, "ptr*", &pHoverWedgeBrush)
+
+        ; Slice Nodes
+        pNodeNormalBrush := 0
+        DllCall("gdiplus\GdipCreateSolidFill", "uint", cNodeNormalBg, "ptr*", &pNodeNormalBrush)
+
+        pNodeNormalPen := 0
+        DllCall("gdiplus\GdipCreatePen1", "uint", cNodeNormalBorder, "float", 1.5 * dpiScale, "int", 2, "ptr*", &pNodeNormalPen)
+
+        pNodeHoverBrush := 0
+        DllCall("gdiplus\GdipCreateSolidFill", "uint", cNodeHoverBg, "ptr*", &pNodeHoverBrush)
+
+        pNodeHoverPen := 0
+        DllCall("gdiplus\GdipCreatePen1", "uint", cNodeHoverBorder, "float", 2.2 * dpiScale, "int", 2, "ptr*", &pNodeHoverPen)
+
+        ; Center Hub
+        pCenterHubBrush := 0
+        DllCall("gdiplus\GdipCreateSolidFill", "uint", cCenterHubBg, "ptr*", &pCenterHubBrush)
+
+        pCenterHubPen := 0
+        DllCall("gdiplus\GdipCreatePen1", "uint", cCenterHubBorder, "float", 2.0 * dpiScale, "int", 2, "ptr*", &pCenterHubPen)
+
+        pTargetIconPen := 0
+        DllCall("gdiplus\GdipCreatePen1", "uint", cTargetIcon, "float", 1.6 * dpiScale, "int", 2, "ptr*", &pTargetIconPen)
+
+        pTargetIconDotBrush := 0
+        DllCall("gdiplus\GdipCreateSolidFill", "uint", cTargetIcon, "ptr*", &pTargetIconDotBrush)
+
+        ; Text Brushes
+        pTextTagNormalBrush := 0
+        DllCall("gdiplus\GdipCreateSolidFill", "uint", cTextTagNormal, "ptr*", &pTextTagNormalBrush)
+        pTextLblNormalBrush := 0
+        DllCall("gdiplus\GdipCreateSolidFill", "uint", cTextLblNormal, "ptr*", &pTextLblNormalBrush)
+        pTextTagHoverBrush := 0
+        DllCall("gdiplus\GdipCreateSolidFill", "uint", cTextTagHover, "ptr*", &pTextTagHoverBrush)
+        pTextLblHoverBrush := 0
+        DllCall("gdiplus\GdipCreateSolidFill", "uint", cTextLblHover, "ptr*", &pTextLblHoverBrush)
+        pTextCenterNormalBrush := 0
+        DllCall("gdiplus\GdipCreateSolidFill", "uint", cTextCenterNormal, "ptr*", &pTextCenterNormalBrush)
+        pTextCenterHoverBrush := 0
+        DllCall("gdiplus\GdipCreateSolidFill", "uint", cTextCenterHover, "ptr*", &pTextCenterHoverBrush)
+
+        dirs := ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
+
+        rectBuf := Buffer(16, 0)
+        ptDst := Buffer(8, 0)
+        sz := Buffer(8, 0)
+        NumPut("int", guiDiameter, sz, 0), NumPut("int", guiDiameter, sz, 4)
+        ptSrc := Buffer(8, 0)
+        blend := Buffer(4, 0)
+        NumPut("uchar", 0, blend, 0), NumPut("uchar", 0, blend, 1)
+        NumPut("uchar", 255, blend, 2), NumPut("uchar", 1, blend, 3)
+
+        posX := originX - guiRadius
+        posY := originY - guiRadius
+        NumPut("int", posX, ptDst, 0), NumPut("int", posY, ptDst, 4)
+
+        this.guiObj.Show("x" . posX . " y" . posY . " w" . guiDiameter . " h" . guiDiameter . " NoActivate")
+
+        DrawFrame(selIndex) {
+            DllCall("gdiplus\GdipGraphicsClear", "ptr", pGraphics, "uint", 0x00000000)
+
+            ; 1. Outer backdrop path (sharp square if radius 0, squircle, or circle)
+            pBackdropPath := 0
+            DllCall("gdiplus\GdipCreatePath", "int", 0, "ptr*", &pBackdropPath)
+            RadialMenuHUD.AddShapeToPath(pBackdropPath, cx - R_outer, cy - R_outer, R_outer * 2.0, R_outer * 2.0, outerCornerR)
+
+            ; Shadow path
+            pShadowPath := 0
+            DllCall("gdiplus\GdipCreatePath", "int", 0, "ptr*", &pShadowPath)
+            shadowOffset := 1.5 * dpiScale
+            shadowR := (outerCornerR > 0) ? (outerCornerR + shadowOffset) : 0.0
+            RadialMenuHUD.AddShapeToPath(pShadowPath, cx - R_outer - shadowOffset, cy - R_outer - shadowOffset, (R_outer + shadowOffset) * 2.0, (R_outer + shadowOffset) * 2.0, shadowR)
+            DllCall("gdiplus\GdipDrawPath", "ptr", pGraphics, "ptr", pWheelShadowPen, "ptr", pShadowPath)
+            DllCall("gdiplus\GdipDeletePath", "ptr", pShadowPath)
+
+            ; Fill backdrop
+            DllCall("gdiplus\GdipFillPath", "ptr", pGraphics, "ptr", pWheelBackdropBrush, "ptr", pBackdropPath)
+
+            ; 2. Hovered slice sector (clipped to backdrop so square corners stay sharp and unclipped)
+            if (selIndex >= 0) {
+                DllCall("gdiplus\GdipSetClipPath", "ptr", pGraphics, "ptr", pBackdropPath, "int", 0)
+                startAngle := (selIndex * 45.0) - 90.0 - 22.5
+                DllCall("gdiplus\GdipFillPie", "ptr", pGraphics, "ptr", pHoverWedgeBrush
+                    , "float", cx - R_outer * 1.5, "float", cy - R_outer * 1.5, "float", R_outer * 3.0, "float", R_outer * 3.0
+                    , "float", startAngle, "float", 45.0)
+                DllCall("gdiplus\GdipResetClip", "ptr", pGraphics)
+            }
+
+            ; 3. Radial Spoke Dividers (clipped to backdrop)
+            DllCall("gdiplus\GdipSetClipPath", "ptr", pGraphics, "ptr", pBackdropPath, "int", 0)
+            Loop 8 {
+                spokeAng := ((A_Index - 1) * 45.0 - 90.0 - 22.5) * (0.0174532925)
+                x1 := cx + R_inner * Cos(spokeAng)
+                y1 := cy + R_inner * Sin(spokeAng)
+                x2 := cx + R_outer * 1.5 * Cos(spokeAng)
+                y2 := cy + R_outer * 1.5 * Sin(spokeAng)
+                DllCall("gdiplus\GdipDrawLine", "ptr", pGraphics, "ptr", pSpokePen, "float", x1, "float", y1, "float", x2, "float", y2)
+            }
+            DllCall("gdiplus\GdipResetClip", "ptr", pGraphics)
+
+            ; 4. Outer Backdrop Border
+            DllCall("gdiplus\GdipDrawPath", "ptr", pGraphics, "ptr", pWheelBorderPen, "ptr", pBackdropPath)
+            DllCall("gdiplus\GdipDeletePath", "ptr", pBackdropPath)
+
+            ; 5. 8 Slice Nodes (matching rm-slice-node shape and theme)
+            Loop 8 {
+                idx := A_Index - 1
+                isHov := (idx == selIndex)
+                rad := (idx * 45.0 - 90.0) * (0.0174532925)
+                nx := cx + R_nodes * Cos(rad)
+                ny := cy + R_nodes * Sin(rad)
+                curDiam := isHov ? nodeHoverDiam : nodeDiam
+                curRad := curDiam / 2.0
+                bx := nx - curRad
+                by := ny - curRad
+
+                curNodeCornerR := (nodeCornerR > 0) ? (isHov ? (nodeHoverDiam / 2.0 * (nodeCornerR / (nodeDiam / 2.0))) : nodeCornerR) : 0.0
+
+                pNodePath := 0
+                DllCall("gdiplus\GdipCreatePath", "int", 0, "ptr*", &pNodePath)
+                RadialMenuHUD.AddShapeToPath(pNodePath, bx, by, curDiam, curDiam, curNodeCornerR)
+                DllCall("gdiplus\GdipFillPath", "ptr", pGraphics, "ptr", (isHov ? pNodeHoverBrush : pNodeNormalBrush), "ptr", pNodePath)
+                DllCall("gdiplus\GdipDrawPath", "ptr", pGraphics, "ptr", (isHov ? pNodeHoverPen : pNodeNormalPen), "ptr", pNodePath)
+                DllCall("gdiplus\GdipDeletePath", "ptr", pNodePath)
+
+                actName := (idx < slices.Length) ? slices[idx + 1] : ""
+                friendly := RadialMenuHUD.GetActionFriendlyName(actName)
+
+                ; Direction Tag (N, NE, etc.)
+                NumPut("float", bx, rectBuf, 0)
+                NumPut("float", by + (6.0 * dpiScale), rectBuf, 4)
+                NumPut("float", curDiam, rectBuf, 8)
+                NumPut("float", 14.0 * dpiScale, rectBuf, 12)
+                DllCall("gdiplus\GdipDrawString", "ptr", pGraphics, "wstr", dirs[idx + 1], "int", -1
+                    , "ptr", pFontDir, "ptr", rectBuf.Ptr, "ptr", pFormat, "ptr", (isHov ? pTextTagHoverBrush : pTextTagNormalBrush))
+
+                ; Action Label (OCR, Next Desk, etc.)
+                NumPut("float", bx + (2.0 * dpiScale), rectBuf, 0)
+                NumPut("float", by + (20.0 * dpiScale), rectBuf, 4)
+                NumPut("float", curDiam - (4.0 * dpiScale), rectBuf, 8)
+                NumPut("float", 24.0 * dpiScale, rectBuf, 12)
+                DllCall("gdiplus\GdipDrawString", "ptr", pGraphics, "wstr", friendly, "int", -1
+                    , "ptr", pFontLabel, "ptr", rectBuf.Ptr, "ptr", pFormat, "ptr", (isHov ? pTextLblHoverBrush : pTextLblNormalBrush))
+            }
+
+            ; 6. Center Hub (Recessed Hub with Target Icon or Action Name)
+            pHubPath := 0
+            DllCall("gdiplus\GdipCreatePath", "int", 0, "ptr*", &pHubPath)
+            RadialMenuHUD.AddShapeToPath(pHubPath, cx - R_inner, cy - R_inner, R_inner * 2.0, R_inner * 2.0, hubCornerR)
+            DllCall("gdiplus\GdipFillPath", "ptr", pGraphics, "ptr", pCenterHubBrush, "ptr", pHubPath)
+            DllCall("gdiplus\GdipDrawPath", "ptr", pGraphics, "ptr", pCenterHubPen, "ptr", pHubPath)
+            DllCall("gdiplus\GdipDeletePath", "ptr", pHubPath)
+
+            if (selIndex >= 0) {
+                centerTxt := RadialMenuHUD.GetActionFriendlyName((selIndex < slices.Length) ? slices[selIndex + 1] : "")
+                NumPut("float", cx - R_inner, rectBuf, 0)
+                NumPut("float", cy - (11.0 * dpiScale), rectBuf, 4)
+                NumPut("float", R_inner * 2.0, rectBuf, 8)
+                NumPut("float", 22.0 * dpiScale, rectBuf, 12)
+                DllCall("gdiplus\GdipDrawString", "ptr", pGraphics, "wstr", centerTxt, "int", -1
+                    , "ptr", pFontCenterAction, "ptr", rectBuf.Ptr, "ptr", pFormat, "ptr", pTextCenterHoverBrush)
+            } else {
+                if (hubCornerR <= 0.5) {
+                    targetRingR := 8.0 * dpiScale
+                    DllCall("gdiplus\GdipDrawRectangle", "ptr", pGraphics, "ptr", pTargetIconPen
+                        , "float", cx - targetRingR, "float", cy - (14.0 * dpiScale) - targetRingR, "float", targetRingR * 2.0, "float", targetRingR * 2.0)
+                    dotR := 3.0 * dpiScale
+                    DllCall("gdiplus\GdipFillRectangle", "ptr", pGraphics, "ptr", pTargetIconDotBrush
+                        , "float", cx - dotR, "float", cy - (14.0 * dpiScale) - dotR, "float", dotR * 2.0, "float", dotR * 2.0)
+                } else {
+                    targetRingR := 9.0 * dpiScale
+                    DllCall("gdiplus\GdipDrawEllipse", "ptr", pGraphics, "ptr", pTargetIconPen
+                        , "float", cx - targetRingR, "float", cy - (14.0 * dpiScale) - targetRingR, "float", targetRingR * 2.0, "float", targetRingR * 2.0)
+                    dotR := 3.2 * dpiScale
+                    DllCall("gdiplus\GdipFillEllipse", "ptr", pGraphics, "ptr", pTargetIconDotBrush
+                        , "float", cx - dotR, "float", cy - (14.0 * dpiScale) - dotR, "float", dotR * 2.0, "float", dotR * 2.0)
+                }
+
+                NumPut("float", cx - R_inner, rectBuf, 0)
+                NumPut("float", cy + (4.0 * dpiScale), rectBuf, 4)
+                NumPut("float", R_inner * 2.0, rectBuf, 8)
+                NumPut("float", 18.0 * dpiScale, rectBuf, 12)
+                DllCall("gdiplus\GdipDrawString", "ptr", pGraphics, "wstr", "HOVER SLICE", "int", -1
+                    , "ptr", pFontCenter, "ptr", rectBuf.Ptr, "ptr", pFormat, "ptr", pTextCenterNormalBrush)
+            }
+
+            DllCall("UpdateLayeredWindow", "ptr", this.guiObj.Hwnd, "ptr", hDC, "ptr", ptDst, "ptr", sz, "ptr", hMemDC, "ptr", ptSrc, "uint", 0, "ptr", blend, "uint", 2)
+        }
+
+        DrawFrame(-1)
+
+        isMouseBtn := (trigBtn = "MButton" || trigBtn = "XButton1" || trigBtn = "XButton2" || trigBtn = "RButton")
+        startTick := A_TickCount
+        selectedSlice := -1
+
+        while (isMouseBtn ? GetKeyState(trigBtn, "P") : (A_TickCount - startTick < 4000 && !GetKeyState("LButton", "P") && !GetKeyState("Escape", "P"))) {
+            Sleep(15)
+            MouseGetPos(&curX, &curY)
+            dx := curX - originX
+            dy := curY - originY
+            dist := Sqrt(dx*dx + dy*dy)
+            
+            newSel := -1
+            if (dist >= (26.0 * dpiScale)) {
+                angle := (ATan2(dx, -dy) * 57.2957795)
+                if (angle < 0) {
+                    angle += 360
+                }
+                newSel := Mod(Round(angle / 45.0), 8)
+            }
+            
+            if (newSel != selectedSlice) {
+                selectedSlice := newSel
+                DrawFrame(selectedSlice)
+            }
+        }
+
+        elapsed := A_TickCount - startTick
+        MouseGetPos(&endX, &endY)
+        dist := Sqrt((endX - originX)*(endX - originX) + (endY - originY)*(endY - originY))
+
+        this.guiObj.Destroy()
+        this.guiObj := 0
+        this.isShowing := false
+
+        DllCall("gdiplus\GdipDeleteBrush", "ptr", pWheelBackdropBrush)
+        DllCall("gdiplus\GdipDeleteBrush", "ptr", pHoverWedgeBrush)
+        DllCall("gdiplus\GdipDeleteBrush", "ptr", pNodeNormalBrush)
+        DllCall("gdiplus\GdipDeleteBrush", "ptr", pNodeHoverBrush)
+        DllCall("gdiplus\GdipDeleteBrush", "ptr", pCenterHubBrush)
+        DllCall("gdiplus\GdipDeleteBrush", "ptr", pTargetIconDotBrush)
+        DllCall("gdiplus\GdipDeleteBrush", "ptr", pTextTagNormalBrush)
+        DllCall("gdiplus\GdipDeleteBrush", "ptr", pTextLblNormalBrush)
+        DllCall("gdiplus\GdipDeleteBrush", "ptr", pTextTagHoverBrush)
+        DllCall("gdiplus\GdipDeleteBrush", "ptr", pTextLblHoverBrush)
+        DllCall("gdiplus\GdipDeleteBrush", "ptr", pTextCenterNormalBrush)
+        DllCall("gdiplus\GdipDeleteBrush", "ptr", pTextCenterHoverBrush)
+        DllCall("gdiplus\GdipDeletePen", "ptr", pWheelShadowPen)
+        DllCall("gdiplus\GdipDeletePen", "ptr", pWheelBorderPen)
+        DllCall("gdiplus\GdipDeletePen", "ptr", pSpokePen)
+        DllCall("gdiplus\GdipDeletePen", "ptr", pNodeNormalPen)
+        DllCall("gdiplus\GdipDeletePen", "ptr", pNodeHoverPen)
+        DllCall("gdiplus\GdipDeletePen", "ptr", pCenterHubPen)
+        DllCall("gdiplus\GdipDeletePen", "ptr", pTargetIconPen)
+        DllCall("gdiplus\GdipDeleteFont", "ptr", pFontDir)
+        DllCall("gdiplus\GdipDeleteFont", "ptr", pFontLabel)
+        DllCall("gdiplus\GdipDeleteFont", "ptr", pFontCenter)
+        DllCall("gdiplus\GdipDeleteFont", "ptr", pFontCenterAction)
+        DllCall("gdiplus\GdipDeleteFontFamily", "ptr", pFamily)
+        DllCall("gdiplus\GdipDeleteStringFormat", "ptr", pFormat)
+        DllCall("gdiplus\GdipDeleteGraphics", "ptr", pGraphics)
+        DllCall("SelectObject", "ptr", hMemDC, "ptr", hOldBmp)
+        DllCall("DeleteObject", "ptr", hBmp)
+        DllCall("DeleteDC", "ptr", hMemDC)
+        DllCall("ReleaseDC", "ptr", 0, "ptr", hDC)
+
+        if (isMouseBtn && dist < 18 && elapsed < 250) {
+            if (trigBtn = "MButton") {
+                Click("Middle")
+            } else if (trigBtn = "XButton1") {
+                Click("X1")
+            } else if (trigBtn = "XButton2") {
+                Click("X2")
+            }
+            return
+        }
+
+        if (selectedSlice >= 0 && selectedSlice < slices.Length) {
+            actionName := slices[selectedSlice + 1]
+            if (actionName != "" && actionName != "none") {
+                ExecuteSystemAction(actionName, "Radial Menu (" . dirs[selectedSlice + 1] . ")")
+            }
+        }
+    }
+
+    static AddRoundRectToPath(pPath, x, y, w, h, r) {
+        d := r * 2.0
+        DllCall("gdiplus\GdipAddPathArc", "ptr", pPath, "float", x, "float", y, "float", d, "float", d, "float", 180.0, "float", 90.0)
+        DllCall("gdiplus\GdipAddPathArc", "ptr", pPath, "float", x + w - d, "float", y, "float", d, "float", d, "float", 270.0, "float", 90.0)
+        DllCall("gdiplus\GdipAddPathArc", "ptr", pPath, "float", x + w - d, "float", y + h - d, "float", d, "float", d, "float", 0.0, "float", 90.0)
+        DllCall("gdiplus\GdipAddPathArc", "ptr", pPath, "float", x, "float", y + h - d, "float", d, "float", d, "float", 90.0, "float", 90.0)
+        DllCall("gdiplus\GdipClosePathFigure", "ptr", pPath)
+    }
+}
+
+ATan2(x, y) {
+    return DllCall("msvcrt\atan2", "Double", x, "Double", y, "Cdecl Double")
 }
