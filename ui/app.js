@@ -15,12 +15,12 @@
           return {
             bgColor: t.bgColor,
             accentColor: t.accentColor,
-            radius: typeof t.radius !== 'undefined' ? parseInt(t.radius, 10) : 22,
+            radius: typeof t.radius !== 'undefined' ? parseInt(t.radius, 10) : 5,
             distance: typeof t.distance !== 'undefined' ? parseInt(t.distance, 10) : 3,
-            lightIntensity: typeof t.lightIntensity !== 'undefined' ? parseInt(t.lightIntensity, 10) : (typeof t.intensity !== 'undefined' ? parseInt(t.intensity, 10) : 18),
-            darkIntensity: typeof t.darkIntensity !== 'undefined' ? parseInt(t.darkIntensity, 10) : (typeof t.intensity !== 'undefined' ? parseInt(t.intensity, 10) : 18),
-            intensity: typeof t.intensity !== 'undefined' ? parseInt(t.intensity, 10) : 15,
-            blur: typeof t.blur !== 'undefined' ? parseInt(t.blur, 10) : 8,
+            lightIntensity: typeof t.lightIntensity !== 'undefined' ? parseInt(t.lightIntensity, 10) : (typeof t.intensity !== 'undefined' ? parseInt(t.intensity, 10) : 22),
+            darkIntensity: typeof t.darkIntensity !== 'undefined' ? parseInt(t.darkIntensity, 10) : (typeof t.intensity !== 'undefined' ? parseInt(t.intensity, 10) : 6),
+            intensity: typeof t.intensity !== 'undefined' ? parseInt(t.intensity, 10) : 14,
+            blur: typeof t.blur !== 'undefined' ? parseInt(t.blur, 10) : 10,
             customPresets: Array.isArray(t.customPresets) ? t.customPresets : []
           };
         }
@@ -34,37 +34,33 @@
 
       if (cached) {
         const parsed = JSON.parse(cached);
-        if (parsed && (parsed.bgColor === '#e8dfd5' || !parsed.bgColor)) {
-          parsed.bgColor = '#b85d68';
-          parsed.accentColor = '#00cc18';
-          parsed.radius = 14;
+        if (parsed && (parsed.bgColor === '#b85d68' || !parsed.bgColor)) {
+          parsed.bgColor = '#e8dfd5';
+          parsed.accentColor = '#d97706';
+          parsed.radius = 5;
           parsed.distance = 3;
-          parsed.lightIntensity = 9;
-          parsed.darkIntensity = 8;
-          parsed.blur = 8;
+          parsed.lightIntensity = 22;
+          parsed.darkIntensity = 6;
+          parsed.intensity = 14;
+          parsed.blur = 10;
           try { localStorage.setItem('ahk_theme', JSON.stringify(parsed)); } catch (e) { }
         }
         if (parsed && parsed.bgColor && parsed.accentColor) {
           return {
             bgColor: parsed.bgColor,
             accentColor: parsed.accentColor,
-            radius: typeof parsed.radius !== 'undefined' ? parseInt(parsed.radius, 10) : 22,
-            radius: typeof parsed.radius !== 'undefined' ? parseInt(parsed.radius, 10) : 14,
+            radius: typeof parsed.radius !== 'undefined' ? parseInt(parsed.radius, 10) : 5,
             distance: typeof parsed.distance !== 'undefined' ? parseInt(parsed.distance, 10) : 3,
-            lightIntensity: typeof parsed.lightIntensity !== 'undefined' ? parseInt(parsed.lightIntensity, 10) : 18,
-            darkIntensity: typeof parsed.darkIntensity !== 'undefined' ? parseInt(parsed.darkIntensity, 10) : 18,
-            intensity: typeof parsed.intensity !== 'undefined' ? parseInt(parsed.intensity, 10) : 15,
-            lightIntensity: typeof parsed.lightIntensity !== 'undefined' ? parseInt(parsed.lightIntensity, 10) : 9,
-            darkIntensity: typeof parsed.darkIntensity !== 'undefined' ? parseInt(parsed.darkIntensity, 10) : 8,
-            intensity: typeof parsed.intensity !== 'undefined' ? parseInt(parsed.intensity, 10) : 10,
-            blur: typeof parsed.blur !== 'undefined' ? parseInt(parsed.blur, 10) : 8,
+            lightIntensity: typeof parsed.lightIntensity !== 'undefined' ? parseInt(parsed.lightIntensity, 10) : 22,
+            darkIntensity: typeof parsed.darkIntensity !== 'undefined' ? parseInt(parsed.darkIntensity, 10) : 6,
+            intensity: typeof parsed.intensity !== 'undefined' ? parseInt(parsed.intensity, 10) : 14,
+            blur: typeof parsed.blur !== 'undefined' ? parseInt(parsed.blur, 10) : 10,
             customPresets: Array.isArray(parsed.customPresets) ? parsed.customPresets : cachedCustom
           };
         }
       }
     } catch (e) { }
     return { bgColor: '#e8dfd5', accentColor: '#d97706', radius: 5, distance: 3, lightIntensity: 22, darkIntensity: 6, intensity: 14, blur: 10, customPresets: [] };
-    return { bgColor: '#b85d68', accentColor: '#00cc18', radius: 14, distance: 3, lightIntensity: 9, darkIntensity: 8, intensity: 10, blur: 8, customPresets: [] };
   })();
 
   let isInitialized = false;
@@ -920,24 +916,21 @@
           output: output,
           multiline: isMulti,
           enabled: 1
+        };
         items.unshift(newItem);
         addItemAcrossProfiles('textExpander', newItem);
       }
-    };
-    items.unshift(newItem);
-    addItemAcrossProfiles('textExpander', newItem);
+    }
+
+    teInputTrigger.value = '';
+    teInputOutput.value = '';
+    teTextareaOutput.value = '';
+    toggleMultiline(false);
+    teInputTrigger.focus();
+
+    renderTextExpander();
+    syncConfig();
   }
-}
-
-  teInputTrigger.value = '';
-teInputOutput.value = '';
-teTextareaOutput.value = '';
-toggleMultiline(false);
-teInputTrigger.focus();
-
-renderTextExpander();
-syncConfig();
-}
 
 function startEditTe(item) {
   state.editingTeId = item.id;
@@ -1245,39 +1238,27 @@ function submitKeyRemapper() {
     return;
   }
 
-  state.config.keyRemapper.items.unshift({
     const newItem = {
       id: 'kr-' + Date.now(),
       source: src,
       target: tgt,
-      name: `${src} → ${tgt}`
-    });
-  name: `${src} → ${tgt}`,
-  const newItem = {
-    id: 'kr-' + Date.now(),
-    source: src,
-    target: tgt,
-    name: `${src} → ${tgt}`,
-    enabled: 1
-  };
-};
-state.config.keyRemapper.items.unshift(newItem);
-addItemAcrossProfiles('keyRemapper', newItem);
+      name: `${src} → ${tgt}`,
+      enabled: 1
+    };
+    state.config.keyRemapper.items.unshift(newItem);
+    addItemAcrossProfiles('keyRemapper', newItem);
 
-state.config.keyRemapper.items.unshift(newItem);
-addItemAcrossProfiles('keyRemapper', newItem);
+    if (krInputSource) {
+      krInputSource.value = '';
+      if (krBtnClearSource) krBtnClearSource.classList.add('hidden-field');
+    }
+    if (krInputTarget) {
+      krInputTarget.value = '';
+      if (krBtnClearTarget) krBtnClearTarget.classList.add('hidden-field');
+    }
 
-if (krInputSource) {
-  krInputSource.value = '';
-  if (krBtnClearSource) krBtnClearSource.classList.add('hidden-field');
-}
-if (krInputTarget) {
-  krInputTarget.value = '';
-  if (krBtnClearTarget) krBtnClearTarget.classList.add('hidden-field');
-}
-
-renderKeyRemapper();
-syncConfig();
+    renderKeyRemapper();
+    syncConfig();
   }
 
 function deleteKr(id) {
@@ -1713,37 +1694,24 @@ function submitAppLauncher() {
     }
     editingAlId = null;
     if (alBtnSubmitText) alBtnSubmitText.textContent = 'ADD';
-  } else {
-    state.config.appLauncher.items.unshift({
+    } else {
       const newItem = {
         id: 'al-' + Date.now(),
         trigger: trigger,
         triggerType: triggerType,
         target: target,
-        name: name
-      });
-    name: name,
-    const newItem = {
-      id: 'al-' + Date.now(),
-      trigger: trigger,
-      triggerType: triggerType,
-      target: target,
-      name: name,
-      enabled: 1
-    };
-    state.config.appLauncher.items.unshift(newItem);
-    addItemAcrossProfiles('appLauncher', newItem);
-  }
-};
-state.config.appLauncher.items.unshift(newItem);
-addItemAcrossProfiles('appLauncher', newItem);
-  }
+        name: name,
+        enabled: 1
+      };
+      state.config.appLauncher.items.unshift(newItem);
+      addItemAcrossProfiles('appLauncher', newItem);
+    }
 
-alInputTrigger.value = '';
-alInputTarget.value = '';
-if (alInputName) alInputName.value = '';
-renderAppLauncher();
-syncConfig();
+    alInputTrigger.value = '';
+    alInputTarget.value = '';
+    if (alInputName) alInputName.value = '';
+    renderAppLauncher();
+    syncConfig();
   }
 
 function deleteAl(id) {
@@ -2365,50 +2333,35 @@ function submitMacro() {
       if (macroBtnSubmitText) macroBtnSubmitText.textContent = 'ADD';
       showToast(`Updated macro "${name}"`);
     } else {
-      state.config.macroRecorder.items.unshift({
-        const newMacro = {
-          id: 'macro-' + Date.now(),
-          name: name,
-          trigger: trig,
-          playbackMode: macroState.playbackMode,
-          repeatInterval: interval,
-          enabled: 1,
-          steps: JSON.parse(JSON.stringify(macroState.steps))
-        });
-    };
-    state.config.macroRecorder.items.unshift(newMacro);
-    addItemAcrossProfiles('macroRecorder', newMacro);
-    showToast(`Created macro "${name}"`);
-  }
       const newMacro = {
-    id: 'macro-' + Date.now(),
-    name: name,
-    trigger: trig,
-    playbackMode: macroState.playbackMode,
-    repeatInterval: interval,
-    enabled: 1,
-    steps: JSON.parse(JSON.stringify(macroState.steps))
-  };
-  state.config.macroRecorder.items.unshift(newMacro);
-  addItemAcrossProfiles('macroRecorder', newMacro);
-  showToast(`Created macro "${name}"`);
-}
+        id: 'macro-' + Date.now(),
+        name: name,
+        trigger: trig,
+        playbackMode: macroState.playbackMode,
+        repeatInterval: interval,
+        enabled: 1,
+        steps: JSON.parse(JSON.stringify(macroState.steps))
+      };
+      state.config.macroRecorder.items.unshift(newMacro);
+      addItemAcrossProfiles('macroRecorder', newMacro);
+      showToast(`Created macro "${name}"`);
+    }
 
-if (macroInputName) macroInputName.value = '';
-if (macroInputTrigger) {
-  macroInputTrigger.value = '';
-  macroInputTrigger.placeholder = 'Click to record...';
-}
-if (macroBtnClearTrigger) macroBtnClearTrigger.classList.add('hidden-field');
-macroState.steps = [];
-renderMacroTimeline();
-renderMacroRecorder();
-syncConfig();
-} catch (err) {
-  console.error('Error submitting macro:', err);
-  showToast('Error saving macro: ' + err.message, 'error');
-}
+    if (macroInputName) macroInputName.value = '';
+    if (macroInputTrigger) {
+      macroInputTrigger.value = '';
+      macroInputTrigger.placeholder = 'Click to record...';
+    }
+    if (macroBtnClearTrigger) macroBtnClearTrigger.classList.add('hidden-field');
+    macroState.steps = [];
+    renderMacroTimeline();
+    renderMacroRecorder();
+    syncConfig();
+  } catch (err) {
+    console.error('Error submitting macro:', err);
+    showToast('Error saving macro: ' + err.message, 'error');
   }
+}
 
 function editMacro(item) {
   macroState.editingId = item.id;
@@ -2606,100 +2559,62 @@ function toggleMasterEngine() {
   syncConfig();
 }
 
-function updateSwitchUi() {
-  if (state.enabled) {
-    mainEngineSwitch.classList.remove('is-off');
-    mainEngineSwitch.classList.add('is-on');
-    if (mainEngineSwitch) {
-      mainEngineSwitch.classList.remove('is-off');
-      mainEngineSwitch.classList.add('is-on');
-      mainEngineSwitch.classList.toggle('is-on', state.enabled);
-      mainEngineSwitch.classList.toggle('is-off', !state.enabled);
-    }
-    if (switchCaptionText) switchCaptionText.textContent = 'ACTIVE';
-    statusSubtitle.innerHTML = 'Engine: <span class="status-indicator-text online">Active</span>';
-    if (statusSubtitle) statusSubtitle.innerHTML = 'Engine: <span class="status-indicator-text online">Active</span>';
-  } else {
-    mainEngineSwitch.classList.remove('is-on');
-    mainEngineSwitch.classList.add('is-off');
-    if (mainEngineSwitch) {
-      mainEngineSwitch.classList.remove('is-on');
-      mainEngineSwitch.classList.add('is-off');
-      if (switchCaptionText) {
-        switchCaptionText.textContent = state.enabled ? 'ACTIVE' : 'SUSPENDED';
+  function updateSwitchUi() {
+    if (state.enabled) {
+      if (mainEngineSwitch) {
+        mainEngineSwitch.classList.remove('is-off');
+        mainEngineSwitch.classList.add('is-on');
+      }
+      if (switchCaptionText) switchCaptionText.textContent = 'ACTIVE';
+      if (statusSubtitle) statusSubtitle.innerHTML = 'Engine: <span class="status-indicator-text online">Active</span>';
+    } else {
+      if (mainEngineSwitch) {
+        mainEngineSwitch.classList.remove('is-on');
+        mainEngineSwitch.classList.add('is-off');
       }
       if (switchCaptionText) switchCaptionText.textContent = 'SUSPENDED';
-      statusSubtitle.innerHTML = 'Engine: <span class="status-indicator-text offline">Suspended</span>';
       if (statusSubtitle) statusSubtitle.innerHTML = 'Engine: <span class="status-indicator-text offline">Suspended</span>';
-      if (statusSubtitle) {
-        statusSubtitle.innerHTML = state.enabled
-          ? 'Engine: <span class="status-indicator-text online">Active</span>'
-          : 'Engine: <span class="status-indicator-text offline">Suspended</span>';
-      }
     }
   }
 
   function updateGlobalIndicators() {
     let totalItems = 0;
-    if (state.config.textExpander && state.config.textExpander.items) {
-      totalItems += state.config.textExpander.items.length;
-      function updateGlobalIndicators() {
-        let totalItems = 0;
-        const isEngActive = state.enabled && state.config && state.config.enabled !== false && state.config.enabled !== 0;
+    const isEngActive = state.enabled && state.config && state.config.enabled !== false && state.config.enabled !== 0;
 
-        if (isEngActive && state.config) {
-          if (state.config.textExpander && state.config.textExpander.enabled !== false && state.config.textExpander.items) {
-            totalItems += state.config.textExpander.items.filter(i => i.enabled !== false && i.enabled !== 0).length;
-          }
-          if (state.config.keyRemapper && state.config.keyRemapper.enabled !== false && state.config.keyRemapper.items) {
-            totalItems += state.config.keyRemapper.items.filter(i => i.enabled !== false && i.enabled !== 0).length;
-          }
-          if (state.config.appLauncher && state.config.appLauncher.enabled !== false && state.config.appLauncher.items) {
-            totalItems += state.config.appLauncher.items.filter(i => i.enabled !== false && i.enabled !== 0).length;
-          }
-          if (state.config.macroRecorder && state.config.macroRecorder.enabled !== false && state.config.macroRecorder.items) {
-            totalItems += state.config.macroRecorder.items.filter(i => i.enabled !== false && i.enabled !== 0).length;
-          }
-          if (state.config.windowManager && state.config.windowManager.enabled !== false) {
-            const wm = state.config.windowManager;
-            const wmKeys = ['alwaysOnTopEnabled', 'centerWindowEnabled', 'hideWindowEnabled', 'borderlessEnabled', 'windowShadeEnabled', 'appVolumeWheel', 'appVolumeMuteEnabled', 'transparencyWheel', 'clickThroughGhost'];
-            for (const k of wmKeys) {
-              if (wm[k] === 1 || wm[k] === true) totalItems++;
-            }
-          }
+    if (isEngActive && state.config) {
+      if (state.config.textExpander && state.config.textExpander.enabled !== false && state.config.textExpander.items) {
+        totalItems += state.config.textExpander.items.filter(i => i.enabled !== false && i.enabled !== 0).length;
+      }
+      if (state.config.keyRemapper && state.config.keyRemapper.enabled !== false && state.config.keyRemapper.items) {
+        totalItems += state.config.keyRemapper.items.filter(i => i.enabled !== false && i.enabled !== 0).length;
+      }
+      if (state.config.appLauncher && state.config.appLauncher.enabled !== false && state.config.appLauncher.items) {
+        totalItems += state.config.appLauncher.items.filter(i => i.enabled !== false && i.enabled !== 0).length;
+      }
+      if (state.config.macroRecorder && state.config.macroRecorder.enabled !== false && state.config.macroRecorder.items) {
+        totalItems += state.config.macroRecorder.items.filter(i => i.enabled !== false && i.enabled !== 0).length;
+      }
+      if (state.config.windowManager && state.config.windowManager.enabled !== false) {
+        const wm = state.config.windowManager;
+        const wmKeys = ['alwaysOnTopEnabled', 'centerWindowEnabled', 'hideWindowEnabled', 'borderlessEnabled', 'windowShadeEnabled', 'appVolumeWheel', 'appVolumeMuteEnabled', 'transparencyWheel', 'clickThroughGhost'];
+        for (const k of wmKeys) {
+          if (wm[k] === 1 || wm[k] === true) totalItems++;
         }
-        if (state.config.keyRemapper && state.config.keyRemapper.items) {
-          totalItems += state.config.keyRemapper.items.length;
+      }
+    }
 
-          if (activeCountBadge) {
-            activeCountBadge.textContent = totalItems;
-          }
-          if (state.config.appLauncher && state.config.appLauncher.items) {
-            totalItems += state.config.appLauncher.items.length;
-          }
-          if (state.config.macroRecorder && state.config.macroRecorder.items) {
-            totalItems += state.config.macroRecorder.items.length;
-          }
+    if (activeCountBadge) {
+      activeCountBadge.textContent = totalItems;
+    }
 
-          if (activeCountBadge) {
-            activeCountBadge.textContent = totalItems;
-          }
-
-          if (gaugeCircle) {
-            const maxItems = 15;
-            const progress = Math.min(totalItems / maxItems, 1);
-            const circumference = 150.79;
-            const offset = circumference - (progress * circumference * 0.75);
-            gaugeCircle.style.strokeDashoffset = offset;
-          }
-          if (gaugeCircle) {
-            const maxItems = 15;
-            const progress = Math.min(totalItems / maxItems, 1);
-            const circumference = 150.79;
-            const offset = circumference - (progress * circumference * 0.75);
-            gaugeCircle.style.strokeDashoffset = offset;
-          }
-        }
+    if (gaugeCircle) {
+      const maxItems = 15;
+      const progress = Math.min(totalItems / maxItems, 1);
+      const circumference = 150.79;
+      const offset = circumference - (progress * circumference * 0.75);
+      gaugeCircle.style.strokeDashoffset = offset;
+    }
+  }
 
         // ============================================================================
         // Theme Engine (Primary Background & Secondary Elements Colors)
@@ -3056,297 +2971,168 @@ function updateSwitchUi() {
             lightIntensity: 30,
             darkIntensity: 16,
             blur: 8
+          },
+          'custom-default': {
+            name: 'Warm Clay (Default)',
+            bgColor: '#e8dfd5',
+            accentColor: '#d97706',
+            radius: 5,
+            distance: 3,
+            lightIntensity: 22,
+            darkIntensity: 6,
+            blur: 10
+          },
+          'brutalist-amber': {
+            name: 'Brutalist Amber',
+            bgColor: '#f59e0b',
+            accentColor: '#1e1b4b',
+            radius: 2,
+            distance: 6,
+            lightIntensity: 65,
+            darkIntensity: 75,
+            blur: 0
+          },
+          'marshmallow-indigo': {
+            name: 'Marshmallow Indigo',
+            bgColor: '#4f46e5',
+            accentColor: '#fde047',
+            radius: 42,
+            distance: 8,
+            lightIntensity: 40,
+            darkIntensity: 48,
+            blur: 18
+          },
+          'porcelain-ceramic': {
+            name: 'Porcelain Ceramic',
+            bgColor: '#f1f5f9',
+            accentColor: '#2563eb',
+            radius: 28,
+            distance: 7,
+            lightIntensity: 85,
+            darkIntensity: 20,
+            blur: 16
+          },
+          'solar-tangerine': {
+            name: 'Solar Tangerine',
+            bgColor: '#ea580c',
+            accentColor: '#fef08a',
+            radius: 34,
+            distance: 5,
+            lightIntensity: 38,
+            darkIntensity: 42,
+            blur: 12
+          },
+          'matrix-terminal': {
+            name: 'Matrix CRT',
+            bgColor: '#052e16',
+            accentColor: '#22c55e',
+            radius: 4,
+            distance: 2,
+            lightIntensity: 40,
+            darkIntensity: 70,
+            blur: 2
+          },
+          'cyber-cyan': {
+            name: 'Cyber Cyan',
+            bgColor: '#0891b2',
+            accentColor: '#fef08a',
+            radius: 18,
+            distance: 4,
+            lightIntensity: 35,
+            darkIntensity: 32,
+            blur: 6
+          },
+          'brutalist-concrete': {
+            name: 'Brutalist Concrete',
+            bgColor: '#78716c',
+            accentColor: '#f97316',
+            radius: 3,
+            distance: 5,
+            lightIntensity: 50,
+            darkIntensity: 60,
+            blur: 1
+          },
+          'midnight-violet': {
+            name: 'Midnight Violet',
+            bgColor: '#3b0764',
+            accentColor: '#f43f5e',
+            radius: 24,
+            distance: 6,
+            lightIntensity: 32,
+            darkIntensity: 65,
+            blur: 14
+          },
+          'spearmint-gelato': {
+            name: 'Spearmint Gelato',
+            bgColor: '#6ee7b7',
+            accentColor: '#831843',
+            radius: 38,
+            distance: 6,
+            lightIntensity: 48,
+            darkIntensity: 28,
+            blur: 14
+          },
+          'garnet-obsidian': {
+            name: 'Garnet Obsidian',
+            bgColor: '#450a0a',
+            accentColor: '#fb7185',
+            radius: 8,
+            distance: 4,
+            lightIntensity: 24,
+            darkIntensity: 70,
+            blur: 9
+          },
+          'abyssal-ocean': {
+            name: 'Abyssal Ocean',
+            bgColor: '#0e2a47',
+            accentColor: '#38bdf8',
+            radius: 16,
+            distance: 4,
+            lightIntensity: 22,
+            darkIntensity: 55,
+            blur: 10
+          },
+          'roasted-cocoa': {
+            name: 'Roasted Cocoa',
+            bgColor: '#351c14',
+            accentColor: '#fbbf24',
+            radius: 10,
+            distance: 3,
+            lightIntensity: 22,
+            darkIntensity: 60,
+            blur: 5
+          },
+          'bubblegum-magenta': {
+            name: 'Bubblegum Magenta',
+            bgColor: '#db2777',
+            accentColor: '#fef08a',
+            radius: 30,
+            distance: 7,
+            lightIntensity: 42,
+            darkIntensity: 38,
+            blur: 15
+          },
+          'lilac-cloud': {
+            name: 'Lilac Cloud',
+            bgColor: '#c4b5fd',
+            accentColor: '#4c1d95',
+            radius: 22,
+            distance: 4,
+            lightIntensity: 36,
+            darkIntensity: 22,
+            blur: 11
+          },
+          'matte-titanium': {
+            name: 'Matte Titanium',
+            bgColor: '#1e293b',
+            accentColor: '#06b6d4',
+            radius: 12,
+            distance: 3,
+            lightIntensity: 22,
+            darkIntensity: 45,
+            blur: 7
           }
         };
-        "custom-default": {
-          "name": "Custom Rose Clay (Default)",
-            "bgColor": "#b85d68",
-              "accentColor": "#00cc18",
-                "radius": 14,
-                  "distance": 3,
-                    "lightIntensity": 9,
-                      "darkIntensity": 8,
-                        "blur": 8
-          name: "Custom Rose Clay (Default)",
-            bgColor: "#b85d68",
-              accentColor: "#00cc18",
-                radius: 14,
-                  distance: 3,
-                    lightIntensity: 9,
-                      darkIntensity: 8,
-                        blur: 8
-        },
-        "brutalist-amber": {
-          "name": "Brutalist Amber",
-            "bgColor": "#f59e0b",
-              "accentColor": "#1e1b4b",
-                "radius": 2,
-                  "distance": 6,
-                    "lightIntensity": 65,
-                      "darkIntensity": 75,
-                        "blur": 0
-          name: "Brutalist Amber",
-            bgColor: "#f59e0b",
-              accentColor: "#1e1b4b",
-                radius: 2,
-                  distance: 6,
-                    lightIntensity: 65,
-                      darkIntensity: 75,
-                        blur: 0
-        },
-        "marshmallow-indigo": {
-          "name": "Marshmallow Indigo",
-            "bgColor": "#4f46e5",
-              "accentColor": "#fde047",
-                "radius": 42,
-                  "distance": 8,
-                    "lightIntensity": 40,
-                      "darkIntensity": 48,
-                        "blur": 18
-          name: "Marshmallow Indigo",
-            bgColor: "#4f46e5",
-              accentColor: "#fde047",
-                radius: 42,
-                  distance: 8,
-                    lightIntensity: 40,
-                      darkIntensity: 48,
-                        blur: 18
-        },
-        "porcelain-ceramic": {
-          "name": "Porcelain Ceramic",
-            "bgColor": "#f1f5f9",
-              "accentColor": "#2563eb",
-                "radius": 28,
-                  "distance": 7,
-                    "lightIntensity": 85,
-                      "darkIntensity": 20,
-                        "blur": 16
-          name: "Porcelain Ceramic",
-            bgColor: "#f1f5f9",
-              accentColor: "#2563eb",
-                radius: 28,
-                  distance: 7,
-                    lightIntensity: 85,
-                      darkIntensity: 20,
-                        blur: 16
-        },
-        "solar-tangerine": {
-          "name": "Solar Tangerine",
-            "bgColor": "#ea580c",
-              "accentColor": "#fef08a",
-                "radius": 34,
-                  "distance": 5,
-                    "lightIntensity": 38,
-                      "darkIntensity": 42,
-                        "blur": 12
-          name: "Solar Tangerine",
-            bgColor: "#ea580c",
-              accentColor: "#fef08a",
-                radius: 34,
-                  distance: 7,
-                    lightIntensity: 45,
-                      darkIntensity: 35,
-                        blur: 12
-        },
-        "matrix-terminal": {
-          "name": "Matrix CRT",
-            "bgColor": "#052e16",
-              "accentColor": "#22c55e",
-                "radius": 4,
-                  "distance": 2,
-                    "lightIntensity": 40,
-                      "darkIntensity": 70,
-                        "blur": 2
-          name: "Matrix CRT",
-            bgColor: "#052e16",
-              accentColor: "#22c55e",
-                radius: 4,
-                  distance: 2,
-                    lightIntensity: 20,
-                      darkIntensity: 65,
-                        blur: 2
-        },
-        "cyber-cyan": {
-          "name": "Cyber Cyan",
-            "bgColor": "#0891b2",
-              "accentColor": "#fef08a",
-                "radius": 18,
-                  "distance": 4,
-                    "lightIntensity": 35,
-                      "darkIntensity": 32,
-                        "blur": 6
-          name: "Cyber Cyan",
-            bgColor: "#0891b2",
-              accentColor: "#fef08a",
-                radius: 18,
-                  distance: 4,
-                    lightIntensity: 35,
-                      darkIntensity: 32,
-                        blur: 6
-        },
-        "brutalist-concrete": {
-          "name": "Brutalist Concrete",
-            "bgColor": "#78716c",
-              "accentColor": "#f97316",
-                "radius": 3,
-                  "distance": 5,
-                    "lightIntensity": 50,
-                      "darkIntensity": 60,
-                        "blur": 1
-          name: "Brutalist Concrete",
-            bgColor: "#78716c",
-              accentColor: "#f97316",
-                radius: 3,
-                  distance: 5,
-                    lightIntensity: 55,
-                      darkIntensity: 65,
-                        blur: 1
-        },
-        "midnight-violet": {
-          "name": "Midnight Violet",
-            "bgColor": "#3b0764",
-              "accentColor": "#f43f5e",
-                "radius": 24,
-                  "distance": 6,
-                    "lightIntensity": 32,
-                      "darkIntensity": 65,
-                        "blur": 14
-          name: "Midnight Violet",
-            bgColor: "#3b0764",
-              accentColor: "#f43f5e",
-                radius: 24,
-                  distance: 6,
-                    lightIntensity: 25,
-                      darkIntensity: 60,
-                        blur: 14
-        },
-        "spearmint-gelato": {
-          "name": "Spearmint Gelato",
-            "bgColor": "#6ee7b7",
-              "accentColor": "#831843",
-                "radius": 38,
-                  "distance": 6,
-                    "lightIntensity": 48,
-                      "darkIntensity": 28,
-                        "blur": 14
-          name: "Spearmint Gelato",
-            bgColor: "#6ee7b7",
-              accentColor: "#831843",
-                radius: 38,
-                  distance: 7,
-                    lightIntensity: 55,
-                      darkIntensity: 25,
-                        blur: 14
-        },
-        "garnet-obsidian": {
-          "name": "Garnet Obsidian",
-            "bgColor": "#450a0a",
-              "accentColor": "#fb7185",
-                "radius": 8,
-                  "distance": 4,
-                    "lightIntensity": 24,
-                      "darkIntensity": 70,
-                        "blur": 9
-          name: "Garnet Obsidian",
-            bgColor: "#450a0a",
-              accentColor: "#fb7185",
-                radius: 8,
-                  distance: 4,
-                    lightIntensity: 24,
-                      darkIntensity: 70,
-                        blur: 9
-        },
-        "abyssal-ocean": {
-          "name": "Abyssal Ocean",
-            "bgColor": "#0e2a47",
-              "accentColor": "#38bdf8",
-                "radius": 16,
-                  "distance": 5,
-                    "lightIntensity": 26,
-                      "darkIntensity": 55,
-                        "blur": 10
-          name: "Abyssal Ocean",
-            bgColor: "#0e2a47",
-              accentColor: "#38bdf8",
-                radius: 16,
-                  distance: 5,
-                    lightIntensity: 26,
-                      darkIntensity: 55,
-                        blur: 10
-        },
-        "roasted-cocoa": {
-          "name": "Roasted Cocoa",
-            "bgColor": "#351c14",
-              "accentColor": "#fbbf24",
-                "radius": 10,
-                  "distance": 3,
-                    "lightIntensity": 22,
-                      "darkIntensity": 60,
-                        "blur": 5
-          name: "Roasted Cocoa",
-            bgColor: "#351c14",
-              accentColor: "#fbbf24",
-                radius: 10,
-                  distance: 3,
-                    lightIntensity: 22,
-                      darkIntensity: 60,
-                        blur: 5
-        },
-        "bubblegum-magenta": {
-          "name": "Bubblegum Magenta",
-            "bgColor": "#db2777",
-              "accentColor": "#fef08a",
-                "radius": 30,
-                  "distance": 7,
-                    "lightIntensity": 42,
-                      "darkIntensity": 38,
-                        "blur": 15
-          name: "Bubblegum Magenta",
-            bgColor: "#db2777",
-              accentColor: "#fef08a",
-                radius: 30,
-                  distance: 7,
-                    lightIntensity: 42,
-                      darkIntensity: 38,
-                        blur: 15
-        },
-        "lilac-cloud": {
-          "name": "Lilac Cloud",
-            "bgColor": "#c4b5fd",
-              "accentColor": "#4c1d95",
-                "radius": 22,
-                  "distance": 4,
-                    "lightIntensity": 36,
-                      "darkIntensity": 22,
-                        "blur": 11
-          name: "Lilac Cloud",
-            bgColor: "#c4b5fd",
-              accentColor: "#4c1d95",
-                radius: 22,
-                  distance: 4,
-                    lightIntensity: 36,
-                      darkIntensity: 22,
-                        blur: 11
-        },
-        "matte-titanium": {
-          "name": "Matte Titanium",
-            "bgColor": "#1e293b",
-              "accentColor": "#06b6d4",
-                "radius": 12,
-                  "distance": 3,
-                    "lightIntensity": 22,
-                      "darkIntensity": 45,
-                        "blur": 7
-          name: "Matte Titanium",
-            bgColor: "#1e293b",
-              accentColor: "#06b6d4",
-                radius: 12,
-                  distance: 3,
-                    lightIntensity: 22,
-                      darkIntensity: 45,
-                        blur: 7
-        }
-      };
 
       function deriveRealisticShadows(bgColor, lightIntensity = 20, darkIntensity = 20) {
         const rgb = hexToRgb(bgColor);
@@ -3552,8 +3338,6 @@ function updateSwitchUi() {
       function applyTheme(bgColor, accentColor, save = false, neo = null) {
         if (!bgColor) bgColor = '#e8dfd5';
         if (!accentColor) accentColor = '#d97706';
-        if (!bgColor) bgColor = '#b85d68';
-        if (!accentColor) accentColor = '#00cc18';
         if (!bgColor.startsWith('#')) bgColor = '#' + bgColor;
         if (!accentColor.startsWith('#')) accentColor = '#' + accentColor;
 
@@ -3561,7 +3345,6 @@ function updateSwitchUi() {
         const radius = (neo && typeof neo.radius !== 'undefined')
           ? parseInt(neo.radius, 10)
           : ((state.config && state.config.theme && typeof state.config.theme.radius !== 'undefined') ? parseInt(state.config.theme.radius, 10) : 5);
-      : ((state.config && state.config.theme && typeof state.config.theme.radius !== 'undefined') ? parseInt(state.config.theme.radius, 10) : 14);
 
         const distance = (neo && typeof neo.distance !== 'undefined')
           ? parseInt(neo.distance, 10)
@@ -3713,15 +3496,11 @@ function updateSwitchUi() {
         const bg = (state.config && state.config.theme && state.config.theme.bgColor)
           || document.documentElement.style.getPropertyValue('--bg-color')
           || '#e8dfd5';
-      || '#b85d68';
         const acc = (state.config && state.config.theme && state.config.theme.accentColor)
           || document.documentElement.style.getPropertyValue('--accent-primary')
           || '#d97706';
-      || '#00cc18';
         const radius = (state.config && state.config.theme && typeof state.config.theme.radius !== 'undefined')
           ? parseInt(state.config.theme.radius, 10) : 5;
-      ?parseInt(state.config.theme.radius, 10) : 14;
-      ?parseInt(state.config.theme.radius, 10) : 14;
         const distance = (state.config && state.config.theme && typeof state.config.theme.distance !== 'undefined')
           ? parseInt(state.config.theme.distance, 10) : 3;
         const lightIntensity = (state.config && state.config.theme && typeof state.config.theme.lightIntensity !== 'undefined')
@@ -4402,12 +4181,10 @@ function updateSwitchUi() {
           });
         }
 
-        // Reset Theme to Default Preset (Soft Clay)
-        // Reset Theme to Default Preset
+        // Reset Theme to Default Preset (Warm Clay)
         if (btnResetTheme) {
           btnResetTheme.addEventListener('click', () => {
-            const def = THEME_PRESETS['soft-gray'];
-            const def = THEME_PRESETS['custom-default'];
+            const def = THEME_PRESETS['custom-default'] || THEME_PRESETS['soft-gray'];
             applyTheme(def.bgColor, def.accentColor, true, {
               radius: def.radius,
               distance: def.distance,

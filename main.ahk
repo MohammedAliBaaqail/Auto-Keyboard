@@ -129,22 +129,22 @@ InitConfig() {
                 if (g_Config.Has("theme") && IsObject(g_Config["theme"])) {
                     themeMap := g_Config["theme"]
                     if (!themeMap.Has("radius")) {
-                        themeMap["radius"] := 14
+                        themeMap["radius"] := 5
                     }
                     if (!themeMap.Has("distance")) {
                         themeMap["distance"] := 3
                     }
                     if (!themeMap.Has("intensity")) {
-                        themeMap["intensity"] := 10
+                        themeMap["intensity"] := 14
                     }
                     if (!themeMap.Has("lightIntensity")) {
-                        themeMap["lightIntensity"] := (themeMap.Has("intensity") ? themeMap["intensity"] : 9)
+                        themeMap["lightIntensity"] := (themeMap.Has("intensity") ? themeMap["intensity"] : 22)
                     }
                     if (!themeMap.Has("darkIntensity")) {
-                        themeMap["darkIntensity"] := (themeMap.Has("intensity") ? themeMap["intensity"] : 8)
+                        themeMap["darkIntensity"] := (themeMap.Has("intensity") ? themeMap["intensity"] : 6)
                     }
                     if (!themeMap.Has("blur")) {
-                        themeMap["blur"] := 8
+                        themeMap["blur"] := 10
                     }
                     if (!themeMap.Has("customPresets")) {
                         themeMap["customPresets"] := []
@@ -243,14 +243,14 @@ GetDefaultConfig() {
             ]
         ),
         "theme", Map(
-            "bgColor", "#b85d68",
-            "accentColor", "#00cc18",
-            "radius", 14,
+            "bgColor", "#e8dfd5",
+            "accentColor", "#d97706",
+            "radius", 5,
             "distance", 3,
-            "lightIntensity", 9,
-            "darkIntensity", 8,
-            "intensity", 10,
-            "blur", 8,
+            "lightIntensity", 22,
+            "darkIntensity", 6,
+            "intensity", 14,
+            "blur", 10,
             "customPresets", []
         )
     )
@@ -1532,7 +1532,7 @@ CreateMainWindow() {
     g_MainGui := Gui("-Caption +Resize", APP_NAME)
     g_MainGui.Opt("+MinSize720x520")
     
-    initBg := "b85d68"
+    initBg := "e8dfd5"
     if (g_Config.Has("theme") && g_Config["theme"].Has("bgColor")) {
         cleanHex := StrReplace(g_Config["theme"]["bgColor"], "#", "")
         if (StrLen(cleanHex) = 6) {
