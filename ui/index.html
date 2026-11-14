@@ -1006,13 +1006,9 @@
         </div>
 
         <div class="theme-modal-body">
-          <!-- Background (Primary) Color Section -->
+          <!-- Theme Presets Section -->
           <div class="theme-section">
-            <div class="theme-section-header">
-              <span class="theme-section-title">Background Color (Primary)</span>
-              <span class="theme-section-subtitle">Sets the clay base plane & automatic ambient lighting</span>
-            </div>
-                        <div class="theme-swatches-grid" id="bgSwatchesGrid">
+            <div class="theme-swatches-grid" id="bgSwatchesGrid">
               <button class="theme-swatch-chip theme-card-chip active" data-preset="custom-default" data-color="#e8dfd5"
                 title="Warm Clay (Default) (Balanced warm clay with warm amber accent)" aria-label="Warm Clay (Default)"
                 style="background-color: #e8dfd5; border-color: #d97706; color: #d97706; border-radius: 5px; box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.08), -2px -2px 6px rgba(255, 255, 255, 0.8);">
@@ -1117,6 +1113,32 @@
             </div>
           </div>
 
+          <!-- Custom Theme Presets Section (Directly Below Main Presets) -->
+          <div class="theme-section">
+            <div class="theme-section-header">
+              <span class="theme-section-title">Custom Theme Presets</span>
+              <span class="theme-section-subtitle">Save your current color palette & 3D clay parameters as a reusable preset</span>
+            </div>
+
+            <div class="custom-preset-save-row">
+              <div class="inset-input-box custom-preset-input-box">
+                <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                  <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                  <polyline points="7 3 7 8 15 8"></polyline>
+                </svg>
+                <input type="text" id="inputCustomPresetName" placeholder="Preset name (e.g. My Dark Clay)..."
+                  autocomplete="off" spellcheck="false" class="custom-preset-name-input" />
+              </div>
+              <button type="button" class="neumorphic-btn btn-go btn-save-preset" id="btnSaveCustomPreset"
+                title="Save current theme as a custom preset">
+                <span>SAVE PRESET</span>
+              </button>
+            </div>
+
+            <div class="theme-swatches-grid custom-presets-grid" id="customPresetsGrid"></div>
+          </div>
+
           <!-- Elements (Secondary / Accent) Color Section -->
           <div class="theme-section">
             <div class="theme-section-header">
@@ -1214,33 +1236,6 @@
                 </div>
               </div>
             </div>
-          </div>
-
-          <!-- 4. Custom Theme Presets Section -->
-          <div class="theme-section">
-            <div class="theme-section-header">
-              <span class="theme-section-title">Custom Theme Presets</span>
-              <span class="theme-section-subtitle">Save your current color palette & 3D clay parameters as a reusable
-                preset</span>
-            </div>
-
-            <div class="custom-preset-save-row">
-              <div class="inset-input-box custom-preset-input-box">
-                <svg class="input-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                  <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                  <polyline points="7 3 7 8 15 8"></polyline>
-                </svg>
-                <input type="text" id="inputCustomPresetName" placeholder="Preset name (e.g. My Dark Clay)..."
-                  autocomplete="off" spellcheck="false" class="custom-preset-name-input" />
-              </div>
-              <button type="button" class="neumorphic-btn btn-go btn-save-preset" id="btnSaveCustomPreset"
-                title="Save current theme as a custom preset">
-                <span>SAVE PRESET</span>
-              </button>
-            </div>
-
-            <div class="theme-swatches-grid custom-presets-grid" id="customPresetsGrid"></div>
           </div>
         </div>
 
