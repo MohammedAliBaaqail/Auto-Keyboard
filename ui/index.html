@@ -1330,17 +1330,23 @@
               <span class="form-field-hint">Multiple executables supported. Click any window card on the right to toggle assignment.</span>
             </div>
 
-            <!-- Option 1: Switch on Mouse Hover -->
-            <div class="profile-option-row" id="profHoverRow">
-              <div class="toggle-wrapper" title="Switch profile on mouse hover">
+            <!-- Option 1: Profile Switch Trigger (Window Focus vs Mouse Hover) -->
+            <div class="profile-option-row profile-trigger-row" id="profHoverRow">
+              <div class="toggle-wrapper" title="Switch trigger mode between Focus and Hover">
                 <input class="toggle-checkbox" type="checkbox" id="profSwitchOnHover">
                 <div class="toggle-container">
                   <div class="toggle-button"></div>
                 </div>
               </div>
               <div class="option-meta">
-                <span class="option-title">Switch on Mouse Hover</span>
-                <span class="option-desc">Activate this profile immediately when the mouse cursor enters its window (no click needed).</span>
+                <div class="trigger-mode-header">
+                  <span class="option-title" id="profHoverTitle">Switch Trigger: On Window Focus</span>
+                  <div class="trigger-mode-pills" role="radiogroup" aria-label="Trigger Mode">
+                    <button type="button" class="trigger-pill active" id="chipTriggerFocus">Window Focus</button>
+                    <button type="button" class="trigger-pill" id="chipTriggerHover">Mouse Hover</button>
+                  </div>
+                </div>
+                <span class="option-desc" id="profHoverDesc">Activate this profile when you click or switch focus to this application's window.</span>
               </div>
             </div>
 

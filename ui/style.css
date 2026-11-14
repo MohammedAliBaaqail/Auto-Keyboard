@@ -727,6 +727,10 @@ html, body {
   transition: var(--transition-smooth);
 }
 
+.profile-option-row.profile-trigger-row {
+  align-items: center;
+}
+
 .profile-option-row:hover {
   filter: brightness(1.02);
 }
@@ -736,6 +740,52 @@ html, body {
   flex-direction: column;
   gap: 2px;
   cursor: pointer;
+  flex: 1;
+  min-width: 0;
+}
+
+.trigger-mode-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.trigger-mode-pills {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 3px;
+  border-radius: var(--radius-pill, 9999px);
+  background: var(--surface-color);
+  box-shadow: var(--inset-sm);
+  flex-shrink: 0;
+}
+
+.trigger-pill {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill, 9999px);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  user-select: none;
+  line-height: 1.2;
+}
+
+.trigger-pill:hover {
+  color: var(--text-primary);
+}
+
+.trigger-pill.active {
+  background: var(--surface-color);
+  color: var(--accent-color);
+  box-shadow: var(--raised-sm);
+  font-weight: 700;
 }
 
 .profile-option-row .option-title {

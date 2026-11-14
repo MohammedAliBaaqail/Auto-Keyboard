@@ -406,7 +406,9 @@
     if (!state.config) return;
     const currentProf = state.config.activeProfile || 'Default';
     if (!state.config.profiles) state.config.profiles = {};
+    const existing = state.config.profiles[currentProf] || {};
     state.config.profiles[currentProf] = {
+      ...existing,
       textExpander: JSON.parse(JSON.stringify(state.config.textExpander || { enabled: 1, items: [] })),
       keyRemapper: JSON.parse(JSON.stringify(state.config.keyRemapper || { enabled: 1, items: [] })),
       appLauncher: JSON.parse(JSON.stringify(state.config.appLauncher || { enabled: 1, items: [] })),
@@ -641,6 +643,7 @@
     prof.targetExe = targetExe;
     prof.switchOnHover = Boolean(switchOnHover);
     prof.showOsdIcon = Boolean(showOsdIcon);
+    renderProfilesRibbon();
     syncConfig();
     showToast(`Updated settings for "${name}"`);
     return true;
@@ -754,6 +757,33 @@
   let profileModalMode = 'add'; // 'add' | 'edit' | 'rename' | 'delete'
   let cachedRunningApps = [];
 
+  function updateProfileTriggerModeUI(isHover) {
+    const profSwitchOnHover = document.getElementById('profSwitchOnHover');
+    const profHoverTitle = document.getElementById('profHoverTitle');
+    const profHoverDesc = document.getElementById('profHoverDesc');
+    const chipTriggerFocus = document.getElementById('chipTriggerFocus');
+    const chipTriggerHover = document.getElementById('chipTriggerHover');
+
+    const hoverBool = Boolean(isHover);
+    if (profSwitchOnHover) {
+      profSwitchOnHover.checked = hoverBool;
+    }
+    if (profHoverTitle) {
+      profHoverTitle.textContent = hoverBool ? 'Switch Trigger: On Mouse Hover' : 'Switch Trigger: On Window Focus';
+    }
+    if (profHoverDesc) {
+      profHoverDesc.textContent = hoverBool
+        ? 'Activate this profile immediately when the mouse cursor enters its window (no click needed).'
+        : 'Activate this profile when you click or switch focus to this application\'s window.';
+    }
+    if (chipTriggerFocus) {
+      chipTriggerFocus.classList.toggle('active', !hoverBool);
+    }
+    if (chipTriggerHover) {
+      chipTriggerHover.classList.toggle('active', hoverBool);
+    }
+  }
+
   function openProfileModal(mode) {
     profileModalMode = mode;
     const curName = (state.config && state.config.activeProfile) || 'Default';
@@ -815,6 +845,12 @@
       if (profileExeGroup) {
         profileExeGroup.style.display = isDefault ? 'none' : 'flex';
       }
+      if (profHoverRow) {
+        profHoverRow.style.display = isDefault ? 'none' : 'flex';
+      }
+      if (profOsdRow) {
+        profOsdRow.style.display = isDefault ? 'none' : 'flex';
+      }
       if (profileAppsColumn) {
         profileAppsColumn.style.display = isDefault ? 'none' : 'flex';
       }
@@ -830,7 +866,7 @@
           profInputExe.value = '';
           profInputExe.disabled = false;
         }
-        if (profSwitchOnHover) profSwitchOnHover.checked = false;
+        updateProfileTriggerModeUI(false);
         if (profSwitchOsdIcon) profSwitchOsdIcon.checked = true;
         if (btnConfirmProfileModal) btnConfirmProfileModal.textContent = 'Create Profile';
       } else if (mode === 'edit') {
@@ -844,9 +880,7 @@
           profInputExe.value = prof.targetExe || '';
           profInputExe.disabled = isDefault;
         }
-        if (profSwitchOnHover) {
-          profSwitchOnHover.checked = Boolean(prof.switchOnHover);
-        }
+        updateProfileTriggerModeUI(Boolean(prof.switchOnHover));
         if (profSwitchOsdIcon) {
           profSwitchOsdIcon.checked = typeof prof.showOsdIcon !== 'undefined' ? Boolean(prof.showOsdIcon) : true;
         }
@@ -4165,6 +4199,26 @@ function toggleMasterEngine() {
         if (runningAppsFilterInput) {
           runningAppsFilterInput.addEventListener('input', () => {
             renderRunningAppsList();
+          });
+        }
+        const profSwitchOnHover = document.getElementById('profSwitchOnHover');
+        if (profSwitchOnHover) {
+          profSwitchOnHover.addEventListener('change', () => {
+            updateProfileTriggerModeUI(profSwitchOnHover.checked);
+          });
+        }
+        const chipTriggerFocus = document.getElementById('chipTriggerFocus');
+        if (chipTriggerFocus) {
+          chipTriggerFocus.addEventListener('click', (e) => {
+            e.stopPropagation();
+            updateProfileTriggerModeUI(false);
+          });
+        }
+        const chipTriggerHover = document.getElementById('chipTriggerHover');
+        if (chipTriggerHover) {
+          chipTriggerHover.addEventListener('click', (e) => {
+            e.stopPropagation();
+            updateProfileTriggerModeUI(true);
           });
         }
         if (btnConfirmProfileModal) {
