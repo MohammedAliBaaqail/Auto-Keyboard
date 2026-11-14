@@ -2730,7 +2730,7 @@ function setMacroPlaybackMode(mode) {
     });
   }
   if (macroIntervalBox) {
-    macroIntervalBox.style.display = (mode === 'NoRepeat') ? 'none' : 'flex';
+    macroIntervalBox.classList.toggle('is-hidden', mode === 'NoRepeat');
   }
 }
 
