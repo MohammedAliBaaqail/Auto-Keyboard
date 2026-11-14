@@ -688,6 +688,7 @@
     state.config.profiles[name] = newProfile;
     switchProfile(name);
     showToast(`Created & switched to profile "${name}"`);
+    closeProfileModal();
     return true;
   }
 
@@ -748,6 +749,7 @@
       syncConfig();
     }
     showToast(`Profile "${name}" deleted`);
+    closeProfileModal();
     return true;
   }
 
@@ -970,6 +972,7 @@
       sendToAhk('getRunningApps');
     }
 
+    profileModal.style.display = '';
     profileModal.classList.remove('hidden-field');
     if (mode === 'add' && profileNameInput) {
       setTimeout(() => profileNameInput.focus(), 60);
@@ -979,6 +982,7 @@
   function closeProfileModal() {
     if (profileModal) {
       profileModal.classList.add('hidden-field');
+      profileModal.style.display = 'none';
       profileModal.classList.remove('has-mode-delete');
     }
     const profileConfigCard = document.getElementById('profileConfigCard');
