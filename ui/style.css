@@ -3238,33 +3238,46 @@ html, body {
 }
 
 .macro-mode-segmented {
-  height: 42px;
+  height: 44px;
   background: var(--surface-color);
   box-shadow: var(--inset-sm);
   border-radius: var(--radius-pill);
-  padding: 3px;
+  padding: 4px;
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
   flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .macro-mode-btn {
   height: 100%;
-  padding: 0 12px;
-  border-radius: calc(var(--radius-pill) - 3px);
+  padding: 0 14px;
+  border-radius: max(0px, calc(var(--radius-pill) - 4px));
   border: none;
   background: transparent;
   color: var(--text-secondary);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
+  font-family: inherit;
   cursor: pointer;
-  transition: var(--transition-smooth);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.macro-mode-btn:hover {
+  color: var(--text-primary);
+  filter: brightness(1.02);
 }
 
 .macro-mode-btn.active {
-  background: var(--surface-color);
-  box-shadow: none;
+  background-color: var(--surface-color);
+  box-shadow: var(--raised-sm);
   color: var(--accent-primary);
   font-weight: 700;
 }
@@ -3273,7 +3286,7 @@ html, body {
   flex: 0 0 92px !important;
   width: 92px !important;
   max-width: 92px !important;
-  height: 42px !important;
+  height: 44px !important;
   flex-shrink: 0 !important;
   display: flex !important;
   align-items: center !important;
