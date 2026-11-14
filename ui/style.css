@@ -646,14 +646,19 @@ html, body {
 }
 
 #profileConfigCard.profile-config-dialog.mode-delete {
-  max-width: 440px;
+  max-width: 460px;
   width: 100%;
   height: auto;
   max-height: 88vh;
   border-radius: var(--radius-card);
   box-shadow: 0 20px 48px rgba(0, 0, 0, 0.45), 0 6px 16px rgba(0, 0, 0, 0.25);
-  padding: 22px 26px;
+  padding: 24px 28px;
   animation: modalPop 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+#profileConfigCard.profile-config-dialog.mode-delete .profile-delete-box {
+  margin: 6px 0 10px 0;
+  padding: 16px 18px;
 }
 
 .profile-config-body {
@@ -1093,8 +1098,41 @@ html, body {
 
 .profile-modal-footer {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
-  gap: 10px;
+  gap: 18px;
+  margin-top: 22px;
+  padding-top: 6px;
+  position: relative;
+  z-index: 2;
+}
+
+.profile-modal-footer .neumorphic-btn {
+  position: relative;
+  z-index: 1;
+  min-width: 96px;
+  height: 40px;
+  padding: 0 20px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.profile-modal-footer .btn-primary-chip {
+  color: var(--accent-primary);
+}
+
+.profile-modal-footer .btn-primary-chip.danger {
+  color: #ef4444 !important;
+}
+
+.profile-modal-footer .btn-primary-chip.danger:hover {
+  color: #dc2626 !important;
+  background: rgba(239, 68, 68, 0.08);
 }
 
 /* ==========================================================================

@@ -405,8 +405,8 @@
   function saveCurrentProfileState() {
     if (!state.config) return;
     const currentProf = state.config.activeProfile || 'Default';
-    if (!state.config.profiles) state.config.profiles = {};
-    const existing = state.config.profiles[currentProf] || {};
+    if (!state.config.profiles || !state.config.profiles[currentProf]) return;
+    const existing = state.config.profiles[currentProf];
     state.config.profiles[currentProf] = {
       ...existing,
       textExpander: JSON.parse(JSON.stringify(state.config.textExpander || { enabled: 1, items: [] })),
@@ -725,15 +725,23 @@
   }
 
   function deleteProfile(name) {
-    const profileNames = Object.keys(state.config.profiles || {});
+    if (!state.config || !state.config.profiles) return false;
+    const profileNames = Object.keys(state.config.profiles);
     if (profileNames.length <= 1) {
       showToast('Cannot delete the only profile!');
       return false;
     }
+    if (name === 'Default') {
+      showToast('Cannot delete System Default profile!');
+      return false;
+    }
+
     delete state.config.profiles[name];
+
     if (state.config.activeProfile === name) {
       const remaining = Object.keys(state.config.profiles);
       const fallback = remaining.includes('Default') ? 'Default' : remaining[0];
+      state.config.activeProfile = fallback;
       switchProfile(fallback);
     } else {
       renderProfileSelect();
@@ -969,7 +977,16 @@
   }
 
   function closeProfileModal() {
-    if (profileModal) profileModal.classList.add('hidden-field');
+    if (profileModal) {
+      profileModal.classList.add('hidden-field');
+      profileModal.classList.remove('has-mode-delete');
+    }
+    const profileConfigCard = document.getElementById('profileConfigCard');
+    if (profileConfigCard) profileConfigCard.classList.remove('mode-delete');
+    if (btnConfirmProfileModal) {
+      btnConfirmProfileModal.classList.remove('danger');
+      btnConfirmProfileModal.textContent = 'Save Profile';
+    }
   }
 
   function handleProfileModalConfirm() {
