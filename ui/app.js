@@ -552,30 +552,67 @@
 
     // 1. Render Fixed Default Profile Slot
     if (defaultSlot) {
-      defaultSlot.innerHTML = '';
-      if (!query || 'default'.includes(query) || ((profiles['Default'] && profiles['Default'].targetExe) || '').toLowerCase().includes(query)) {
+      const existingDefCard = defaultSlot.querySelector('.lgs-profile-card');
+      const showDef = (!query || 'default'.includes(query) || ((profiles['Default'] && profiles['Default'].targetExe) || '').toLowerCase().includes(query));
+      if (showDef) {
         defaultSlot.style.display = 'flex';
-        defaultSlot.appendChild(createProfileCard('Default', true));
+        if (existingDefCard) {
+          existingDefCard.classList.toggle('active', currentProfName === 'Default');
+        } else {
+          defaultSlot.innerHTML = '';
+          defaultSlot.appendChild(createProfileCard('Default', true));
+        }
       } else {
         defaultSlot.style.display = 'none';
       }
     }
 
-    // 2. Render App Profiles Track
-    track.innerHTML = '<div class="lgs-profiles-glider" id="lgsProfilesGlider"></div>';
+    // 2. Render App Profiles Track & Preserve Glider for True Bi-Directional Animation
+    let glider = document.getElementById('lgsProfilesGlider');
+    if (!glider) {
+      glider = document.createElement('div');
+      glider.className = 'lgs-profiles-glider';
+      glider.id = 'lgsProfilesGlider';
+      track.appendChild(glider);
+    }
+
     const otherNames = allProfileNames.filter(n => n !== 'Default');
-    otherNames.forEach(pName => {
+    const visibleNames = otherNames.filter(pName => {
       const prof = profiles[pName] || {};
       const targetLower = (prof.targetExe || '').toLowerCase();
-      if (query && !pName.toLowerCase().includes(query) && !targetLower.includes(query)) {
-        return;
-      }
-      track.appendChild(createProfileCard(pName, false));
+      return !(query && !pName.toLowerCase().includes(query) && !targetLower.includes(query));
     });
 
-    requestAnimationFrame(() => {
+    const existingCards = Array.from(track.querySelectorAll('.lgs-profile-card'));
+    const existingNames = existingCards.map(c => c.getAttribute('data-profile'));
+
+    const isSameStructure = (existingNames.length === visibleNames.length &&
+      existingNames.every((n, i) => n === visibleNames[i]));
+
+    if (isSameStructure) {
+      // Structure didn't change: preserve existing DOM cards & glider
+      // Update active state and subtitle text so CSS transition glides seamlessly in BOTH directions
+      existingCards.forEach(card => {
+        const pName = card.getAttribute('data-profile');
+        const isActive = (pName === currentProfName);
+        card.classList.toggle('active', isActive);
+        const prof = profiles[pName] || {};
+        const exeEl = card.querySelector('.lgs-profile-exe');
+        if (exeEl) {
+          exeEl.textContent = prof.targetExe ? prof.targetExe.split(',')[0].trim() : 'Manual Switch';
+        }
+      });
       updateProfileGlider(false);
-    });
+    } else {
+      // Structure changed: remove cards only (glider remains!) and re-append cards
+      existingCards.forEach(c => c.remove());
+      visibleNames.forEach(pName => {
+        track.appendChild(createProfileCard(pName, false));
+      });
+      requestAnimationFrame(() => {
+        updateProfileGlider(false);
+      });
+    }
   }
 
   function updateProfileGlider(instant = false) {
@@ -597,15 +634,23 @@
       return;
     }
 
-    if (instant) {
+    const wasHidden = (glider.style.opacity === '0' || !glider.style.opacity);
+
+    if (instant || wasHidden) {
       glider.style.transition = 'none';
+      glider.style.transform = `translateX(${left}px)`;
+      glider.style.width = `${width}px`;
+      if (wasHidden) {
+        void glider.offsetWidth;
+        glider.style.transition = 'opacity 0.25s ease';
+      }
+      glider.style.opacity = '1';
     } else {
       glider.style.transition = 'transform 0.32s cubic-bezier(0.25, 1, 0.5, 1), width 0.32s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.2s ease';
+      glider.style.transform = `translateX(${left}px)`;
+      glider.style.width = `${width}px`;
+      glider.style.opacity = '1';
     }
-
-    glider.style.transform = `translateX(${left}px)`;
-    glider.style.width = `${width}px`;
-    glider.style.opacity = '1';
   }
 
   function renderProfileSelect() {
