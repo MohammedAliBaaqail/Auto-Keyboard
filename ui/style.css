@@ -324,6 +324,351 @@ html, body {
   width: 100%;
 }
 
+.profile-config-dialog {
+  max-width: 960px;
+  width: 94vw;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-config-dialog.mode-delete {
+  max-width: 440px;
+}
+
+.profile-config-body {
+  display: flex;
+  gap: 22px;
+  overflow: hidden;
+  max-height: calc(88vh - 140px);
+}
+
+.profile-config-dialog.mode-delete .profile-config-body {
+  flex-direction: column;
+  max-height: none;
+}
+
+.profile-form-column {
+  flex: 0 0 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.profile-config-dialog.mode-delete .profile-form-column {
+  flex: 1 1 auto;
+  overflow-y: visible;
+  padding-right: 0;
+}
+
+.profile-apps-column {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-color);
+  box-shadow: var(--inset-sm);
+  border-radius: var(--radius-card);
+  padding: 14px;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.profile-delete-box {
+  padding: 12px 14px;
+  border-radius: var(--radius-subcard);
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  box-shadow: var(--inset-sm);
+}
+
+.form-group-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-field-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.form-field-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-sm-chip {
+  height: 26px;
+  padding: 0 10px;
+  font-size: 11px;
+  font-weight: 700;
+  gap: 4px;
+  border-radius: var(--radius-btn);
+}
+
+.icon-svg-xs {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+}
+
+.form-field-lbl {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  letter-spacing: 0.3px;
+}
+
+.form-field-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+.default-profile-badge-notice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-subcard);
+  background: var(--surface-color);
+  box-shadow: var(--inset-sm);
+  color: var(--accent-primary);
+}
+
+.default-profile-badge-notice .notice-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.default-profile-badge-notice .notice-meta strong {
+  color: var(--text-primary);
+  font-size: 12px;
+}
+
+.profile-option-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-subcard);
+  background: var(--surface-color);
+  box-shadow: var(--raised-sm);
+  transition: var(--transition-smooth);
+}
+
+.profile-option-row:hover {
+  filter: brightness(1.02);
+}
+
+.profile-option-row .option-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  cursor: pointer;
+}
+
+.profile-option-row .option-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.profile-option-row .option-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+.profile-info-tip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: var(--radius-subcard);
+  background: var(--surface-color);
+  box-shadow: var(--inset-sm);
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+/* Apps Column Header */
+.apps-column-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  margin-bottom: 8px;
+}
+
+.apps-header-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.apps-col-title {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  color: var(--accent-primary);
+}
+
+.apps-col-subtitle {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.apps-filter-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  background: var(--surface-color);
+  box-shadow: var(--inset-sm);
+  border-radius: var(--radius-btn);
+  padding: 0 10px;
+  color: var(--text-muted);
+}
+
+.apps-filter-box input {
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 12px;
+  color: var(--text-primary);
+  width: 100%;
+}
+
+.running-apps-scroll-area {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-right: 4px;
+}
+
+.running-apps-scroll-area::-webkit-scrollbar {
+  width: 6px;
+}
+
+.running-apps-scroll-area::-webkit-scrollbar-thumb {
+  background: var(--shadow-dark);
+  border-radius: 3px;
+}
+
+.apps-empty-state {
+  text-align: center;
+  padding: 30px 10px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+/* Running App Card Item */
+.running-app-item-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-btn);
+  background: var(--surface-color);
+  box-shadow: var(--raised-sm);
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+
+.running-app-item-card:hover {
+  filter: brightness(1.03);
+  transform: translateY(-1px);
+}
+
+.running-app-item-card.is-selected {
+  box-shadow: var(--inset-sm);
+  border: 1.5px solid var(--accent-primary);
+  background: var(--surface-color);
+}
+
+.app-icon-thumb-box {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.app-icon-thumb-img {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+}
+
+.app-icon-thumb-fallback {
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-primary);
+}
+
+.app-item-info {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.app-item-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.app-item-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.app-item-badge-assigned {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--accent-primary);
+  display: none;
+  align-items: center;
+  gap: 3px;
+}
+
+.running-app-item-card.is-selected .app-item-badge-assigned {
+  display: inline-flex;
+}
+
+.app-item-exe-name {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', Consolas, monospace;
+}
+
 .profile-modal-body {
   display: flex;
   flex-direction: column;

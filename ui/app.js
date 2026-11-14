@@ -455,7 +455,7 @@
     showToast(`Profile: ${name}`);
   }
 
-  function createNewProfile(name) {
+  function createNewProfile(name, targetExe = '', switchOnHover = false, showOsdIcon = true) {
     name = (name || '').trim();
     if (!name) return false;
     if (state.config.profiles && state.config.profiles[name]) {
@@ -477,6 +477,9 @@
     const newAc = { ...JSON.parse(JSON.stringify(curAc)), enabled: 0 };
 
     const newProfile = {
+      targetExe: targetExe,
+      switchOnHover: Boolean(switchOnHover),
+      showOsdIcon: Boolean(showOsdIcon),
       textExpander: {
         enabled: 1,
         items: cloneItems(state.config.textExpander && state.config.textExpander.items)
@@ -501,7 +504,20 @@
     if (!state.config.profiles) state.config.profiles = {};
     state.config.profiles[name] = newProfile;
     switchProfile(name);
-    showToast(`Created & switched to profile "${name}" (All features OFF)`);
+    showToast(`Created & switched to profile "${name}"`);
+    return true;
+  }
+
+  function updateProfileSettings(name, targetExe, switchOnHover, showOsdIcon) {
+    name = (name || '').trim();
+    if (!name || !state.config.profiles || !state.config.profiles[name]) return false;
+    saveCurrentProfileState();
+    const prof = state.config.profiles[name];
+    prof.targetExe = targetExe;
+    prof.switchOnHover = Boolean(switchOnHover);
+    prof.showOsdIcon = Boolean(showOsdIcon);
+    syncConfig();
+    showToast(`Updated settings for "${name}"`);
     return true;
   }
 
@@ -610,48 +626,123 @@
     }
   }
 
-  let profileModalMode = 'add'; // 'add' | 'rename' | 'delete'
+  let profileModalMode = 'add'; // 'add' | 'edit' | 'rename' | 'delete'
+  let cachedRunningApps = [];
 
   function openProfileModal(mode) {
     profileModalMode = mode;
     const curName = (state.config && state.config.activeProfile) || 'Default';
     if (!profileModal) return;
 
-    if (mode === 'add') {
-      if (profileModalTitle) profileModalTitle.textContent = 'Create New Profile';
-      if (profileModalDesc) profileModalDesc.textContent = 'Enter a name for the new profile (all current items will be copied and set to OFF by default):';
-      if (profileNameInput) {
-        profileNameInput.style.display = 'block';
-        profileNameInput.value = '';
-        profileNameInput.placeholder = 'e.g. Gaming, Work, Editing...';
-      }
-      if (btnConfirmProfileModal) {
-        btnConfirmProfileModal.textContent = 'Create Profile';
-        btnConfirmProfileModal.classList.remove('danger');
-      }
-    } else if (mode === 'rename') {
-      if (profileModalTitle) profileModalTitle.textContent = 'Rename Profile';
-      if (profileModalDesc) profileModalDesc.textContent = `Enter a new name for profile "${curName}":`;
-      if (profileNameInput) {
-        profileNameInput.style.display = 'block';
-        profileNameInput.value = curName;
-      }
-      if (btnConfirmProfileModal) {
-        btnConfirmProfileModal.textContent = 'Rename';
-        btnConfirmProfileModal.classList.remove('danger');
-      }
-    } else if (mode === 'delete') {
-      if (profileModalTitle) profileModalTitle.textContent = 'Delete Profile';
+    const profileConfigCard = document.getElementById('profileConfigCard');
+    const profileDeleteNotice = document.getElementById('profileDeleteNotice');
+    const profileNameGroup = document.getElementById('profileNameGroup');
+    const defaultProfileBadgeNotice = document.getElementById('defaultProfileBadgeNotice');
+    const profileExeGroup = document.getElementById('profileExeGroup');
+    const profHoverRow = document.getElementById('profHoverRow');
+    const profOsdRow = document.getElementById('profOsdRow');
+    const profileAppsColumn = document.getElementById('profileAppsColumn');
+    const profileInfoTip = document.getElementById('profileInfoTip');
+
+    const profInputExe = document.getElementById('profInputExe');
+    const profSwitchOnHover = document.getElementById('profSwitchOnHover');
+    const profSwitchOsdIcon = document.getElementById('profSwitchOsdIcon');
+    const runningAppsFilterInput = document.getElementById('runningAppsFilterInput');
+
+    if (runningAppsFilterInput) runningAppsFilterInput.value = '';
+
+    if (mode === 'delete') {
+      if (profileConfigCard) profileConfigCard.classList.add('mode-delete');
+      if (profileModalTitle) profileModalTitle.textContent = 'DELETE PROFILE';
+      if (profileDeleteNotice) profileDeleteNotice.classList.remove('hidden-field');
       if (profileModalDesc) profileModalDesc.textContent = `Are you sure you want to delete profile "${curName}"?`;
-      if (profileNameInput) profileNameInput.style.display = 'none';
+      if (profileNameGroup) profileNameGroup.classList.add('hidden-field');
+      if (defaultProfileBadgeNotice) defaultProfileBadgeNotice.classList.add('hidden-field');
+      if (profileExeGroup) profileExeGroup.classList.add('hidden-field');
+      if (profHoverRow) profHoverRow.classList.add('hidden-field');
+      if (profOsdRow) profOsdRow.classList.add('hidden-field');
+      if (profileAppsColumn) profileAppsColumn.classList.add('hidden-field');
+      if (profileInfoTip) profileInfoTip.classList.add('hidden-field');
       if (btnConfirmProfileModal) {
         btnConfirmProfileModal.textContent = 'Delete Profile';
         btnConfirmProfileModal.classList.add('danger');
       }
+    } else {
+      if (profileConfigCard) profileConfigCard.classList.remove('mode-delete');
+      if (profileDeleteNotice) profileDeleteNotice.classList.add('hidden-field');
+      if (profileNameGroup) profileNameGroup.classList.remove('hidden-field');
+      if (profileExeGroup) profileExeGroup.classList.remove('hidden-field');
+      if (profHoverRow) profHoverRow.classList.remove('hidden-field');
+      if (profOsdRow) profOsdRow.classList.remove('hidden-field');
+      if (profileAppsColumn) profileAppsColumn.classList.remove('hidden-field');
+      if (profileInfoTip) profileInfoTip.classList.remove('hidden-field');
+      if (btnConfirmProfileModal) {
+        btnConfirmProfileModal.classList.remove('danger');
+      }
+
+      const isDefault = (mode === 'edit' && curName === 'Default');
+      if (defaultProfileBadgeNotice) {
+        defaultProfileBadgeNotice.classList.toggle('hidden-field', !isDefault);
+      }
+      if (profileExeGroup) {
+        profileExeGroup.style.display = isDefault ? 'none' : 'flex';
+      }
+      if (profileAppsColumn) {
+        profileAppsColumn.style.display = isDefault ? 'none' : 'flex';
+      }
+
+      if (mode === 'add') {
+        if (profileModalTitle) profileModalTitle.textContent = 'CREATE APP PROFILE';
+        if (profileNameInput) {
+          profileNameInput.value = '';
+          profileNameInput.disabled = false;
+          profileNameInput.placeholder = 'e.g. Chrome, Blender, Gaming, VS Code...';
+        }
+        if (profInputExe) {
+          profInputExe.value = '';
+          profInputExe.disabled = false;
+        }
+        if (profSwitchOnHover) profSwitchOnHover.checked = false;
+        if (profSwitchOsdIcon) profSwitchOsdIcon.checked = true;
+        if (btnConfirmProfileModal) btnConfirmProfileModal.textContent = 'Create Profile';
+      } else if (mode === 'edit') {
+        if (profileModalTitle) profileModalTitle.textContent = `CONFIGURE PROFILE: ${curName}`;
+        if (profileNameInput) {
+          profileNameInput.value = curName;
+          profileNameInput.disabled = isDefault;
+        }
+        const prof = (state.config.profiles && state.config.profiles[curName]) || {};
+        if (profInputExe) {
+          profInputExe.value = prof.targetExe || '';
+          profInputExe.disabled = isDefault;
+        }
+        if (profSwitchOnHover) {
+          profSwitchOnHover.checked = Boolean(prof.switchOnHover);
+        }
+        if (profSwitchOsdIcon) {
+          profSwitchOsdIcon.checked = typeof prof.showOsdIcon !== 'undefined' ? Boolean(prof.showOsdIcon) : true;
+        }
+        if (btnConfirmProfileModal) btnConfirmProfileModal.textContent = 'Save Changes';
+      } else if (mode === 'rename') {
+        if (profileModalTitle) profileModalTitle.textContent = 'RENAME PROFILE';
+        if (profileNameInput) {
+          profileNameInput.value = curName;
+          profileNameInput.disabled = false;
+        }
+        if (profileExeGroup) profileExeGroup.classList.add('hidden-field');
+        if (profHoverRow) profHoverRow.classList.add('hidden-field');
+        if (profOsdRow) profOsdRow.classList.add('hidden-field');
+        if (profileAppsColumn) profileAppsColumn.classList.add('hidden-field');
+        if (profileInfoTip) profileInfoTip.classList.add('hidden-field');
+        if (btnConfirmProfileModal) btnConfirmProfileModal.textContent = 'Rename';
+      }
+
+      // Request open running windows list from AHK backend
+      sendToAhk('getRunningApps');
     }
 
     profileModal.classList.remove('hidden-field');
-    if (mode !== 'delete' && profileNameInput) {
+    if (mode === 'add' && profileNameInput) {
       setTimeout(() => profileNameInput.focus(), 60);
     }
   }
@@ -662,13 +753,31 @@
 
   function handleProfileModalConfirm() {
     const curName = (state.config && state.config.activeProfile) || 'Default';
+    const profInputExe = document.getElementById('profInputExe');
+    const profSwitchOnHover = document.getElementById('profSwitchOnHover');
+    const profSwitchOsdIcon = document.getElementById('profSwitchOsdIcon');
+
+    const targetExe = profInputExe ? profInputExe.value.trim() : '';
+    const switchOnHover = profSwitchOnHover ? profSwitchOnHover.checked : false;
+    const showOsdIcon = profSwitchOsdIcon ? profSwitchOsdIcon.checked : true;
+
     if (profileModalMode === 'add') {
       const name = profileNameInput ? profileNameInput.value.trim() : '';
       if (!name) {
         if (profileNameInput) profileNameInput.focus();
+        showToast('Please enter a name for the profile');
         return;
       }
-      if (createNewProfile(name)) {
+      if (createNewProfile(name, targetExe, switchOnHover, showOsdIcon)) {
+        closeProfileModal();
+      }
+    } else if (profileModalMode === 'edit') {
+      const newName = profileNameInput ? profileNameInput.value.trim() : curName;
+      if (curName !== 'Default' && newName && newName !== curName) {
+        renameProfile(curName, newName);
+      }
+      const actualName = (curName !== 'Default' && newName) ? newName : curName;
+      if (updateProfileSettings(actualName, targetExe, switchOnHover, showOsdIcon)) {
         closeProfileModal();
       }
     } else if (profileModalMode === 'rename') {
@@ -685,6 +794,90 @@
         closeProfileModal();
       }
     }
+  }
+
+  function renderRunningAppsList(apps) {
+    if (Array.isArray(apps)) cachedRunningApps = apps;
+    const container = document.getElementById('runningAppsList');
+    if (!container) return;
+
+    const filterInput = document.getElementById('runningAppsFilterInput');
+    const filter = (filterInput ? filterInput.value : '').trim().toLowerCase();
+
+    const profInputExe = document.getElementById('profInputExe');
+    const rawExeVal = profInputExe ? profInputExe.value : '';
+    const selectedExes = rawExeVal.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+
+    const filtered = (cachedRunningApps || []).filter(app => {
+      if (!filter) return true;
+      const t = (app.title || '').toLowerCase();
+      const p = (app.process || '').toLowerCase();
+      return t.includes(filter) || p.includes(filter);
+    });
+
+    if (filtered.length === 0) {
+      container.innerHTML = `<div class="apps-empty-state">${cachedRunningApps.length === 0 ? 'No open eligible application windows found.' : 'No open windows match filter.'}</div>`;
+      return;
+    }
+
+    container.innerHTML = '';
+    filtered.forEach(app => {
+      const cleanProc = (app.process || '').replace(/\.exe$/i, '');
+      const isSelected = selectedExes.includes((app.process || '').toLowerCase());
+
+      const card = document.createElement('div');
+      card.className = `running-app-item-card ${isSelected ? 'is-selected' : ''}`;
+      card.setAttribute('data-process', (app.process || '').toLowerCase());
+      card.title = `${app.title}\nExecutable: ${app.process}\nClick to toggle binding for this profile`;
+
+      card.innerHTML = `
+        <div class="app-icon-thumb-box">
+          <img class="app-icon-thumb-img" src="icons/${encodeURIComponent(cleanProc)}.png" alt="${cleanProc}" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';" />
+          <div class="app-icon-thumb-fallback" style="display: none;">
+            <svg class="icon-svg-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+          </div>
+        </div>
+        <div class="app-item-info">
+          <div class="app-item-title-row">
+            <span class="app-item-title">${escapeHtml(app.title || cleanProc)}</span>
+            <span class="app-item-badge-assigned">
+              <svg class="icon-svg-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg> Assigned
+            </span>
+          </div>
+          <span class="app-item-exe-name">${escapeHtml(app.process || '')}</span>
+        </div>
+      `;
+
+      card.addEventListener('click', () => {
+        if (!profInputExe || profInputExe.disabled) return;
+        const curList = profInputExe.value.split(',').map(s => s.trim()).filter(Boolean);
+        const lowerList = curList.map(s => s.toLowerCase());
+        const procLower = (app.process || '').toLowerCase();
+
+        if (lowerList.includes(procLower)) {
+          const updated = curList.filter(s => s.toLowerCase() !== procLower);
+          profInputExe.value = updated.join(', ');
+          card.classList.remove('is-selected');
+        } else {
+          curList.push(app.process);
+          profInputExe.value = curList.join(', ');
+          card.classList.add('is-selected');
+        }
+
+        // Auto-fill profile name if it's currently empty and in create mode
+        if (profileModalMode === 'add' && profileNameInput && !profileNameInput.value.trim()) {
+          profileNameInput.value = cleanProc.charAt(0).toUpperCase() + cleanProc.slice(1);
+        }
+      });
+
+      container.appendChild(card);
+    });
   }
 
   // ============================================================================
@@ -3780,6 +3973,12 @@ function toggleMasterEngine() {
             openProfileModal('add');
           });
         }
+        const btnEditProfile = document.getElementById('btnEditProfile');
+        if (btnEditProfile) {
+          btnEditProfile.addEventListener('click', () => {
+            openProfileModal('edit');
+          });
+        }
         if (btnRenameProfile) {
           btnRenameProfile.addEventListener('click', () => {
             openProfileModal('rename');
@@ -3788,6 +3987,26 @@ function toggleMasterEngine() {
         if (btnDeleteProfile) {
           btnDeleteProfile.addEventListener('click', () => {
             openProfileModal('delete');
+          });
+        }
+        const btnBrowseProfileExe = document.getElementById('btnBrowseProfileExe');
+        if (btnBrowseProfileExe) {
+          btnBrowseProfileExe.addEventListener('click', () => {
+            sendToAhk('browseProfileApp');
+          });
+        }
+        const btnRescanRunningApps = document.getElementById('btnRescanRunningApps');
+        if (btnRescanRunningApps) {
+          btnRescanRunningApps.addEventListener('click', () => {
+            const list = document.getElementById('runningAppsList');
+            if (list) list.innerHTML = '<div class="apps-empty-state">Rescanning open windows...</div>';
+            sendToAhk('getRunningApps');
+          });
+        }
+        const runningAppsFilterInput = document.getElementById('runningAppsFilterInput');
+        if (runningAppsFilterInput) {
+          runningAppsFilterInput.addEventListener('input', () => {
+            renderRunningAppsList();
           });
         }
         if (btnConfirmProfileModal) {
@@ -4270,6 +4489,41 @@ function toggleMasterEngine() {
             }
             isInitialized = true;
             renderAll(false);
+          } else if (msg.type === 'runningAppsList') {
+            renderRunningAppsList(msg.apps || []);
+          } else if (msg.type === 'profileAppSelected') {
+            const profInputExe = document.getElementById('profInputExe');
+            if (profInputExe && msg.exe) {
+              const cur = profInputExe.value.split(',').map(s => s.trim()).filter(Boolean);
+              if (!cur.some(x => x.toLowerCase() === msg.exe.toLowerCase())) {
+                cur.push(msg.exe);
+                profInputExe.value = cur.join(', ');
+              }
+              if (profileModalMode === 'add' && profileNameInput && !profileNameInput.value.trim() && msg.name) {
+                profileNameInput.value = msg.name.charAt(0).toUpperCase() + msg.name.slice(1);
+              }
+              renderRunningAppsList();
+            }
+          } else if (msg.type === 'profileAutoSwitched') {
+            if (msg.activeProfile && state.config && state.config.profiles && state.config.profiles[msg.activeProfile]) {
+              state.config.activeProfile = msg.activeProfile;
+              const prof = state.config.profiles[msg.activeProfile];
+              state.config.textExpander = prof.textExpander;
+              state.config.keyRemapper = prof.keyRemapper;
+              state.config.appLauncher = prof.appLauncher;
+              state.config.macroRecorder = prof.macroRecorder;
+              state.config.windowManager = prof.windowManager;
+              state.config.autoClicker = prof.autoClicker;
+              renderProfileSelect();
+              renderTextExpander();
+              renderKeyRemapper();
+              initWindowManager();
+              renderAppLauncher();
+              renderMacroRecorder();
+              updateAutoClickerUI();
+              updateGlobalIndicators();
+              showToast(`Switched Profile: ${msg.activeProfile}` + (msg.triggerExe ? ` (${msg.triggerExe})` : ''));
+            }
           } else if (msg.type === 'autoClickerState') {
             updateAutoClickerUi(msg.running);
           } else if (msg.type === 'appSelected') {

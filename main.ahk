@@ -87,6 +87,8 @@ OnExit(OnAppExit)
 OnAppExit(exitReason, exitCode) {
     global g_Wvc, g_MainGui, g_Config
     SetTimer(CheckActiveAppFocus, 0)
+    SetTimer(CheckAutoProfileSwitch, 0)
+    ProfileOsdHUD.Hide()
     if (g_MainGui) {
         try {
             g_MainGui.GetPos(,, &curW, &curH)
@@ -946,6 +948,418 @@ CheckActiveAppFocus() {
 }
 
 ; ==============================================================================
+; Profile Auto-Switching Engine & Running Apps Scanner
+; ==============================================================================
+
+global g_LastActiveSwitchProc := ""
+global g_LastActiveSwitchHwnd := 0
+
+class ProfileGdipHelper {
+    static pToken := 0
+    static Init() {
+        if (this.pToken != 0)
+            return true
+        DllCall("LoadLibrary", "Str", "gdiplus.dll", "Ptr")
+        si := Buffer(24, 0)
+        NumPut("UInt", 1, si, 0)
+        token := 0
+        if (DllCall("gdiplus\GdiplusStartup", "Ptr*", &token, "Ptr", si.Ptr, "Ptr", 0) == 0) {
+            this.pToken := token
+            return true
+        }
+        return false
+    }
+}
+
+class ProfileAppScanner {
+    static ExtractExeIcon(fullPath, outPng) {
+        try {
+            if (!ProfileGdipHelper.Init())
+                return false
+            hIcon := 0
+            hIcons := Buffer(A_PtrSize, 0)
+            hIconIds := Buffer(4, 0)
+            if (DllCall("user32\PrivateExtractIconsW", "Str", fullPath, "Int", 0, "Int", 48, "Int", 48, "Ptr", hIcons.Ptr, "Ptr", hIconIds.Ptr, "UInt", 1, "UInt", 0) > 0) {
+                hIcon := NumGet(hIcons, 0, "Ptr")
+            }
+            if (!hIcon) {
+                pathBuf := Buffer(520, 0)
+                StrPut(fullPath, pathBuf, "UTF-16")
+                index := 0
+                hIcon := DllCall("shell32\ExtractAssociatedIcon", "Ptr", 0, "Ptr", pathBuf.Ptr, "Short*", &index, "Ptr")
+            }
+            if (hIcon) {
+                pBitmap := 0
+                DllCall("gdiplus\GdipCreateBitmapFromHICON", "Ptr", hIcon, "Ptr*", &pBitmap)
+                DllCall("user32\DestroyIcon", "Ptr", hIcon)
+                if (pBitmap) {
+                    clsidPng := Buffer(16)
+                    DllCall("ole32\CLSIDFromString", "Str", "{557CF406-1A04-11D3-9A73-0000F81EF32E}", "Ptr", clsidPng.Ptr)
+                    DllCall("gdiplus\GdipSaveImageToFile", "Ptr", pBitmap, "Str", outPng, "Ptr", clsidPng.Ptr, "Ptr", 0)
+                    DllCall("gdiplus\GdipDisposeImage", "Ptr", pBitmap)
+                }
+            }
+            return FileExist(outPng) ? true : false
+        } catch {
+            return false
+        }
+    }
+
+    static ExtractWindowIcon(hwnd, outPng) {
+        try {
+            hIcon := SendMessage(0x007F, 1, 0, hwnd) ; WM_GETICON, ICON_BIG
+            if (!hIcon)
+                hIcon := SendMessage(0x007F, 0, 0, hwnd) ; WM_GETICON, ICON_SMALL
+            if (!hIcon)
+                hIcon := DllCall("GetClassLongPtr", "Ptr", hwnd, "Int", -14, "Ptr") ; GCLP_HICON
+            if (!hIcon)
+                hIcon := DllCall("GetClassLongPtr", "Ptr", hwnd, "Int", -34, "Ptr") ; GCLP_HICONSM
+            if (hIcon) {
+                if (ProfileGdipHelper.Init()) {
+                    pBitmap := 0
+                    DllCall("gdiplus\GdipCreateBitmapFromHICON", "Ptr", hIcon, "Ptr*", &pBitmap)
+                    if (pBitmap) {
+                        clsidPng := Buffer(16)
+                        DllCall("ole32\CLSIDFromString", "Str", "{557CF406-1A04-11D3-9A73-0000F81EF32E}", "Ptr", clsidPng.Ptr)
+                        DllCall("gdiplus\GdipSaveImageToFile", "Ptr", pBitmap, "Str", outPng, "Ptr", clsidPng.Ptr, "Ptr", 0)
+                        DllCall("gdiplus\GdipDisposeImage", "Ptr", pBitmap)
+                    }
+                }
+            }
+            return FileExist(outPng) ? true : false
+        } catch {
+            return false
+        }
+    }
+
+    static GetRunningApps() {
+        procs := Map()
+        outDir := A_ScriptDir . "\ui\icons"
+        if (!DirExist(outDir)) {
+            try DirCreate(outDir)
+        }
+        try {
+            hwndList := WinGetList()
+            for hwnd in hwndList {
+                if (!DllCall("IsWindowVisible", "Ptr", hwnd))
+                    continue
+                title := WinGetTitle(hwnd)
+                if (title == "" || title == "Program Manager")
+                    continue
+                try {
+                    pname := WinGetProcessName(hwnd)
+                    if (pname != "" && !procs.Has(pname)) {
+                        if (pname != "explorer.exe" && pname != "AutoHotkey64.exe" && pname != "msedgewebview2.exe" && pname != "ApplicationFrameHost.exe" && pname != "SystemSettings.exe") {
+                            cleanProc := RegExReplace(pname, "i)\.exe$", "")
+                            iconFile := outDir . "\" . cleanProc . ".png"
+                            if (!FileExist(iconFile)) {
+                                exePath := ""
+                                try exePath := WinGetProcessPath(hwnd)
+                                if (exePath != "" && FileExist(exePath)) {
+                                    this.ExtractExeIcon(exePath, iconFile)
+                                }
+                                if (!FileExist(iconFile)) {
+                                    this.ExtractWindowIcon(hwnd, iconFile)
+                                }
+                            }
+                            hasIcon := FileExist(iconFile) ? 1 : 0
+                            procs[pname] := { title: title, icon: cleanProc, hasIcon: hasIcon }
+                        }
+                    }
+                }
+            }
+        }
+        out := []
+        for pname, info in procs {
+            out.Push(Map("process", pname, "title", info.title, "icon", info.icon, "hasIcon", info.hasIcon))
+        }
+        return out
+    }
+}
+
+class ProfileOsdHUD {
+    static guiObj := ""
+    static hideFn := () => ProfileOsdHUD.Hide()
+
+    static Init() {
+        if (this.guiObj != "")
+            return
+        ProfileGdipHelper.Init()
+        this.guiObj := Gui("+AlwaysOnTop -Caption +ToolWindow -DPIScale +E0x08000000 +E0x00000020 +E0x00080000")
+    }
+
+    static ShowIcon(iconPath := "", durationMs := 1200) {
+        this.Init()
+        dpiScale := A_ScreenDPI / 96.0
+        guiW := Round(56 * dpiScale)
+        guiH := Round(56 * dpiScale)
+        cornerRadius := 14.0 * dpiScale
+
+        hDC := DllCall("GetDC", "ptr", 0, "ptr")
+        hMemDC := DllCall("CreateCompatibleDC", "ptr", hDC, "ptr")
+
+        bi := Buffer(40, 0)
+        NumPut("uint", 40, bi, 0)
+        NumPut("int", guiW, bi, 4)
+        NumPut("int", -guiH, bi, 8)
+        NumPut("ushort", 1, bi, 12)
+        NumPut("ushort", 32, bi, 14)
+        NumPut("uint", 0, bi, 16)
+
+        pBits := 0
+        hBmp := DllCall("CreateDIBSection", "ptr", hMemDC, "ptr", bi, "uint", 0, "ptr*", &pBits, "ptr", 0, "uint", 0, "ptr")
+        hOldBmp := DllCall("SelectObject", "ptr", hMemDC, "ptr", hBmp, "ptr")
+
+        pGraphics := 0
+        DllCall("gdiplus\GdipCreateFromHDC", "ptr", hMemDC, "ptr*", &pGraphics)
+        DllCall("gdiplus\GdipSetSmoothingMode", "ptr", pGraphics, "int", 4)
+
+        inset := 1.2 * dpiScale
+        r := cornerRadius
+        d := r * 2.0
+        rw := Float(guiW) - (inset * 2.0)
+        rh := Float(guiH) - (inset * 2.0)
+
+        pPath := 0
+        DllCall("gdiplus\GdipCreatePath", "int", 0, "ptr*", &pPath)
+        DllCall("gdiplus\GdipAddPathArc", "ptr", pPath, "float", inset, "float", inset, "float", d, "float", d, "float", 180, "float", 90)
+        DllCall("gdiplus\GdipAddPathArc", "ptr", pPath, "float", inset + rw - d, "float", inset, "float", d, "float", d, "float", 270, "float", 90)
+        DllCall("gdiplus\GdipAddPathArc", "ptr", pPath, "float", inset + rw - d, "float", inset + rh - d, "float", d, "float", d, "float", 0, "float", 90)
+        DllCall("gdiplus\GdipAddPathArc", "ptr", pPath, "float", inset, "float", inset + rh - d, "float", d, "float", d, "float", 90, "float", 90)
+        DllCall("gdiplus\GdipClosePathFigure", "ptr", pPath)
+
+        pBgBrush := 0
+        DllCall("gdiplus\GdipCreateSolidFill", "uint", 0xF218181B, "ptr*", &pBgBrush)
+        DllCall("gdiplus\GdipFillPath", "ptr", pGraphics, "ptr", pBgBrush, "ptr", pPath)
+
+        pPen := 0
+        DllCall("gdiplus\GdipCreatePen1", "uint", 0xFFD97706, "float", 1.5 * dpiScale, "int", 2, "ptr*", &pPen)
+        DllCall("gdiplus\GdipDrawPath", "ptr", pGraphics, "ptr", pPen, "ptr", pPath)
+
+        pBitmap := 0
+        if (iconPath != "" && FileExist(iconPath)) {
+            DllCall("gdiplus\GdipCreateBitmapFromFile", "wstr", iconPath, "ptr*", &pBitmap)
+        }
+        if (pBitmap) {
+            imgW := 0, imgH := 0
+            DllCall("gdiplus\GdipGetImageWidth", "ptr", pBitmap, "uint*", &imgW)
+            DllCall("gdiplus\GdipGetImageHeight", "ptr", pBitmap, "uint*", &imgH)
+            if (imgW > 0 && imgH > 0) {
+                maxBox := 34.0 * dpiScale
+                scale := Min(maxBox / imgW, maxBox / imgH)
+                drawW := imgW * scale
+                drawH := imgH * scale
+                dstX := (Float(guiW) - drawW) / 2.0
+                dstY := (Float(guiH) - drawH) / 2.0
+                DllCall("gdiplus\GdipSetInterpolationMode", "ptr", pGraphics, "int", 7)
+                DllCall("gdiplus\GdipDrawImageRectRect", "ptr", pGraphics, "ptr", pBitmap
+                    , "float", dstX, "float", dstY, "float", drawW, "float", drawH
+                    , "float", 0.0, "float", 0.0, "float", Float(imgW), "float", Float(imgH)
+                    , "int", 2, "ptr", 0, "ptr", 0, "ptr", 0)
+            }
+            DllCall("gdiplus\GdipDisposeImage", "ptr", pBitmap)
+        }
+
+        CoordMode("Mouse", "Screen")
+        MouseGetPos(&mX, &mY)
+        monCount := MonitorGetCount()
+        monIndex := 1
+        Loop monCount {
+            MonitorGet(A_Index, &mL, &mT, &mR, &mB)
+            if (mX >= mL && mX < mR && mY >= mT && mY < mB) {
+                monIndex := A_Index
+                break
+            }
+        }
+        MonitorGetWorkArea(monIndex, &WL, &WT, &WR, &WB)
+        posX := WR - guiW - Round(24 * dpiScale)
+        posY := WB - guiH - Round(24 * dpiScale)
+
+        ptDst := Buffer(8, 0)
+        NumPut("int", posX, ptDst, 0), NumPut("int", posY, ptDst, 4)
+        sz := Buffer(8, 0)
+        NumPut("int", guiW, sz, 0), NumPut("int", guiH, sz, 4)
+        ptSrc := Buffer(8, 0)
+        NumPut("int", 0, ptSrc, 0), NumPut("int", 0, ptSrc, 4)
+        blend := Buffer(4, 0)
+        NumPut("uchar", 0, blend, 0), NumPut("uchar", 0, blend, 1)
+        NumPut("uchar", 255, blend, 2), NumPut("uchar", 1, blend, 3)
+
+        this.guiObj.Show("x" . posX . " y" . posY . " w" . guiW . " h" . guiH . " NoActivate")
+        DllCall("UpdateLayeredWindow", "ptr", this.guiObj.Hwnd, "ptr", hDC, "ptr", ptDst, "ptr", sz, "ptr", hMemDC, "ptr", ptSrc, "uint", 0, "ptr", blend, "uint", 2)
+
+        DllCall("gdiplus\GdipDeleteBrush", "ptr", pBgBrush)
+        DllCall("gdiplus\GdipDeletePen", "ptr", pPen)
+        DllCall("gdiplus\GdipDeletePath", "ptr", pPath)
+        DllCall("gdiplus\GdipDeleteGraphics", "ptr", pGraphics)
+        DllCall("SelectObject", "ptr", hMemDC, "ptr", hOldBmp)
+        DllCall("DeleteObject", "ptr", hBmp)
+        DllCall("DeleteDC", "ptr", hMemDC)
+        DllCall("ReleaseDC", "ptr", 0, "ptr", hDC)
+
+        SetTimer(this.hideFn, -durationMs)
+    }
+
+    static Hide() {
+        if (this.guiObj != "") {
+            this.guiObj.Hide()
+        }
+    }
+}
+
+CheckAutoProfileSwitch() {
+    global g_Config, g_MainGui, g_Wv, g_LastActiveSwitchProc, g_LastActiveSwitchHwnd
+    if (!g_Config.Has("profiles") || !IsObject(g_Config["profiles"]))
+        return
+
+    ; Check if any profile has switchOnHover enabled
+    hasHoverProfiles := false
+    for pName, pData in g_Config["profiles"] {
+        if (IsObject(pData) && pData.Has("switchOnHover") && (pData["switchOnHover"] = 1 || pData["switchOnHover"] = true)) {
+            hasHoverProfiles := true
+            break
+        }
+    }
+
+    matchedProfile := ""
+    triggerProc := ""
+
+    ; 1. If any hover profile exists, check window under cursor
+    if (hasHoverProfiles) {
+        try {
+            CoordMode("Mouse", "Screen")
+            MouseGetPos(&mX, &mY, &hoverHwnd)
+            if (hoverHwnd && (!g_MainGui || hoverHwnd != g_MainGui.Hwnd)) {
+                hoverProc := WinGetProcessName("ahk_id " . hoverHwnd)
+                if (hoverProc != "" && hoverProc != "AutoHotkey64.exe" && hoverProc != "msedgewebview2.exe") {
+                    matchedProfile := FindProfileForProcess(hoverProc, true)
+                    if (matchedProfile != "") {
+                        triggerProc := hoverProc
+                    }
+                }
+            }
+        }
+    }
+
+    ; 2. If not matched via hover, check focused window
+    if (matchedProfile == "") {
+        activeHwnd := WinExist("A")
+        if (!activeHwnd || (g_MainGui && activeHwnd == g_MainGui.Hwnd))
+            return
+
+        if (!hasHoverProfiles && activeHwnd == g_LastActiveSwitchHwnd)
+            return
+
+        activeProc := ""
+        try activeProc := WinGetProcessName(activeHwnd)
+        if (activeProc == "" || activeProc = "AutoHotkey64.exe" || activeProc = "msedgewebview2.exe" || activeProc = "explorer.exe")
+            return
+
+        g_LastActiveSwitchHwnd := activeHwnd
+        matchedProfile := FindProfileForProcess(activeProc, false)
+        if (matchedProfile != "") {
+            triggerProc := activeProc
+        }
+    }
+
+    ; 3. Fallback to Default profile if no specific profile matched
+    if (matchedProfile == "") {
+        matchedProfile := "Default"
+    }
+
+    curProfile := g_Config.Has("activeProfile") ? g_Config["activeProfile"] : "Default"
+    if (matchedProfile != curProfile && g_Config["profiles"].Has(matchedProfile)) {
+        g_LastActiveSwitchProc := triggerProc
+        SwitchToProfileInternal(matchedProfile, triggerProc)
+    }
+}
+
+FindProfileForProcess(procName, hoverOnly := false) {
+    global g_Config
+    procLower := StrLower(Trim(procName))
+    if (!g_Config.Has("profiles") || !IsObject(g_Config["profiles"]))
+        return ""
+
+    for pName, pData in g_Config["profiles"] {
+        if (!IsObject(pData) || pName = "Default")
+            continue
+        if (hoverOnly) {
+            isHover := pData.Has("switchOnHover") && (pData["switchOnHover"] = 1 || pData["switchOnHover"] = true)
+            if (!isHover)
+                continue
+        }
+        targetExe := pData.Has("targetExe") ? pData["targetExe"] : ""
+        if (targetExe != "") {
+            for part in StrSplit(targetExe, ",") {
+                clean := StrLower(Trim(part))
+                if (clean == "")
+                    continue
+                if (!InStr(clean, ".exe"))
+                    clean .= ".exe"
+                if (clean == procLower)
+                    return pName
+            }
+        }
+    }
+    return ""
+}
+
+SwitchToProfileInternal(targetProfile, triggerExe := "") {
+    global g_Config, g_Wv
+    if (!g_Config["profiles"].Has(targetProfile))
+        return
+
+    g_Config["activeProfile"] := targetProfile
+    prof := g_Config["profiles"][targetProfile]
+    if (IsObject(prof)) {
+        if (prof.Has("textExpander"))
+            g_Config["textExpander"] := prof["textExpander"]
+        if (prof.Has("keyRemapper"))
+            g_Config["keyRemapper"] := prof["keyRemapper"]
+        if (prof.Has("appLauncher"))
+            g_Config["appLauncher"] := prof["appLauncher"]
+        if (prof.Has("macroRecorder"))
+            g_Config["macroRecorder"] := prof["macroRecorder"]
+        if (prof.Has("windowManager"))
+            g_Config["windowManager"] := prof["windowManager"]
+        if (prof.Has("autoClicker"))
+            g_Config["autoClicker"] := prof["autoClicker"]
+    }
+
+    SaveConfigToFile()
+    ApplyAllModules()
+
+    ; Notify WebUI of profile change
+    if (g_Wv) {
+        g_Wv.PostWebMessageAsString(JSON.stringify(Map(
+            "type", "profileAutoSwitched",
+            "activeProfile", targetProfile,
+            "triggerExe", triggerExe
+        )))
+    }
+
+    ; Trigger App Icon OSD popup if enabled for this profile
+    showIcon := true
+    if (IsObject(prof) && prof.Has("showOsdIcon")) {
+        showIcon := (prof["showOsdIcon"] = 1 || prof["showOsdIcon"] = true)
+    }
+    if (showIcon) {
+        iconPath := ""
+        if (triggerExe != "") {
+            cleanName := RegExReplace(triggerExe, "i)\.exe$", "")
+            testPng := A_ScriptDir . "\ui\icons\" . cleanName . ".png"
+            if (FileExist(testPng)) {
+                iconPath := testPng
+            }
+        }
+        if (iconPath == "") {
+            iconPath := A_ScriptDir . "\ui\app-icon.png"
+        }
+        ProfileOsdHUD.ShowIcon(iconPath, 1200)
+    }
+}
+
+; ==============================================================================
 ; 4. Quick App Launcher & Runner Module
 ; ==============================================================================
 
@@ -1688,6 +2102,8 @@ InitWebView2() {
         
         ; Start polling for active window changes to update Window Manager volume live
         SetTimer(CheckActiveAppFocus, 400)
+        ; Start polling for real-time application profile auto-switching
+        SetTimer(CheckAutoProfileSwitch, 350)
         
     } catch as err {
         LogMessage("FATAL: Failed to configure WebView2: " . err.Message)
@@ -1888,6 +2304,47 @@ OnWebMessageReceived(thisPtr, senderPtr, argsPtr) {
 
             case "toggleMuteActiveApp":
                 ToggleActiveAppMute()
+
+            case "getRunningApps":
+                try {
+                    apps := ProfileAppScanner.GetRunningApps()
+                    if (g_Wv) {
+                        g_Wv.PostWebMessageAsString(JSON.stringify(Map(
+                            "type", "runningAppsList",
+                            "apps", apps
+                        )))
+                    }
+                } catch as err {
+                    LogMessage("getRunningApps error: " . err.Message)
+                }
+
+            case "browseProfileApp":
+                try {
+                    selectedFile := FileSelect(1, , "Select Target Application", "Programs (*.exe; *.lnk; *.bat; *.cmd; *.com)|All Files (*.*)")
+                    if (selectedFile != "") {
+                        SplitPath(selectedFile, &outFileName, &outDir, &outExt, &outNameNoExt)
+                        iconName := outNameNoExt
+                        outDirPng := A_ScriptDir . "\ui\icons"
+                        if (!DirExist(outDirPng)) {
+                            try DirCreate(outDirPng)
+                        }
+                        iconPng := outDirPng . "\" . outNameNoExt . ".png"
+                        if (!FileExist(iconPng)) {
+                            ProfileAppScanner.ExtractExeIcon(selectedFile, iconPng)
+                        }
+                        if (g_Wv) {
+                            g_Wv.PostWebMessageAsString(JSON.stringify(Map(
+                                "type", "profileAppSelected",
+                                "path", selectedFile,
+                                "exe": outFileName,
+                                "name", outNameNoExt,
+                                "hasIcon", FileExist(iconPng) ? 1 : 0
+                            )))
+                        }
+                    }
+                } catch as err {
+                    LogMessage("browseProfileApp error: " . err.Message)
+                }
         }
     } catch as err {
         LogMessage("WebMessage dispatch error: " . err.Message)

@@ -192,6 +192,12 @@
                 <line x1="5" y1="12" x2="19" y2="12"></line>
               </svg>
             </button>
+            <button class="squircle-btn profile-action-btn" id="btnEditProfile" title="Configure Profile Settings & Auto-Switching">
+              <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+              </svg>
+            </button>
             <button class="squircle-btn profile-action-btn" id="btnRenameProfile" title="Rename Current Profile">
               <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
@@ -1246,31 +1252,139 @@
       </div>
     </div>
 
-    <!-- Profile Name Prompt / Confirmation Modal -->
+    <!-- Profile Setup & Auto-Switch Configuration Modal -->
     <div class="modal-overlay hidden-field" id="profileModal">
-      <div class="modal-card profile-modal-card">
+      <div class="modal-card profile-config-dialog" id="profileConfigCard">
         <div class="modal-header">
           <div class="modal-title-row">
             <svg class="icon-svg" style="color:var(--accent-primary);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
               <circle cx="12" cy="7" r="4"></circle>
             </svg>
-            <h3 class="modal-title" id="profileModalTitle">Profile</h3>
+            <h3 class="modal-title" id="profileModalTitle">CREATE APP PROFILE</h3>
           </div>
-          <button class="squircle-btn btn-mini" id="btnCloseProfileModal" title="Close">
+          <button class="squircle-btn btn-mini" id="btnCloseProfileModal" title="Close (Esc)">
             <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
           </button>
         </div>
-        <div class="modal-body profile-modal-body">
-          <p class="profile-modal-desc" id="profileModalDesc">Enter a name for the new profile:</p>
-          <input type="text" class="profile-modal-input" id="profileNameInput" placeholder="e.g. Work, Gaming, Coding..." maxlength="24" autocomplete="off" spellcheck="false" />
+
+        <div class="profile-config-body" id="profileConfigBody">
+          <!-- Left Column: Form & Toggles -->
+          <div class="profile-form-column">
+            <!-- Delete Mode Confirmation Prompt -->
+            <div id="profileDeleteNotice" class="profile-delete-box hidden-field">
+              <p class="profile-modal-desc" id="profileModalDesc">Are you sure you want to delete this profile?</p>
+            </div>
+
+            <!-- Profile Name -->
+            <div class="form-group-field" id="profileNameGroup">
+              <label for="profileNameInput" class="form-field-lbl">Profile Name:</label>
+              <input type="text" class="profile-modal-input" id="profileNameInput" placeholder="e.g. Chrome, Blender, Gaming, VS Code..." maxlength="28" autocomplete="off" spellcheck="false" />
+            </div>
+
+            <!-- Default Profile Info (shown when editing Default) -->
+            <div class="default-profile-badge-notice hidden-field" id="defaultProfileBadgeNotice">
+              <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+              <div class="notice-meta">
+                <strong>System Default Profile</strong>
+                <span>Fallback profile activated when no application-specific profile matches.</span>
+              </div>
+            </div>
+
+            <!-- Target Executables -->
+            <div class="form-group-field" id="profileExeGroup">
+              <div class="form-field-header-row">
+                <label for="profInputExe" class="form-field-lbl">Target Executable(s):</label>
+                <div class="form-field-actions">
+                  <button type="button" class="neumorphic-btn btn-chip btn-sm-chip" id="btnBrowseProfileExe" title="Browse your PC for an executable file">
+                    <svg class="icon-svg-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    <span>Browse .exe</span>
+                  </button>
+                  <button type="button" class="neumorphic-btn btn-chip btn-sm-chip" id="btnRescanRunningApps" title="Rescan currently open application windows">
+                    <svg class="icon-svg-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="23 4 23 10 17 10"></polyline>
+                      <polyline points="1 20 1 14 7 14"></polyline>
+                      <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                    </svg>
+                    <span>Rescan</span>
+                  </button>
+                </div>
+              </div>
+              <input type="text" class="profile-modal-input" id="profInputExe" placeholder="e.g. chrome.exe, code.exe (comma-separated)" autocomplete="off" spellcheck="false" />
+              <span class="form-field-hint">Multiple executables supported. Click any window card on the right to toggle assignment.</span>
+            </div>
+
+            <!-- Option 1: Switch on Mouse Hover -->
+            <div class="profile-option-row" id="profHoverRow">
+              <div class="toggle-wrapper" title="Switch profile on mouse hover">
+                <input class="toggle-checkbox" type="checkbox" id="profSwitchOnHover">
+                <div class="toggle-container">
+                  <div class="toggle-button"></div>
+                </div>
+              </div>
+              <div class="option-meta">
+                <span class="option-title">Switch on Mouse Hover</span>
+                <span class="option-desc">Activate this profile immediately when the mouse cursor enters its window (no click needed).</span>
+              </div>
+            </div>
+
+            <!-- Option 2: Show App Icon on Switch (OSD HUD) -->
+            <div class="profile-option-row" id="profOsdRow">
+              <div class="toggle-wrapper" title="Show app icon popup on profile switch">
+                <input class="toggle-checkbox" type="checkbox" id="profSwitchOsdIcon" checked>
+                <div class="toggle-container">
+                  <div class="toggle-button"></div>
+                </div>
+              </div>
+              <div class="option-meta">
+                <span class="option-title">Show App Icon on Switch</span>
+                <span class="option-desc">Display a sleek floating on-screen HUD badge showing the target app icon whenever switched.</span>
+              </div>
+            </div>
+
+            <!-- Profile Info Tip -->
+            <div class="profile-info-tip" id="profileInfoTip">
+              <svg class="icon-svg-xs" style="color:var(--accent-primary);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+              <span>Auto-Switching detects active windows automatically in real time across all your displays.</span>
+            </div>
+          </div>
+
+          <!-- Right Column: Pick From Open Windows & Running Applications Explorer -->
+          <div class="profile-apps-column" id="profileAppsColumn">
+            <div class="apps-column-header">
+              <div class="apps-header-titles">
+                <span class="apps-col-title">SHOWING CURRENT OPEN APP(S)</span>
+                <span class="apps-col-subtitle">Click any open application window card below to bind it to this profile</span>
+              </div>
+              <div class="apps-filter-box">
+                <svg class="icon-svg-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="runningAppsFilterInput" placeholder="Filter open apps..." autocomplete="off" spellcheck="false" />
+              </div>
+            </div>
+
+            <div class="running-apps-scroll-area" id="runningAppsList">
+              <div class="apps-empty-state">Scanning active open windows...</div>
+            </div>
+          </div>
         </div>
+
         <div class="modal-footer profile-modal-footer">
           <button class="neumorphic-btn btn-chip" id="btnCancelProfileModal">Cancel</button>
-          <button class="neumorphic-btn btn-chip btn-primary-chip" id="btnConfirmProfileModal">Confirm</button>
+          <button class="neumorphic-btn btn-chip btn-primary-chip" id="btnConfirmProfileModal">Save Profile</button>
         </div>
       </div>
     </div>
