@@ -1395,28 +1395,38 @@ html, body {
 
 .al-type-btn {
   height: 100%;
-  padding: 0 12px;
+  padding: 0 14px;
   border-radius: max(0px, calc(var(--radius-pill) - 4px));
   border: none;
   background: transparent;
   color: var(--text-secondary);
-  font-size: 11px;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
   cursor: pointer;
   white-space: nowrap;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  transition: var(--transition-smooth);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  box-sizing: border-box;
 }
 
 .al-type-btn:hover {
   color: var(--text-primary);
+  filter: brightness(1.02);
 }
 
 .al-type-btn.active {
-  background: var(--surface-color);
-  box-shadow: none;
+  background-color: var(--surface-color);
+  box-shadow: var(--raised-sm);
+  color: var(--accent-primary);
+  font-weight: 700;
+}
+
+.al-type-btn.active .al-type-icon {
   color: var(--accent-primary);
 }
 

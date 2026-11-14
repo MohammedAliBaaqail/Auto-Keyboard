@@ -1368,7 +1368,6 @@ function renderKeyRemapper() {
     card.className = `shortcut-card ${isEnabled ? '' : 'is-disabled'}`;
     card.innerHTML = `
         <div class="card-info">
-          <span class="trigger-badge">${escapeHtml(item.source)}</span>
           <span class="trigger-badge ${isEnabled ? '' : 'is-disabled'}">${escapeHtml(item.source)}</span>
           <span class="arrow-divider"><svg class="arrow-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></span>
           <span class="expansion-text"><strong>${escapeHtml(item.target)}</strong> — ${escapeHtml(item.name || 'Remap')}</span>
@@ -1963,7 +1962,6 @@ function renderAppLauncher() {
 
     card.innerHTML = `
         <div class="card-info">
-          <span class="trigger-badge ${isHotkey ? 'trigger-badge-hotkey' : ''}">${badgeIcon}${escapeHtml(item.trigger)}</span>
           <span class="trigger-badge ${isHotkey ? 'trigger-badge-hotkey' : ''} ${isEnabled ? '' : 'is-disabled'}">${badgeIcon}${escapeHtml(item.trigger)}</span>
           <span class="arrow-divider"><svg class="arrow-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></span>
           <span class="expansion-text"><strong>${escapeHtml(item.name || 'Launch')}</strong>: ${escapeHtml(item.target)}</span>
