@@ -2336,7 +2336,7 @@ OnWebMessageReceived(thisPtr, senderPtr, argsPtr) {
                             g_Wv.PostWebMessageAsString(JSON.stringify(Map(
                                 "type", "profileAppSelected",
                                 "path", selectedFile,
-                                "exe": outFileName,
+                                "exe", outFileName,
                                 "name", outNameNoExt,
                                 "hasIcon", FileExist(iconPng) ? 1 : 0
                             )))
