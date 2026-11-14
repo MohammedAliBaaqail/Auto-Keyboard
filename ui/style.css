@@ -406,63 +406,96 @@ html, body {
 .lgs-profiles-track {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   overflow-x: auto;
-  padding: 4px 2px;
+  padding: 4px 4px;
   flex: 1 1 auto;
   scrollbar-width: none;
   min-width: 0;
   scroll-behavior: smooth;
+  position: relative;
 }
 
 .lgs-profiles-track::-webkit-scrollbar {
   display: none;
 }
 
-/* Individual Profile Tile */
+/* Sliding Glider for Profiles Track (Faithful Match to Main App Tabs) */
+.lgs-profiles-glider {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 0;
+  border-radius: max(0px, calc(var(--radius-pill) - 4px));
+  background-color: var(--surface-color);
+  box-shadow: var(--raised-sm);
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  will-change: transform, width;
+  transition: transform 0.32s cubic-bezier(0.25, 1, 0.5, 1), width 0.32s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.2s ease;
+}
+
+/* Individual Profile Tile (Matching Segmented Control Tab Buttons) */
 .lgs-profile-card {
   display: flex;
   align-items: center;
-  min-width: 135px;
-  max-width: 195px;
-  height: 40px;
-  padding: 4px 8px;
+  min-width: 125px;
+  max-width: 190px;
+  height: 38px;
+  padding: 3px 10px;
   gap: 8px;
-  border-radius: var(--radius-btn);
-  background: var(--surface-color);
-  box-shadow: var(--raised-sm);
-  border: 1.5px solid transparent;
+  border-radius: max(0px, calc(var(--radius-pill) - 4px));
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none;
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
+  z-index: 2;
   flex-shrink: 0;
   user-select: none;
   box-sizing: border-box;
 }
 
 .lgs-profile-card:hover {
-  box-shadow: var(--raised-md);
+  color: var(--text-primary);
   filter: brightness(1.02);
-  transform: translateY(-1px);
+}
+
+.lgs-profile-card:hover .lgs-icon-box {
+  transform: scale(1.08);
 }
 
 .lgs-profile-card.active {
-  box-shadow: var(--inset-sm);
-  border: 1px solid transparent;
-  background: var(--surface-color);
+  color: var(--accent-primary);
+  font-weight: 700;
+  border: none;
   transform: none;
   filter: none;
 }
 
-.lgs-profile-card.active:hover {
-  box-shadow: var(--inset-sm);
-  transform: none;
-  filter: none;
+/* Default Profile Slot (Fixed outside track: animates active elevation directly) */
+.lgs-default-profile-slot {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
 }
 
-.lgs-profile-card.active .lgs-icon-box {
-  background: transparent;
-  box-shadow: none;
+.lgs-default-profile-slot .lgs-profile-card {
+  transition: all 0.32s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.lgs-default-profile-slot .lgs-profile-card.active {
+  background-color: var(--surface-color) !important;
+  box-shadow: var(--raised-sm) !important;
+  color: var(--accent-primary);
+  font-weight: 700;
+}
+
+.lgs-default-profile-slot .lgs-profile-card.active:hover {
+  filter: brightness(1.02);
 }
 
 .lgs-icon-box {
@@ -475,11 +508,12 @@ html, body {
   flex-shrink: 0;
   overflow: hidden;
   background: transparent;
+  transition: transform 0.2s ease;
 }
 
 .profile-card-img {
   width: 22px;
-  height: 24px;
+  height: 22px;
   object-fit: contain;
   background: transparent;
   user-select: none;
@@ -489,6 +523,15 @@ html, body {
 .profile-card-svg {
   width: 16px;
   height: 16px;
+  color: var(--text-secondary);
+  transition: color 0.2s ease;
+}
+
+.lgs-profile-card:hover .profile-card-svg {
+  color: var(--text-primary);
+}
+
+.lgs-profile-card.active .profile-card-svg {
   color: var(--accent-primary);
 }
 
@@ -499,7 +542,16 @@ html, body {
   align-items: center;
   justify-content: center;
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 700;
+  color: var(--text-secondary);
+  transition: color 0.2s ease;
+}
+
+.lgs-profile-card:hover .profile-card-fallback-badge {
+  color: var(--text-primary);
+}
+
+.lgs-profile-card.active .profile-card-fallback-badge {
   color: var(--accent-primary);
 }
 
@@ -514,25 +566,35 @@ html, body {
 
 .lgs-profile-name {
   font-size: 12px;
-  font-weight: 700;
-  color: var(--text-primary);
+  font-weight: 600;
+  color: var(--text-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: color 0.2s ease;
+}
+
+.lgs-profile-card:hover .lgs-profile-name {
+  color: var(--text-primary);
 }
 
 .lgs-profile-card.active .lgs-profile-name {
   color: var(--accent-primary);
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .lgs-profile-exe {
-  font-size: 10px;
+  font-size: 9.5px;
   color: var(--text-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   font-family: 'JetBrains Mono', Consolas, monospace;
+  opacity: 0.75;
+}
+
+.lgs-profile-card.active .lgs-profile-exe {
+  opacity: 0.9;
 }
 
 /* Profile Modal Dialog */

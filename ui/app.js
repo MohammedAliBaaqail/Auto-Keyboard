@@ -562,7 +562,7 @@
     }
 
     // 2. Render App Profiles Track
-    track.innerHTML = '';
+    track.innerHTML = '<div class="lgs-profiles-glider" id="lgsProfilesGlider"></div>';
     const otherNames = allProfileNames.filter(n => n !== 'Default');
     otherNames.forEach(pName => {
       const prof = profiles[pName] || {};
@@ -572,6 +572,40 @@
       }
       track.appendChild(createProfileCard(pName, false));
     });
+
+    requestAnimationFrame(() => {
+      updateProfileGlider(false);
+    });
+  }
+
+  function updateProfileGlider(instant = false) {
+    const track = document.getElementById('lgsProfilesTrack');
+    const glider = document.getElementById('lgsProfilesGlider');
+    if (!track || !glider) return;
+
+    const activeCard = track.querySelector('.lgs-profile-card.active');
+    if (!activeCard) {
+      glider.style.opacity = '0';
+      return;
+    }
+
+    const left = activeCard.offsetLeft;
+    const width = activeCard.offsetWidth;
+
+    if (width === 0) {
+      requestAnimationFrame(() => updateProfileGlider(instant));
+      return;
+    }
+
+    if (instant) {
+      glider.style.transition = 'none';
+    } else {
+      glider.style.transition = 'transform 0.32s cubic-bezier(0.25, 1, 0.5, 1), width 0.32s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.2s ease';
+    }
+
+    glider.style.transform = `translateX(${left}px)`;
+    glider.style.width = `${width}px`;
+    glider.style.opacity = '1';
   }
 
   function renderProfileSelect() {
@@ -4266,6 +4300,7 @@ function toggleMasterEngine() {
 
         window.addEventListener('resize', () => {
           updateSegmentedGlider(true);
+          updateProfileGlider(true);
         });
 
         // Text Expander Listeners
@@ -4879,6 +4914,7 @@ function toggleMasterEngine() {
       renderAll(false);
       requestAnimationFrame(() => {
         updateSegmentedGlider(true);
+        updateProfileGlider(true);
       });
       initAhkBridge();
 

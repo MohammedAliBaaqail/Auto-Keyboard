@@ -78,7 +78,7 @@
                 localStorage.setItem('ahk_theme', JSON.stringify(parsed));
               }
               t = parsed;
-            } catch (e) {}
+            } catch (e) { }
           }
         }
         if (!t || !t.bgColor) {
@@ -143,7 +143,8 @@
   <!-- Google Fonts: JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap"
+    rel="stylesheet">
   <!-- App Icon / Favicon -->
   <link rel="icon" type="image/svg+xml" href="app-icon.svg">
   <link rel="alternate icon" href="app-icon.ico">
@@ -183,7 +184,7 @@
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
-              <input type="text" id="profileSearchInput" placeholder="Filter profiles..." autocomplete="off" spellcheck="false" />
+              <input type="text" id="profileSearchInput" placeholder="Search" autocomplete="off" spellcheck="false" />
             </div>
             <div class="lgs-action-btns">
               <button class="squircle-btn lgs-mini-btn" id="btnAddProfile" title="Add New Profile">
@@ -192,10 +193,13 @@
                   <line x1="5" y1="12" x2="19" y2="12"></line>
                 </svg>
               </button>
-              <button class="squircle-btn lgs-mini-btn" id="btnEditProfile" title="Configure Profile Settings & Auto-Switching">
+              <button class="squircle-btn lgs-mini-btn" id="btnEditProfile"
+                title="Configure Profile Settings & Auto-Switching">
                 <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <circle cx="12" cy="12" r="3"></circle>
-                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                  <path
+                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                  </path>
                 </svg>
               </button>
               <button class="squircle-btn lgs-mini-btn btn-danger-profile" id="btnDeleteProfile" title="Delete Profile">
@@ -218,6 +222,7 @@
         <div class="lgs-carousel-wrap">
           <button class="lgs-scroll-btn left" id="btnScrollProfilesLeft" title="Scroll Left">‹</button>
           <div class="lgs-profiles-track" id="lgsProfilesTrack">
+            <div class="lgs-profiles-glider" id="lgsProfilesGlider"></div>
             <!-- Dynamic profile cards injected here -->
           </div>
           <button class="lgs-scroll-btn right" id="btnScrollProfilesRight" title="Scroll Right">›</button>
@@ -263,7 +268,8 @@
       <div class="segmented-control" id="segmentedBar">
         <div class="segmented-glider" id="segmentedGlider"></div>
         <button class="segment-btn active" data-tab="textExpander">
-          <svg class="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg class="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
             <path d="M17 5H3"></path>
             <path d="M21 12H8"></path>
             <path d="M21 19H8"></path>
@@ -272,7 +278,8 @@
           <span class="tab-label">Text Expander</span>
         </button>
         <button class="segment-btn" data-tab="keyRemapper">
-          <svg class="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg class="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
             <rect x="2" y="4" width="20" height="16" rx="2"></rect>
             <path d="M10 8h.01"></path>
             <path d="M12 12h.01"></path>
@@ -286,7 +293,8 @@
           <span class="tab-label">Key Remapper</span>
         </button>
         <button class="segment-btn" data-tab="windowManager">
-          <svg class="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg class="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
             <rect x="2" y="4" width="20" height="16" rx="2"></rect>
             <path d="M10 4v4"></path>
             <path d="M2 8h20"></path>
@@ -295,7 +303,8 @@
           <span class="tab-label">Window Manager</span>
         </button>
         <button class="segment-btn" data-tab="appLauncher">
-          <svg class="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg class="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path>
             <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09"></path>
             <path d="M9 12a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.4 22.4 0 0 1-4 2z"></path>
@@ -304,17 +313,21 @@
           <span class="tab-label">App Launcher</span>
         </button>
         <button class="segment-btn" data-tab="autoClicker">
-          <svg class="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg class="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 4.1 12 6"></path>
             <path d="m5.1 8-2.9-.8"></path>
             <path d="m6 12-1.9 2"></path>
             <path d="M7.2 2.2 8 5.1"></path>
-            <path d="M9.037 9.69a.498.498 0 0 1 .653-.653l11 4.5a.5.5 0 0 1-.074.949l-4.349 1.041a1 1 0 0 0-.74.739l-1.04 4.35a.5.5 0 0 1-.95.074z"></path>
+            <path
+              d="M9.037 9.69a.498.498 0 0 1 .653-.653l11 4.5a.5.5 0 0 1-.074.949l-4.349 1.041a1 1 0 0 0-.74.739l-1.04 4.35a.5.5 0 0 1-.95.074z">
+            </path>
           </svg>
           <span class="tab-label">Auto Clicker</span>
         </button>
         <button class="segment-btn" data-tab="macroRecorder">
-          <svg class="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg class="tab-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"></circle>
             <circle cx="12" cy="12" r="3.5" fill="currentColor"></circle>
           </svg>
@@ -571,7 +584,8 @@
                 <div class="uiverse-checkmark"></div>
               </label>
               <div class="wm-sub-info">
-                <label for="wmCheckboxGhostMode" class="wm-sub-label" title="Clicks pass through transparent windows">Click-Through "Ghost" (pass clicks)</label>
+                <label for="wmCheckboxGhostMode" class="wm-sub-label"
+                  title="Clicks pass through transparent windows">Click-Through "Ghost" (pass clicks)</label>
                 <div class="wm-sub-hotkey-tag" id="wmBadgeGhostMode" title="Direct toggle hotkey">Ctrl + Alt + G</div>
               </div>
             </div>
@@ -753,7 +767,8 @@
                 <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
                 <line x1="7" y1="7" x2="7.01" y2="7"></line>
               </svg>
-              <input type="text" id="alInputName" placeholder="Name (optional)..." autocomplete="off" spellcheck="false" />
+              <input type="text" id="alInputName" placeholder="Name (optional)..." autocomplete="off"
+                spellcheck="false" />
             </div>
 
             <button class="neumorphic-btn btn-go al-btn-submit" id="alBtnSubmit">
@@ -762,7 +777,8 @@
           </div>
 
           <div class="input-hints">
-            <span class="hint-tag" id="alHintTag">Typing trigger anywhere opens apps, websites, or commands instantly</span>
+            <span class="hint-tag" id="alHintTag">Typing trigger anywhere opens apps, websites, or commands
+              instantly</span>
           </div>
         </div>
 
@@ -1029,82 +1045,145 @@
               <button class="theme-swatch-chip theme-card-chip active" data-preset="custom-default" data-color="#e8dfd5"
                 title="Warm Clay (Default) (Balanced warm clay with warm amber accent)" aria-label="Warm Clay (Default)"
                 style="background-color: #e8dfd5; border-color: #d97706; color: #d97706; border-radius: 5px; box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.08), -2px -2px 6px rgba(255, 255, 255, 0.8);">
-                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
               </button>
               <button class="theme-swatch-chip theme-card-chip" data-preset="brutalist-amber" data-color="#f59e0b"
-                title="Brutalist Amber (Vivid amber pop with zero blur hard-edge comic shadows and chiseled edges)" aria-label="Brutalist Amber"
+                title="Brutalist Amber (Vivid amber pop with zero blur hard-edge comic shadows and chiseled edges)"
+                aria-label="Brutalist Amber"
                 style="background-color: #f59e0b; border-color: #1e1b4b; color: #1e1b4b; border-radius: 2px; box-shadow: 5px 5px 0px rgba(0, 0, 0, 0.55), -5px -5px 0px rgba(255, 255, 255, 0.65);">
-                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
               </button>
               <button class="theme-swatch-chip theme-card-chip" data-preset="marshmallow-indigo" data-color="#4f46e5"
-                title="Marshmallow Indigo (Electric indigo with soft lemon cream in an ultra-pill marshmallow 3D cloud)" aria-label="Marshmallow Indigo"
+                title="Marshmallow Indigo (Electric indigo with soft lemon cream in an ultra-pill marshmallow 3D cloud)"
+                aria-label="Marshmallow Indigo"
                 style="background-color: #4f46e5; border-color: #fde047; color: #fde047; border-radius: 42px; box-shadow: 6px 6px 18px rgba(0, 0, 0, 0.53), -6px -6px 18px rgba(255, 255, 255, 0.44);">
-                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
               </button>
               <button class="theme-swatch-chip theme-card-chip" data-preset="porcelain-ceramic" data-color="#f1f5f9"
-                title="Porcelain Ceramic (High-key sculpted slate white ceramic with royal sapphire blue and specular glow)" aria-label="Porcelain Ceramic"
+                title="Porcelain Ceramic (High-key sculpted slate white ceramic with royal sapphire blue and specular glow)"
+                aria-label="Porcelain Ceramic"
                 style="background-color: #f1f5f9; border-color: #2563eb; color: #2563eb; border-radius: 28px; box-shadow: 5px 5px 16px rgba(0, 0, 0, 0.22), -5px -5px 16px rgba(255, 255, 255, 0.65);">
-                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
               </button>
               <button class="theme-swatch-chip theme-card-chip" data-preset="solar-tangerine" data-color="#ea580c"
-                title="Solar Tangerine (Punchy fire tangerine orange clay with radiant sunbeam cream highlights)" aria-label="Solar Tangerine"
+                title="Solar Tangerine (Punchy fire tangerine orange clay with radiant sunbeam cream highlights)"
+                aria-label="Solar Tangerine"
                 style="background-color: #ea580c; border-color: #fef08a; color: #fef08a; border-radius: 34px; box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.46), -4px -4px 12px rgba(255, 255, 255, 0.42);">
-                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
               </button>
               <button class="theme-swatch-chip theme-card-chip" data-preset="matrix-terminal" data-color="#052e16"
-                title="Matrix CRT (Deep phosphor CRT green terminal with crisp sunken bevel and phosphor laser text)" aria-label="Matrix CRT"
+                title="Matrix CRT (Deep phosphor CRT green terminal with crisp sunken bevel and phosphor laser text)"
+                aria-label="Matrix CRT"
                 style="background-color: #052e16; border-color: #22c55e; color: #22c55e; border-radius: 4px; box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.55), -2px -2px 2px rgba(255, 255, 255, 0.44);">
-                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
               </button>
               <button class="theme-swatch-chip theme-card-chip" data-preset="cyber-cyan" data-color="#0891b2"
-                title="Cyber Cyan (Vivid Mediterranean electric cyan clay with high-saturation lemon triggers)" aria-label="Cyber Cyan"
+                title="Cyber Cyan (Vivid Mediterranean electric cyan clay with high-saturation lemon triggers)"
+                aria-label="Cyber Cyan"
                 style="background-color: #0891b2; border-color: #fef08a; color: #fef08a; border-radius: 18px; box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.35), -3px -3px 6px rgba(255, 255, 255, 0.39);">
-                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
               </button>
               <button class="theme-swatch-chip theme-card-chip" data-preset="brutalist-concrete" data-color="#78716c"
-                title="Brutalist Concrete (Raw architectural concrete stone with safety orange and 1px hard-relief shadow)" aria-label="Brutalist Concrete"
+                title="Brutalist Concrete (Raw architectural concrete stone with safety orange and 1px hard-relief shadow)"
+                aria-label="Brutalist Concrete"
                 style="background-color: #78716c; border-color: #f97316; color: #f97316; border-radius: 3px; box-shadow: 4px 4px 1px rgba(0, 0, 0, 0.55), -4px -4px 1px rgba(255, 255, 255, 0.55);">
-                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
               </button>
               <button class="theme-swatch-chip theme-card-chip" data-preset="midnight-violet" data-color="#3b0764"
-                title="Midnight Violet (Deep royal ultraviolet plum with fluorescent neon fuchsia pop)" aria-label="Midnight Violet"
+                title="Midnight Violet (Deep royal ultraviolet plum with fluorescent neon fuchsia pop)"
+                aria-label="Midnight Violet"
                 style="background-color: #3b0764; border-color: #f43f5e; color: #f43f5e; border-radius: 24px; box-shadow: 5px 5px 14px rgba(0, 0, 0, 0.55), -5px -5px 14px rgba(255, 255, 255, 0.35);">
-                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
               </button>
               <button class="theme-swatch-chip theme-card-chip" data-preset="spearmint-gelato" data-color="#6ee7b7"
-                title="Spearmint Gelato (Fresh spearmint gelato clay with deep blackberry wine contrast and high-radius curve)" aria-label="Spearmint Gelato"
+                title="Spearmint Gelato (Fresh spearmint gelato clay with deep blackberry wine contrast and high-radius curve)"
+                aria-label="Spearmint Gelato"
                 style="background-color: #6ee7b7; border-color: #831843; color: #831843; border-radius: 38px; box-shadow: 5px 5px 14px rgba(0, 0, 0, 0.31), -5px -5px 14px rgba(255, 255, 255, 0.53);">
-                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
               </button>
               <button class="theme-swatch-chip theme-card-chip" data-preset="garnet-obsidian" data-color="#450a0a"
-                title="Garnet Obsidian (Deep chiseled crimson mahogany gemstone with coral rose illumination)" aria-label="Garnet Obsidian"
+                title="Garnet Obsidian (Deep chiseled crimson mahogany gemstone with coral rose illumination)"
+                aria-label="Garnet Obsidian"
                 style="background-color: #450a0a; border-color: #fb7185; color: #fb7185; border-radius: 8px; box-shadow: 3px 3px 9px rgba(0, 0, 0, 0.55), -3px -3px 9px rgba(255, 255, 255, 0.26);">
-                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
               </button>
               <button class="theme-swatch-chip theme-card-chip" data-preset="abyssal-ocean" data-color="#0e2a47"
-                title="Abyssal Ocean (Deep navy sapphire oceanic abyss with electric cyan telemetry glow)" aria-label="Abyssal Ocean"
+                title="Abyssal Ocean (Deep navy sapphire oceanic abyss with electric cyan telemetry glow)"
+                aria-label="Abyssal Ocean"
                 style="background-color: #0e2a47; border-color: #38bdf8; color: #38bdf8; border-radius: 16px; box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.55), -4px -4px 10px rgba(255, 255, 255, 0.29);">
-                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
               </button>
               <button class="theme-swatch-chip theme-card-chip" data-preset="roasted-cocoa" data-color="#351c14"
-                title="Roasted Cocoa (Dark artisanal roasted coffee and cocoa bean with molten amber gold accents)" aria-label="Roasted Cocoa"
+                title="Roasted Cocoa (Dark artisanal roasted coffee and cocoa bean with molten amber gold accents)"
+                aria-label="Roasted Cocoa"
                 style="background-color: #351c14; border-color: #fbbf24; color: #fbbf24; border-radius: 10px; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.55), -2px -2px 5px rgba(255, 255, 255, 0.24);">
-                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
               </button>
               <button class="theme-swatch-chip theme-card-chip" data-preset="bubblegum-magenta" data-color="#db2777"
-                title="Bubblegum Magenta (Bold electric hot magenta clay with sunburst yellow highlights)" aria-label="Bubblegum Magenta"
+                title="Bubblegum Magenta (Bold electric hot magenta clay with sunburst yellow highlights)"
+                aria-label="Bubblegum Magenta"
                 style="background-color: #db2777; border-color: #fef08a; color: #fef08a; border-radius: 30px; box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.42), -5px -5px 15px rgba(255, 255, 255, 0.46);">
-                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
               </button>
               <button class="theme-swatch-chip theme-card-chip" data-preset="lilac-cloud" data-color="#c4b5fd"
-                title="Lilac Cloud (Soft dream lavender lilac clay with regal royal violet depth)" aria-label="Lilac Cloud"
+                title="Lilac Cloud (Soft dream lavender lilac clay with regal royal violet depth)"
+                aria-label="Lilac Cloud"
                 style="background-color: #c4b5fd; border-color: #4c1d95; color: #4c1d95; border-radius: 22px; box-shadow: 3px 3px 11px rgba(0, 0, 0, 0.24), -3px -3px 11px rgba(255, 255, 255, 0.40);">
-                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
               </button>
               <button class="theme-swatch-chip theme-card-chip" data-preset="matte-titanium" data-color="#1e293b"
-                title="Matte Titanium (Tactical gunmetal stealth titanium with hyper cyan aerospace accents)" aria-label="Matte Titanium"
+                title="Matte Titanium (Tactical gunmetal stealth titanium with hyper cyan aerospace accents)"
+                aria-label="Matte Titanium"
                 style="background-color: #1e293b; border-color: #06b6d4; color: #06b6d4; border-radius: 12px; box-shadow: 2px 2px 7px rgba(0, 0, 0, 0.50), -2px -2px 7px rgba(255, 255, 255, 0.24);">
-                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <svg class="theme-check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
               </button>
             </div>
             <!-- Custom Background Color Picker Row -->
@@ -1268,7 +1347,8 @@
       <div class="profile-config-dialog" id="profileConfigCard">
         <div class="modal-header">
           <div class="modal-title-row">
-            <svg class="icon-svg" style="color:var(--accent-primary);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg class="icon-svg" style="color:var(--accent-primary);" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
               <circle cx="12" cy="7" r="4"></circle>
             </svg>
@@ -1293,13 +1373,17 @@
             <!-- Profile Name -->
             <div class="form-group-field" id="profileNameGroup">
               <label for="profileNameInput" class="form-field-lbl">Profile Name:</label>
-              <input type="text" class="profile-modal-input" id="profileNameInput" placeholder="e.g. Chrome, Blender, Gaming, VS Code..." maxlength="28" autocomplete="off" spellcheck="false" />
+              <input type="text" class="profile-modal-input" id="profileNameInput"
+                placeholder="e.g. Chrome, Blender, Gaming, VS Code..." maxlength="28" autocomplete="off"
+                spellcheck="false" />
             </div>
 
             <!-- Default Profile Info (shown when editing Default) -->
             <div class="default-profile-badge-notice hidden-field" id="defaultProfileBadgeNotice">
               <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                <polygon
+                  points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+                </polygon>
               </svg>
               <div class="notice-meta">
                 <strong>System Default Profile</strong>
@@ -1312,13 +1396,15 @@
               <div class="form-field-header-row">
                 <label for="profInputExe" class="form-field-lbl">Target Executable(s):</label>
                 <div class="form-field-actions">
-                  <button type="button" class="neumorphic-btn btn-chip btn-sm-chip" id="btnBrowseProfileExe" title="Browse your PC for an executable file">
+                  <button type="button" class="neumorphic-btn btn-chip btn-sm-chip" id="btnBrowseProfileExe"
+                    title="Browse your PC for an executable file">
                     <svg class="icon-svg-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
                     </svg>
                     <span>Browse .exe</span>
                   </button>
-                  <button type="button" class="neumorphic-btn btn-chip btn-sm-chip" id="btnRescanRunningApps" title="Rescan currently open application windows">
+                  <button type="button" class="neumorphic-btn btn-chip btn-sm-chip" id="btnRescanRunningApps"
+                    title="Rescan currently open application windows">
                     <svg class="icon-svg-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <polyline points="23 4 23 10 17 10"></polyline>
                       <polyline points="1 20 1 14 7 14"></polyline>
@@ -1328,8 +1414,10 @@
                   </button>
                 </div>
               </div>
-              <input type="text" class="profile-modal-input" id="profInputExe" placeholder="e.g. chrome.exe, code.exe (comma-separated)" autocomplete="off" spellcheck="false" />
-              <span class="form-field-hint">Multiple executables supported. Click any window card on the right to toggle assignment.</span>
+              <input type="text" class="profile-modal-input" id="profInputExe"
+                placeholder="e.g. chrome.exe, code.exe (comma-separated)" autocomplete="off" spellcheck="false" />
+              <span class="form-field-hint">Multiple executables supported. Click any window card on the right to toggle
+                assignment.</span>
             </div>
 
             <!-- Option 1: Profile Switch Trigger (Window Focus vs Mouse Hover) -->
@@ -1348,7 +1436,8 @@
                     <button type="button" class="trigger-pill" id="chipTriggerHover">Mouse Hover</button>
                   </div>
                 </div>
-                <span class="option-desc" id="profHoverDesc">Activate this profile when you click or switch focus to this application's window.</span>
+                <span class="option-desc" id="profHoverDesc">Activate this profile when you click or switch focus to
+                  this application's window.</span>
               </div>
             </div>
 
@@ -1362,13 +1451,15 @@
               </div>
               <div class="option-meta">
                 <span class="option-title">Show App Icon on Switch</span>
-                <span class="option-desc">Display a sleek floating on-screen HUD badge showing the target app icon whenever switched.</span>
+                <span class="option-desc">Display a sleek floating on-screen HUD badge showing the target app icon
+                  whenever switched.</span>
               </div>
             </div>
 
             <!-- Profile Info Tip -->
             <div class="profile-info-tip" id="profileInfoTip">
-              <svg class="icon-svg-xs" style="color:var(--accent-primary);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <svg class="icon-svg-xs" style="color:var(--accent-primary);" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2">
                 <circle cx="12" cy="12" r="10"></circle>
                 <line x1="12" y1="16" x2="12" y2="12"></line>
                 <line x1="12" y1="8" x2="12.01" y2="8"></line>
@@ -1382,14 +1473,16 @@
             <div class="apps-column-header">
               <div class="apps-header-titles">
                 <span class="apps-col-title">SHOWING CURRENT OPEN APP(S)</span>
-                <span class="apps-col-subtitle">Click any open application window card below to bind it to this profile</span>
+                <span class="apps-col-subtitle">Click any open application window card below to bind it to this
+                  profile</span>
               </div>
               <div class="apps-filter-box">
                 <svg class="icon-svg-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <circle cx="11" cy="11" r="8"></circle>
                   <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
-                <input type="text" id="runningAppsFilterInput" placeholder="Filter open apps..." autocomplete="off" spellcheck="false" />
+                <input type="text" id="runningAppsFilterInput" placeholder="Filter open apps..." autocomplete="off"
+                  spellcheck="false" />
               </div>
             </div>
 
