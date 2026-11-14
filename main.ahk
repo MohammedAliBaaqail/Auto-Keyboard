@@ -39,7 +39,7 @@ A_MenuMaskKey := "vkE8"
 
 ; Global constants and variables
 global APP_NAME := "AutoHotKeyboard"
-global APP_WIDTH := 880
+global APP_WIDTH := 1320
 global APP_HEIGHT := 760
 global CONFIG_FILE := A_ScriptDir . "\config.json"
 
@@ -85,8 +85,20 @@ try {
 OnExit(OnAppExit)
 
 OnAppExit(exitReason, exitCode) {
-    global g_Wvc
+    global g_Wvc, g_MainGui, g_Config
     SetTimer(CheckActiveAppFocus, 0)
+    if (g_MainGui) {
+        try {
+            g_MainGui.GetPos(,, &curW, &curH)
+            if (curW >= 720 && curH >= 520) {
+                if (!g_Config.Has("window") || !IsObject(g_Config["window"])) {
+                    g_Config["window"] := Map()
+                }
+                g_Config["window"]["width"] := curW
+                g_Config["window"]["height"] := curH
+            }
+        }
+    }
     SaveConfigToFile()
     StopAutoClicker()
     UnregisterAllHooks()
@@ -148,6 +160,18 @@ InitConfig() {
                     }
                     if (!themeMap.Has("customPresets")) {
                         themeMap["customPresets"] := []
+                    }
+                }
+                
+                ; Ensure window custom size is tracked and valid
+                if (!g_Config.Has("window") || !IsObject(g_Config["window"])) {
+                    g_Config["window"] := Map("width", APP_WIDTH, "height", APP_HEIGHT)
+                } else {
+                    if (!g_Config["window"].Has("width") || g_Config["window"]["width"] < 720) {
+                        g_Config["window"]["width"] := APP_WIDTH
+                    }
+                    if (!g_Config["window"].Has("height") || g_Config["window"]["height"] < 520) {
+                        g_Config["window"]["height"] := APP_HEIGHT
                     }
                 }
             } else {
@@ -252,6 +276,10 @@ GetDefaultConfig() {
             "intensity", 14,
             "blur", 10,
             "customPresets", []
+        ),
+        "window", Map(
+            "width", 1320,
+            "height", 760
         )
     )
 }
@@ -1541,8 +1569,21 @@ CreateMainWindow() {
     }
     g_MainGui.BackColor := initBg
     
-    posX := (A_ScreenWidth - APP_WIDTH) // 2
-    posY := (A_ScreenHeight - APP_HEIGHT) // 2
+    winW := APP_WIDTH
+    winH := APP_HEIGHT
+    if (g_Config.Has("window") && IsObject(g_Config["window"])) {
+        if (g_Config["window"].Has("width") && g_Config["window"]["width"] >= 720) {
+            winW := Integer(g_Config["window"]["width"])
+        }
+        if (g_Config["window"].Has("height") && g_Config["window"]["height"] >= 520) {
+            winH := Integer(g_Config["window"]["height"])
+        }
+    }
+    winW := Min(winW, A_ScreenWidth)
+    winH := Min(winH, A_ScreenHeight)
+    
+    posX := (A_ScreenWidth - winW) // 2
+    posY := (A_ScreenHeight - winH) // 2
     
     g_MainGui.OnEvent("Close", (*) => ExitApp())
     g_MainGui.OnEvent("Size", OnGuiSize)
@@ -1578,7 +1619,7 @@ CreateMainWindow() {
         }
     }
 
-    g_MainGui.Show(Format("x{} y{} w{} h{}", posX, posY, APP_WIDTH, APP_HEIGHT))
+    g_MainGui.Show(Format("x{} y{} w{} h{}", posX, posY, winW, winH))
     
     InitWebView2()
 }
@@ -1656,10 +1697,22 @@ InitWebView2() {
 }
 
 OnGuiSize(guiObj, minMax, width, height) {
-    global g_Wvc
+    global g_Wvc, g_Config
     if (g_Wvc && minMax != -1) {
         try g_Wvc.Fill()
     }
+    if (minMax = 0 && width >= 720 && height >= 520) {
+        if (!g_Config.Has("window") || !IsObject(g_Config["window"])) {
+            g_Config["window"] := Map()
+        }
+        g_Config["window"]["width"] := width
+        g_Config["window"]["height"] := height
+        SetTimer(SaveWindowSizeDebounced, -600)
+    }
+}
+
+SaveWindowSizeDebounced() {
+    SaveConfigToFile()
 }
 
 ; ==============================================================================
@@ -1686,7 +1739,11 @@ OnWebMessageReceived(thisPtr, senderPtr, argsPtr) {
                 
             case "saveState":
                 if (msg.Has("config") && IsObject(msg["config"])) {
-                    g_Config := msg["config"]
+                    newConfig := msg["config"]
+                    if (!newConfig.Has("window") && g_Config.Has("window")) {
+                        newConfig["window"] := g_Config["window"]
+                    }
+                    g_Config := newConfig
                     if (g_Config.Has("enabled")) {
                         g_IsEngineActive := (g_Config["enabled"] = true || g_Config["enabled"] = 1)
                     }
@@ -1762,6 +1819,18 @@ OnWebMessageReceived(thisPtr, senderPtr, argsPtr) {
                 g_MainGui.Minimize()
                 
             case "close":
+                if (g_MainGui) {
+                    try {
+                        g_MainGui.GetPos(,, &curW, &curH)
+                        if (curW >= 720 && curH >= 520) {
+                            if (!g_Config.Has("window") || !IsObject(g_Config["window"])) {
+                                g_Config["window"] := Map()
+                            }
+                            g_Config["window"]["width"] := curW
+                            g_Config["window"]["height"] := curH
+                        }
+                    }
+                }
                 SaveConfigToFile()
                 ExitApp()
                 

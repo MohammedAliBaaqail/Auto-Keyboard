@@ -129,7 +129,8 @@
           }
         ]
       },
-      theme: initialTheme
+      theme: initialTheme,
+      window: { width: 1320, height: 760 }
     },
     editingTeId: null,
     isMultiline: false

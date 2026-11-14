@@ -42,6 +42,10 @@
     "lightIntensity":22,
     "radius":5
   },
+  "window":{
+    "height":774,
+    "width":1334
+  },
   "windowManager":{
     "alwaysOnTopEnabled":0,
     "alwaysOnTopHotkey":"^SPACE",
